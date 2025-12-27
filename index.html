@@ -217,6 +217,56 @@
         .stat-badge { display: inline-block; padding: 12px 25px; background: #E3F2FD; color: var(--primary); border-radius: 50px; font-weight: 700; margin-top: 10px; box-shadow: 0 5px 15px rgba(74, 144, 226, 0.2); }
         .check-list li { margin-bottom: 15px; display: flex; align-items: center; gap: 15px; font-weight: 500; }
 
+        /* --- STUDENT SECTION (NEW) --- */
+        .student-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 30px;
+            justify-items: center;
+            padding: 20px 0;
+            width: 100%;
+        }
+        .student-card {
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            position: relative;
+        }
+        .student-card:hover { transform: translateY(-10px); }
+        .student-card:hover .student-img-wrapper { box-shadow: 0 15px 30px rgba(74, 144, 226, 0.3); border-color: var(--primary); }
+        
+        .student-img-wrapper {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin: 0 auto 15px;
+            border: 4px solid white;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            position: relative;
+            background: #eee;
+            transition: all 0.3s ease;
+        }
+        .student-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        .student-card:hover .student-img { transform: scale(1.1); }
+        
+        .student-name {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.95rem;
+            margin-bottom: 5px;
+        }
+        .student-id {
+            font-size: 0.8rem;
+            color: #8898aa;
+        }
+
         /* --- GALLERY & VIDEO (NEW LOGIC) --- */
         .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 50px; }
         .gallery-item { border-radius: 15px; overflow: hidden; height: 200px; cursor: pointer; position: relative; box-shadow: 0 10px 20px rgba(0,0,0,0.1); background: #eee; }
@@ -279,6 +329,7 @@
             .chart-section { padding: 30px; gap: 30px; }
             section { padding: 60px 20px; }
             .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+            .student-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 15px; }
         }
     </style>
 </head>
@@ -387,8 +438,22 @@
         </div>
     </section>
 
-    <!-- 6. GALERI & VIDEO (BARU DITAMBAHKAN) -->
-    <section>
+    <!-- 6. DAFTAR SISWA (NEW SECTION) -->
+    <section style="background: #fff;">
+        <div class="container">
+            <h2 class="section-title reveal">Siswa Kelas 4A</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 40px; margin-top: -40px;">Wajah-wajah ceria generasi penerus bangsa.</p>
+            
+            <div id="student-container" class="student-grid">
+                <div style="grid-column: 1/-1; text-align: center; color: #8898aa;">
+                    <i class="fas fa-spinner fa-spin"></i> Memuat Data Siswa...
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. GALERI & VIDEO -->
+    <section style="background: #F9FAFB;">
         <div class="container">
             <h2 class="section-title reveal">Galeri & Kegiatan</h2>
             
@@ -406,7 +471,7 @@
         </div>
     </section>
 
-    <!-- 7. SAMBUTAN GURU -->
+    <!-- 8. SAMBUTAN GURU -->
     <div class="container">
         <div class="sambutan-section reveal">
             <i class="fas fa-quote-right sambutan-bg-icon"></i>
@@ -467,6 +532,7 @@
         window.addEventListener('load', async () => {
             await loadSchoolInfo();
             await loadTeacherInfo();
+            await loadStudentData(); // Memanggil data siswa
             await loadChartData();
             document.getElementById('preloader').style.opacity = '0';
             setTimeout(() => { document.getElementById('preloader').style.display = 'none'; }, 500);
@@ -543,23 +609,23 @@
                         setTimeout(() => { document.querySelectorAll('.news-card.reveal').forEach(el => { observer.observe(el); el.classList.add('active'); }); }, 100);
                     }
 
-                    // --- LOAD GALERI (BARU) ---
+                    // --- LOAD GALERI (10 ITEMS) ---
                     const galContainer = document.getElementById('gallery-container');
                     const validGallery = galeri.filter(img => img && img.trim() !== "");
                     
                     if(validGallery.length > 0) {
+                        // Loop map otomatis menangani berapapun jumlah data (sampai 10 sesuai Guru2.html)
                         galContainer.innerHTML = validGallery.map((img, idx) => `
                             <div class="gallery-item reveal delay-${(idx % 3) * 100}" onclick="openModal('Galeri Kegiatan', '${img}', '')">
                                 <img src="${img}" alt="Kegiatan ${idx+1}">
                             </div>
                         `).join('');
-                        // Trigger animasi manual untuk konten dinamis
                         setTimeout(() => { document.querySelectorAll('.gallery-item.reveal').forEach(el => { observer.observe(el); el.classList.add('active'); }); }, 100);
                     } else {
                         galContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #8898aa; padding: 20px;">Belum ada foto kegiatan.</div>';
                     }
 
-                    // --- LOAD YOUTUBE (BARU) ---
+                    // --- LOAD YOUTUBE ---
                     const ytContainer = document.getElementById('video-container-wrapper');
                     const validYoutube = youtube.filter(url => url && url.trim() !== "");
 
@@ -586,7 +652,6 @@
         function getYoutubeEmbedUrl(url) {
             if(!url) return null;
             let videoId = "";
-            // Pola untuk berbagai format link YouTube
             const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
             const match = url.match(regExp);
             if (match && match[2].length === 11) {
@@ -605,7 +670,46 @@
             }
         }
 
-        // 3. LOAD & RENDER CHART 7 KAIH
+        // 3. LOAD STUDENT DATA (BARU - DIPERBAIKI QUERY)
+        async function loadStudentData() {
+            const container = document.getElementById('student-container');
+            // FIX: Menggunakan '4A' (tanpa spasi) sesuai instruksi "SISWA ADALAH SISWA KELAS 4A"
+            const { data: students, error } = await supabaseClient
+                .from('siswa')
+                .select('*')
+                .eq('kelas', '4A') 
+                .order('nama', { ascending: true });
+
+            if (error || !students || students.length === 0) {
+                container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #8898aa; padding: 20px;">Belum ada data siswa untuk Kelas 4A.</div>`;
+                return;
+            }
+
+            // Render siswa
+            container.innerHTML = students.map((s, idx) => {
+                const safeName = s.nama.replace(/'/g, "\\'");
+                const safeFoto = s.foto || 'https://placehold.co/150?text=Siswa';
+                
+                return `
+                <div class="student-card reveal delay-${(idx % 5) * 100}" onclick="openModal('${safeName}', '${safeFoto}', 'Siswa Kelas 4A - ${s.nomor_induk ? 'NIS: ' + s.nomor_induk : ''}')">
+                    <div class="student-img-wrapper">
+                        <img src="${safeFoto}" alt="${s.nama}" class="student-img">
+                    </div>
+                    <div class="student-name">${s.nama}</div>
+                    <div class="student-id">${s.nomor_induk || ''}</div>
+                </div>
+                `;
+            }).join('');
+
+            setTimeout(() => { 
+                document.querySelectorAll('.student-card.reveal').forEach(el => { 
+                    observer.observe(el); 
+                    el.classList.add('active'); 
+                }); 
+            }, 100);
+        }
+
+        // 4. LOAD & RENDER CHART 7 KAIH
         async function loadChartData() {
             const { data: laporan } = await supabaseClient.from('laporan').select('*').limit(50);
             if(!laporan || laporan.length === 0) return;
