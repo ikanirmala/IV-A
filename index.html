@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IV-A</title>
+    
+    <!-- Supabase & Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #4A90E2;
+            --secondary: #50E3C2;
+            --accent: #FF6B6B;
+            --dark: #2C3E50;
+            --light: #F9FAFB;
+            --gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--light); color: var(--dark); overflow-x: hidden; }
+
+        /* --- PRELOADER --- */
+        #preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999; display: flex; justify-content: center; align-items: center; transition: opacity 0.5s; }
+        .loader { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- SCROLL ANIMATIONS (ATRAKTIF) --- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal-scale {
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+
+        .reveal-scale.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Staggered Delays for Cards */
+        .delay-100 { transition-delay: 0.1s; }
+        .delay-200 { transition-delay: 0.2s; }
+        .delay-300 { transition-delay: 0.3s; }
+
+        /* --- PARALLAX HERO SECTION --- */
+        .hero {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            background-image: url('https://images.unsplash.com/photo-1509062522246-3755977927d7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            overflow: hidden;
+        }
+        
+        .hero-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(44, 62, 80, 0.75);
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative; z-index: 2;
+            max-width: 800px; padding: 20px;
+            animation: fadeDown 1.2s ease-out;
+        }
+
+        .hero h1 { font-size: 3.5rem; font-weight: 800; margin-bottom: 10px; text-shadow: 2px 2px 10px rgba(0,0,0,0.5); letter-spacing: -1px; }
+        .hero p { font-size: 1.2rem; margin-bottom: 40px; font-weight: 300; letter-spacing: 1px; opacity: 0.9; }
+
+        @keyframes fadeDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- NAVIGATION CARDS --- */
+        .nav-cards {
+            display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 30px;
+        }
+
+        .nav-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            padding: 25px 50px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.4s ease;
+            text-decoration: none;
+            color: white;
+            min-width: 200px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-card::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: translateX(-100%); transition: 0.5s;
+        }
+
+        .nav-card:hover::after { transform: translateX(100%); }
+        .nav-card:hover { transform: translateY(-5px); background: rgba(255, 255, 255, 0.3); box-shadow: 0 15px 30px rgba(0,0,0,0.4); }
+        .nav-card i { font-size: 2.2rem; margin-bottom: 10px; display: block; }
+        .nav-card h3 { font-size: 1.1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* --- SECTIONS COMMON --- */
+        section { padding: 100px 20px; position: relative; overflow: hidden; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        .section-title { 
+            text-align: center; margin-bottom: 60px; font-size: 2.5rem; font-weight: 800; 
+            color: var(--dark); position: relative; display: inline-block; left: 50%; transform: translateX(-50%); 
+        }
+        .section-title::before {
+            content: ''; position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%);
+            width: 80px; height: 6px; background: var(--primary); border-radius: 3px;
+        }
+        .section-title::after {
+            content: ''; position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%);
+            width: 15px; height: 6px; background: white; z-index: 1;
+        }
+
+        /* --- TEACHER & VISION --- */
+        .profile-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 50px; align-items: center; }
+        
+        .teacher-card {
+            background: white; border-radius: 30px; padding: 40px; text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1); transition: transform 0.3s;
+            position: relative; overflow: hidden; border: 1px solid rgba(0,0,0,0.05);
+        }
+        .teacher-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 120px;
+            background: var(--gradient-bg); z-index: 0;
+        }
+        .teacher-img {
+            width: 140px; height: 140px; border-radius: 50%; object-fit: cover;
+            border: 6px solid white; position: relative; z-index: 1;
+            margin-bottom: 20px; background: #eee; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .teacher-info { position: relative; z-index: 1; }
+        .teacher-info h3 { font-size: 1.8rem; color: var(--dark); margin-bottom: 5px; font-weight: 700; }
+        .teacher-info p { color: #8898aa; font-size: 1rem; margin-bottom: 20px; font-weight: 500; }
+        
+        .vision-box {
+            background: white; padding: 50px; border-radius: 30px; box-shadow: 0 15px 40px rgba(0,0,0,0.05);
+            border-left: 8px solid var(--secondary); position: relative;
+        }
+        .vision-box i.bg-icon {
+            position: absolute; right: 20px; bottom: 20px; font-size: 100px;
+            color: rgba(0,0,0,0.03); transform: rotate(-15deg);
+        }
+        .vision-box h4 { color: var(--primary); font-size: 1.5rem; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
+        .vision-text { color: #525f7f; line-height: 1.9; margin-bottom: 25px; font-size: 1.1rem; }
+
+        /* --- VISUAL PREVIEWS & CHART --- */
+        .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; margin-bottom: 80px; }
+        .preview-card {
+            position: relative; height: 280px; border-radius: 25px; overflow: hidden; cursor: pointer;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); group: hover;
+        }
+        .preview-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .preview-card:hover img { transform: scale(1.15); }
+        .preview-overlay {
+            position: absolute; bottom: 0; left: 0; width: 100%; padding: 30px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); color: white;
+            transform: translateY(20px); transition: 0.4s;
+        }
+        .preview-card:hover .preview-overlay { transform: translateY(0); }
+        .preview-overlay h3 { font-size: 1.4rem; margin-bottom: 5px; }
+        .preview-overlay p { font-size: 0.9rem; opacity: 0.8; }
+
+        /* --- ANNOUNCEMENTS (CARDS) --- */
+        .announcement-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .news-card {
+            background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: all 0.4s ease; border-bottom: 5px solid transparent; cursor: pointer;
+            position: relative; top: 0; display: flex; flex-direction: column;
+        }
+        .news-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); border-bottom-color: var(--primary); }
+        
+        /* Updated News Icon/Image Style */
+        .news-header { height: 160px; position: relative; overflow: hidden; background: #F0F4F8; display: flex; align-items: center; justify-content: center; }
+        .news-header img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+        .news-card:hover .news-header img { transform: scale(1.1); }
+        .news-icon-placeholder { font-size: 3rem; color: var(--primary); opacity: 0.5; }
+        
+        .news-content { padding: 30px; flex-grow: 1; display: flex; flex-direction: column; }
+        .news-content h3 { margin-bottom: 15px; font-size: 1.3rem; color: var(--dark); font-weight: 700; line-height: 1.4; }
+        .news-content p { color: #8898aa; font-size: 0.95rem; line-height: 1.6; margin-bottom: 20px; flex-grow: 1; }
+        .read-more { font-weight: 600; color: var(--primary); font-size: 0.9rem; display: inline-flex; align-items: center; gap: 5px; }
+
+        /* --- CHART SECTION --- */
+        .chart-section { 
+            background: white; padding: 60px; border-radius: 40px; 
+            box-shadow: 0 30px 80px rgba(74, 144, 226, 0.15); 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; 
+        }
+        .chart-text h3 { font-size: 2.2rem; margin-bottom: 20px; color: var(--dark); font-weight: 800; }
+        .chart-text p { color: #666; margin-bottom: 30px; line-height: 1.8; font-size: 1.05rem; }
+        .stat-badge { display: inline-block; padding: 12px 25px; background: #E3F2FD; color: var(--primary); border-radius: 50px; font-weight: 700; margin-top: 10px; box-shadow: 0 5px 15px rgba(74, 144, 226, 0.2); }
+        .check-list li { margin-bottom: 15px; display: flex; align-items: center; gap: 15px; font-weight: 500; }
+
+        /* --- SAMBUTAN SECTION --- */
+        .sambutan-section { 
+            background: var(--dark); color: white; border-radius: 40px; margin: 50px 0; padding: 80px 40px; 
+            position: relative; overflow: hidden; text-align: center;
+        }
+        .sambutan-bg-icon {
+            position: absolute; font-size: 300px; color: rgba(255,255,255,0.03);
+            top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;
+        }
+        .sambutan-content { position: relative; z-index: 2; max-width: 900px; margin: 0 auto; }
+        .quote-icon { font-size: 3rem; color: var(--secondary); margin-bottom: 30px; display: inline-block; }
+        .quote-text { font-size: 1.5rem; font-style: italic; line-height: 1.8; margin-bottom: 40px; font-weight: 300; }
+        .quote-author { font-weight: 700; font-size: 1.2rem; letter-spacing: 1px; color: var(--secondary); text-transform: uppercase; }
+
+        /* --- FOOTER --- */
+        footer { background: #1a252f; color: #ecf0f1; padding: 50px 0; text-align: center; font-size: 1rem; position: relative; }
+        .social-links { margin-top: 25px; display: flex; justify-content: center; gap: 25px; }
+        .social-links a { 
+            color: white; font-size: 1.3rem; width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.1);
+            display: flex; align-items: center; justify-content: center; transition: all 0.3s;
+        }
+        .social-links a:hover { background: var(--primary); transform: translateY(-5px); }
+
+        /* --- MODAL --- */
+        .modal {
+            display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        .modal.show { opacity: 1; }
+        .modal-content {
+            background-color: #fefefe; margin: 5% auto; padding: 0; border-radius: 25px;
+            width: 80%; max-width: 800px; position: relative; transform: translateY(50px);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden; box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.5);
+        }
+        .modal.show .modal-content { transform: translateY(0); }
+        .modal-header { background: var(--primary); color: white; padding: 25px; display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { padding: 40px; max-height: 70vh; overflow-y: auto; text-align: left; }
+        .close-modal { color: white; font-size: 30px; font-weight: bold; cursor: pointer; transition: 0.2s; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,0.2); }
+        .close-modal:hover { background: rgba(255,255,255,0.4); transform: rotate(90deg); }
+        .modal-img { width: 100%; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .modal-btn { display: inline-block; padding: 12px 25px; background: var(--primary); color: white; border-radius: 10px; text-decoration: none; font-weight: 600; margin-top: 20px; transition: 0.3s; }
+        .modal-btn:hover { background: #357ABD; transform: translateY(-2px); }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .profile-grid, .info-grid, .chart-section { grid-template-columns: 1fr; }
+            .teacher-card { order: 1; } .vision-box { order: 2; }
+            .chart-section { padding: 30px; gap: 30px; }
+            section { padding: 60px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="preloader"><div class="loader"></div></div>
+
+    <!-- 1. HEADER PARALLAX -->
+    <header class="hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 id="hero-title">WEB Kelas 4 A<br>SDN Setu 02</h1>
+            <p>Berakhlak Mulia, Cerdas, dan Berkarakter</p>
+            
+            <div class="nav-cards">
+                <a href="Guru.html" class="nav-card">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <h3>Portal Guru</h3>
+                </a>
+                <a href="Siswa.html" class="nav-card">
+                    <i class="fas fa-user-graduate"></i>
+                    <h3>Portal Siswa</h3>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. PROFIL GURU & VISI MISI -->
+    <section>
+        <div class="container">
+            <h2 class="section-title reveal">Profil Kelas</h2>
+            <div class="profile-grid">
+                <div class="teacher-card reveal-scale delay-100">
+                    <div class="teacher-bg"></div>
+                    <img src="https://placehold.co/150?text=Foto" id="teacher-photo" alt="Guru Kelas" class="teacher-img">
+                    <div class="teacher-info">
+                        <h3 id="teacher-name">Memuat Nama...</h3>
+                        <p id="teacher-nip">Wali Kelas 4 A</p>
+                        <div class="stat-badge"><i class="fas fa-star"></i> Guru Terbaik</div>
+                    </div>
+                </div>
+                
+                <div class="vision-box reveal delay-200">
+                    <i class="fas fa-quote-right bg-icon"></i>
+                    <h4><i class="fas fa-bullseye"></i> Visi & Misi Sekolah</h4>
+                    <div id="visi-text" class="vision-text">Memuat visi...</div>
+                    <div id="misi-text" class="vision-text" style="font-size: 0.95rem; color: #777;">Memuat misi...</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. INFO VISUAL (PREVIEW & MODAL) -->
+    <section style="background: #eef2f5;">
+        <div class="container">
+            <h2 class="section-title reveal">Informasi Kelas</h2>
+            <div class="info-grid">
+                <div class="preview-card reveal delay-100" onclick="openModal('Jadwal Pelajaran', document.getElementById('img-jadwal-src').src, 'Jadwal pelajaran berlaku untuk semester ini.')">
+                    <img src="https://placehold.co/600x400?text=Jadwal+Pelajaran" id="img-jadwal-src" alt="Jadwal">
+                    <div class="preview-overlay">
+                        <h3><i class="fas fa-calendar-alt"></i> Jadwal Pelajaran</h3>
+                        <p>Klik untuk memperbesar</p>
+                    </div>
+                </div>
+                <div class="preview-card reveal delay-200" onclick="openModal('Regu Piket & Struktur', document.getElementById('img-struktur-src').src, 'Daftar petugas piket kebersihan dan struktur organisasi kelas.')">
+                    <img src="https://placehold.co/600x400?text=Struktur+Kelas" id="img-struktur-src" alt="Struktur">
+                    <div class="preview-overlay">
+                        <h3><i class="fas fa-users"></i> Regu Kelas</h3>
+                        <p>Klik untuk melihat detail</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. PENGUMUMAN (DYNAMIC FROM DB) -->
+    <section>
+        <div class="container">
+            <h2 class="section-title reveal">Papan Pengumuman</h2>
+            <!-- Container ini akan diisi otomatis oleh JavaScript berdasarkan data di Pengaturan -->
+            <div id="announcement-container" class="announcement-grid">
+                <!-- Fallback jika data belum diload / kosong -->
+                <div style="grid-column: 1/-1; text-align: center; color: #8898aa;">
+                    <i class="fas fa-spinner fa-spin"></i> Memuat Pengumuman...
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. GRAFIK 7 KAIH -->
+    <section style="background: linear-gradient(to right, #f8f9fa, #e9ecef);">
+        <div class="container">
+            <div class="chart-section reveal-scale">
+                <div>
+                    <canvas id="kaihChart"></canvas>
+                </div>
+                <div class="chart-text">
+                    <h3>Grafik 7 KAIH</h3>
+                    <p>Pemantauan perkembangan karakter siswa melalui 7 Kebiasaan Anak Indonesia Hebat (7KAIH). Data ini diambil secara <strong>real-time</strong> dari laporan harian siswa.</p>
+                    <div class="stat-badge"><i class="fas fa-chart-pie"></i> Analisis Data Kelas</div>
+                    <ul class="check-list" style="margin-top: 30px; list-style: none; color: #555;">
+                        <li><i class="fas fa-check-circle" style="color: var(--secondary); font-size: 1.2rem;"></i> Ketaatan Beribadah</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--secondary); font-size: 1.2rem;"></i> Disiplin Waktu</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--secondary); font-size: 1.2rem;"></i> Gaya Hidup Sehat</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. SAMBUTAN GURU -->
+    <div class="container">
+        <div class="sambutan-section reveal">
+            <i class="fas fa-quote-right sambutan-bg-icon"></i>
+            <div class="sambutan-content">
+                <i class="fas fa-comment-dots quote-icon"></i>
+                <p class="quote-text" id="sambutan-text">"Pendidikan adalah senjata paling mematikan di dunia, karena dengan pendidikan, Anda dapat mengubah dunia."</p>
+                <p class="quote-author" id="sambutan-author">- Guru Kelas 4 A</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 SDN Setu 02 - Kelas 4 A. Dibuat dengan semangat belajar.</p>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-youtube"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- GENERIC MODAL -->
+    <div id="genericModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Judul</h3>
+                <span class="close-modal" onclick="closeGenericModal()">×</span>
+            </div>
+            <div class="modal-body">
+                <img id="modalImg" src="" style="display:none;" class="modal-img">
+                <p id="modalDesc"></p>
+                <div id="modalHtmlContent"></div>
+                <div id="modalActionArea"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://ztcdcxqbffobonlubiga.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_Tlt7BdyANH_U1j_wVXLcnw_ltkzm-Bb";
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // --- SCROLL ANIMATION OBSERVER ---
+        const observerOptions = { threshold: 0.15 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target); // Hanya animasi sekali
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal, .reveal-scale').forEach(el => observer.observe(el));
+
+
+        // Init Data
+        window.addEventListener('load', async () => {
+            await loadSchoolInfo();
+            await loadTeacherInfo();
+            await loadChartData();
+            document.getElementById('preloader').style.opacity = '0';
+            setTimeout(() => { document.getElementById('preloader').style.display = 'none'; }, 500);
+        });
+
+        // 1. LOAD INFO SEKOLAH (Visi, Misi, Visuals, & Pengumuman)
+        async function loadSchoolInfo() {
+            try {
+                const { data, error } = await supabaseClient.from('pengaturan').select('data').eq('key', 'global').single();
+                if (data && data.data) {
+                    const info = data.data.infoSekolah || {};
+                    const visual = info.infoKelas || {};
+                    const vm = info.visiMisi || {};
+                    const pengumumanData = info.pengumuman || {};
+
+                    // Header
+                    if(info.namaSekolah) document.querySelector('title').textContent = `WEB ${info.namaSekolah}`;
+                    
+                    // Visi Misi Short
+                    document.getElementById('visi-text').textContent = vm.visi ? `"${vm.visi}"` : "Visi belum diatur.";
+                    document.getElementById('misi-text').textContent = vm.misi ? vm.misi.substring(0, 100) + '...' : "Misi belum diatur.";
+                    
+                    // Sambutan
+                    if(info.sambutanKepsek) document.getElementById('sambutan-text').textContent = `"${info.sambutanKepsek}"`;
+                    if(info.namaKepsek) document.getElementById('sambutan-author').textContent = `- ${info.namaKepsek} (Kepala Sekolah)`;
+
+                    // Info Visual (Images)
+                    if(visual.jadwalPelajaran) document.getElementById('img-jadwal-src').src = visual.jadwalPelajaran;
+                    if(visual.strukturOrganisasi) document.getElementById('img-struktur-src').src = visual.strukturOrganisasi;
+
+                    // --- LOAD PENGUMUMAN DINAMIS ---
+                    const announcementContainer = document.getElementById('announcement-container');
+                    let announcementHtml = '';
+                    let count = 0;
+
+                    for (let i = 1; i <= 3; i++) {
+                        const p = pengumumanData[`pengumuman${i}`];
+                        if (p && p[`pengumuman${i}Judul`]) {
+                            count++;
+                            const judul = p[`pengumuman${i}Judul`];
+                            const text = p[`pengumuman${i}Text`] || 'Tidak ada konten teks.';
+                            const gambar = p[`pengumuman${i}Gambar`]; // Bisa kosong
+                            const dokumen = p[`pengumuman${i}Dokumen`]; // Bisa kosong
+                            
+                            // Siapkan argumen untuk Modal (escape string untuk keamanan sederhana di onclick)
+                            const safeJudul = judul.replace(/'/g, "\\'");
+                            const safeText = text.replace(/'/g, "\\'").replace(/\n/g, "<br>");
+                            const safeGambar = gambar ? gambar.replace(/'/g, "\\'") : '';
+                            const safeDokumen = dokumen ? dokumen.replace(/'/g, "\\'") : '';
+
+                            // Tentukan Tampilan Header Card (Gambar atau Icon)
+                            let headerHtml = `<div class="news-header"><i class="fas fa-bullhorn news-icon-placeholder"></i></div>`;
+                            if (gambar) {
+                                headerHtml = `<div class="news-header"><img src="${gambar}" alt="Gambar Pengumuman"></div>`;
+                            }
+
+                            announcementHtml += `
+                            <div class="news-card reveal delay-${i*100}" onclick="openAnnouncementModal('${safeJudul}', '${safeGambar}', '${safeText}', '${safeDokumen}')">
+                                ${headerHtml}
+                                <div class="news-content">
+                                    <h3>${judul}</h3>
+                                    <p>${text.substring(0, 100)}${text.length > 100 ? '...' : ''}</p>
+                                    <span class="read-more">Baca Selengkapnya <i class="fas fa-arrow-right"></i></span>
+                                </div>
+                            </div>
+                            `;
+                        }
+                    }
+
+                    if (count === 0) {
+                        announcementContainer.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #8898aa; padding: 40px;">Belum ada pengumuman yang dipublikasikan.</div>`;
+                    } else {
+                        announcementContainer.innerHTML = announcementHtml;
+                        // Trigger animasi ulang untuk elemen baru
+                        setTimeout(() => {
+                            document.querySelectorAll('.news-card.reveal').forEach(el => {
+                                observer.observe(el);
+                                el.classList.add('active'); // Paksa aktif agar muncul langsung
+                            });
+                        }, 100);
+                    }
+
+                }
+            } catch (e) { console.error("Err Info:", e); }
+        }
+
+        // 2. LOAD TEACHER INFO
+        async function loadTeacherInfo() {
+            const { data } = await supabaseClient.from('users').select('*').eq('role', 'Guru').limit(1).single();
+            if (data) {
+                document.getElementById('teacher-name').textContent = data.nama;
+                document.getElementById('teacher-nip').textContent = `Wali Kelas ${data.kelas || '4 A'}`;
+                if(data.foto) document.getElementById('teacher-photo').src = data.foto;
+            }
+        }
+
+        // 3. LOAD & RENDER CHART 7 KAIH
+        async function loadChartData() {
+            const { data: laporan } = await supabaseClient.from('laporan').select('*').limit(50);
+            if(!laporan || laporan.length === 0) return;
+
+            let stats = { ibadah: 0, bangun: 0, tidur: 0, olahraga: 0, belajar: 0, sosial: 0, makan: 0 };
+            const total = laporan.length;
+
+            laporan.forEach(lap => {
+                // Ibadah (Check if fields not empty)
+                let ibCount = 0;
+                for(let i=1; i<=7; i++) if(lap[`ibadah${i}`]) ibCount++;
+                if(ibCount >= 4) stats.ibadah++; // Asumsi 4 ibadah = tercapai
+
+                // Waktu (Hardcoded threshold based on logic in Guru.html)
+                if(lap.bangun_pagi && lap.bangun_pagi <= "05:00") stats.bangun++;
+                if(lap.tidur_cepat && lap.tidur_cepat <= "21:00") stats.tidur++;
+
+                // Kegiatan
+                if(lap.rincian_olahraga && lap.rincian_olahraga.length > 2) stats.olahraga++;
+                if(lap.materi_belajar && lap.materi_belajar.length > 2) stats.belajar++;
+                if(lap.kegiatan_masyarakat && lap.kegiatan_masyarakat.length > 2) stats.sosial++;
+
+                // Makanan (Count booleans)
+                let foodScore = (lap.makanan_karbo?1:0) + (lap.makanan_sayur?1:0) + (lap.makanan_susu?1:0) + (lap.makanan_lauk?1:0) + (lap.makanan_air?1:0);
+                if(foodScore >= 3) stats.makan++;
+            });
+
+            // Convert to Percentage
+            const dataSet = [
+                (stats.ibadah/total)*100, (stats.bangun/total)*100, (stats.tidur/total)*100,
+                (stats.olahraga/total)*100, (stats.belajar/total)*100, (stats.sosial/total)*100, (stats.makan/total)*100
+            ];
+
+            const ctx = document.getElementById('kaihChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Beribadah', 'Bangun Pagi', 'Tidur Cepat', 'Olahraga', 'Belajar', 'Bermasyarakat', 'Makan Sehat'],
+                    datasets: [{
+                        label: 'Persentase Kepatuhan Kelas (%)',
+                        data: dataSet,
+                        backgroundColor: 'rgba(74, 144, 226, 0.2)',
+                        borderColor: '#4A90E2',
+                        pointBackgroundColor: '#FF6B6B',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    scales: { r: { suggestedMin: 0, suggestedMax: 100 } },
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+
+        // --- MODAL FUNCTIONS ---
+        const modal = document.getElementById('genericModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalImg = document.getElementById('modalImg');
+        const modalHtml = document.getElementById('modalHtmlContent');
+        const modalAction = document.getElementById('modalActionArea');
+
+        function openModal(title, imgSrc, desc) {
+            modalTitle.textContent = title;
+            modalImg.src = imgSrc;
+            modalImg.style.display = imgSrc ? 'block' : 'none';
+            modalHtml.innerHTML = `<p>${desc}</p>`;
+            modalAction.innerHTML = '';
+            modal.style.display = 'block';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+
+        function openAnnouncementModal(title, imgSrc, textContent, docLink) {
+            modalTitle.textContent = title;
+            
+            if(imgSrc) {
+                modalImg.src = imgSrc;
+                modalImg.style.display = 'block';
+            } else {
+                modalImg.style.display = 'none';
+            }
+
+            modalHtml.innerHTML = `<p style="line-height:1.8; white-space: pre-line; font-size: 1rem; color: #525f7f;">${textContent}</p>`;
+            
+            if(docLink) {
+                modalAction.innerHTML = `<a href="${docLink}" target="_blank" class="modal-btn"><i class="fas fa-file-download"></i> Buka Dokumen / Tautan</a>`;
+            } else {
+                modalAction.innerHTML = '';
+            }
+
+            modal.style.display = 'block';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+
+        function closeGenericModal() {
+            modal.classList.remove('show');
+            setTimeout(() => { modal.style.display = 'none'; }, 300);
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) closeGenericModal();
+        }
+    </script>
+</body>
+</html>
