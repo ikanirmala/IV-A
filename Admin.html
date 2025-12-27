@@ -1,0 +1,2298 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin</title>
+    <link rel="icon" type="image/x-icon" href="">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Ganti Firebase dengan Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        :root {
+            --primary-color: #4F46E5; --secondary-color: #6B7280; --success-color: #10B981;
+            --danger-color: #EF4444; --warning-color: #F59E0B; --info-color: #3B82F6;
+            --light-color: #F9FAFB; --dark-color: #1F2937; --background-color: #F3F4F6;
+            --text-color: #111827; --card-bg-color: #ffffff; --shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+            --border-radius: 12px;
+            --border-color: #EAECEF;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--background-color); color: var(--text-color); line-height: 1.6; }
+        
+        #login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, var(--dark-color), #4b5563); }
+        .login-card { background: var(--card-bg-color); border-radius: 20px; padding: 40px; width: 100%; max-width: 450px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); text-align: center; }
+        .login-card h2 { font-size: 28px; margin-bottom: 30px; }
+        .form-group { position: relative; margin-bottom: 25px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: #374151; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 15px; border: 1px solid #D1D5DB; border-radius: 8px; font-size: 16px; font-family: 'Poppins', sans-serif; transition: all 0.2s ease-in-out; }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); }
+        .submit-button { width: 100%; background: var(--primary-color); color: white; padding: 16px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background-color 0.3s; }
+        .submit-button:hover { background-color: #4338CA; }
+        .submit-button:disabled { background: #9CA3AF; cursor: not-allowed; }
+
+        #dashboard-container { display: flex; }
+        .sidebar { width: 260px; background-color: var(--dark-color); color: #E5E7EB; display: flex; flex-direction: column; height: 100vh; position: fixed; }
+        .sidebar-header { padding: 25px; text-align: center; border-bottom: 1px solid #374151; }
+        .sidebar-header h2 { font-size: 24px; color: white; }
+        .sidebar-nav { flex-grow: 1; }
+        .sidebar-nav a { display: flex; align-items: center; gap: 15px; color: #D1D5DB; text-decoration: none; padding: 18px 25px; font-weight: 500; transition: background-color 0.2s, color 0.2s; }
+        .sidebar-nav a.nav-link { border-left: 4px solid transparent; }
+        .sidebar-nav a:hover { background-color: #374151; color: white; }
+        .sidebar-nav a.active { background-color: #4F46E5; color: white; border-left-color: var(--info-color); }
+
+        .sidebar-nav .nav-group-toggle { justify-content: space-between; cursor: pointer; }
+        .sidebar-nav .nav-arrow { font-size: 0.8em; transition: transform 0.3s ease; }
+        .nav-group.open > .nav-group-toggle .nav-arrow { transform: rotate(180deg); }
+        .submenu { display: none; background-color: #111827; }
+        .nav-group.open > .submenu { display: block; }
+        .submenu .nav-link { padding-left: 50px; padding-top: 14px; padding-bottom: 14px; font-size: 14px; }
+        .submenu .nav-link.active { background-color: #374151; border-left-color: var(--info-color); }
+        .submenu .nav-link:hover { background-color: #4F46E5; }
+
+        .sidebar-footer { padding: 25px; border-top: 1px solid #374151; }
+        #logoutButton { width: 100%; background: var(--danger-color); } #logoutButton:hover{ background: #D91A2A; }
+
+        .main-content { margin-left: 260px; width: calc(100% - 260px); padding: 30px; }
+        .page { display: none; }
+        .page.active { display: block; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;}
+        .page-header h1 { font-size: 32px; font-weight: 700; }
+        .page-header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { padding: 10px 20px; border: none; cursor: pointer; font-size: 15px; font-weight: 500; border-radius: 8px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary { background-color: var(--primary-color); color: white; } .btn-primary:hover { background-color: #4338CA; }
+        .btn-success { background-color: var(--success-color); color: white; } .btn-success:hover { background-color: #059669; }
+        .btn-danger { background-color: var(--danger-color); color: white; } .btn-danger:hover { background-color: #B91C1C; }
+        .btn-secondary { background-color: var(--secondary-color); color: white; } .btn-secondary:hover { background-color: #5A626F; }
+        .btn-warning { background-color: var(--warning-color); color: white; } .btn-warning:hover { background-color: #D97706; }
+        
+        .card { background-color: var(--card-bg-color); padding: 25px; border-radius: var(--border-radius); box-shadow: var(--shadow); margin-bottom: 30px; }
+        .table-wrapper { overflow-x: auto; max-height: 70vh; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px 15px; border-bottom: 1px solid #E5E7EB; text-align: left; vertical-align: middle; white-space: nowrap;}
+        th { background-color: var(--light-color); font-weight: 600; position: sticky; top: 0; z-index: 1;}
+        .actions-cell button { margin-right: 8px; padding: 6px 10px; }
+        .teacher-photo { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+        
+        .filters-container { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; margin-bottom: 25px; }
+        .filter-group { display: flex; align-items: center; gap: 10px; }
+        .filter-group label { font-weight: 500; }
+        .filter-group input, .filter-group select { padding: 8px 12px; border-radius: 8px; border: 1px solid #D1D5DB; }
+        .chart-container { position: relative; height:60vh; width:100%; margin-top:20px;}
+        #ibadah-charts-container, #waktu-charts-container, #kegiatan-charts-container, #belajar-makanan-charts-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; }
+        .chart-wrapper { position: relative; height: 40vh; }
+
+
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        #settingsForm h2, #galeriForm h2, #youtube-links-container h2 { font-size: 20px; font-weight: 600; color: var(--primary-color); border-bottom: 2px solid #E5E7EB; padding-bottom: 10px; margin-top: 30px; margin-bottom: 20px; grid-column: 1 / -1; }
+        #settingsForm h2:first-child { margin-top: 0; }
+        #settingsForm h3 { font-size: 16px; font-weight: 600; color: var(--dark-color); margin-top: 15px; margin-bottom: 10px; grid-column: 1 / -1; }
+        .textarea-full-width { grid-column: 1 / -1; }
+        .gallery-preview { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 15px; background-color: #f3f4f6; border: 1px solid #e5e7eb; }
+
+        .ibadah-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; grid-column: 1 / -1; }
+        .ibadah-item { display: flex; flex-direction: column; gap: 10px; }
+        .ibadah-checkbox { display: flex; align-items: center; gap: 12px; background-color: var(--light-color); padding: 12px; border-radius: 8px; }
+        .ibadah-checkbox input { width: 1.2em; height: 1.2em; accent-color: var(--primary-color); }
+        .ibadah-checkbox label { font-weight: 500; margin-bottom: 0; }
+        
+        .supervisi-settings-group { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .supervisi-settings-group h4 { font-size: 16px; margin-bottom: 15px; }
+        .supervisi-item-container { display: flex; flex-direction: column; gap: 10px; }
+        .supervisi-item { display: flex; align-items: center; gap: 10px; }
+        .supervisi-item input[type="text"] { flex-grow: 1; }
+        .supervisi-item input[type="checkbox"] { width: 1.1em; height: 1.1em; }
+        .supervisi-item .btn-danger { padding: 5px 10px; font-size: 12px; }
+
+        #uploadStatus { margin-top: 15px; font-weight: 500; }
+        .text-success { color: var(--success-color); }
+        .text-primary { color: var(--primary-color); }
+        .text-danger { color: var(--danger-color); }
+        
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
+        .modal.show { display: flex; }
+        .modal-content { background-color: var(--card-bg-color); padding: 30px; border-radius: var(--border-radius); width: 90%; max-width: 800px; box-shadow: var(--shadow); max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #E5E7EB; padding-bottom: 15px; }
+        .modal-header h3 { margin: 0; }
+        .modal-header .close { font-size: 32px; font-weight: bold; cursor: pointer; }
+        .modal-section { margin-bottom: 20px; }
+        .modal-section h4 { margin-bottom: 10px; font-weight: 600; }
+        .modal-footer { text-align: right; margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; }
+
+        #laporan-controls-wrapper { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 20px; align-items: flex-start; margin-bottom: 25px; }
+        #laporan-view-switcher .btn { background: none; border: 1px solid var(--border-color); box-shadow: none;  padding: 10px 15px; color: var(--secondary-color); font-weight: 600; }
+        #laporan-view-switcher .btn:hover { color: var(--primary-color); background-color: #f0f0f0; }
+        #laporan-view-switcher .btn.active { color: white; background-color: var(--primary-color); border-color: var(--primary-color); }
+        #laporan-filters-container { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; }
+        .search-wrapper { position: relative; }
+        .search-wrapper i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #aaa; }
+        #laporanSearchSiswaInput { padding-left: 40px; }
+        #laporanSiswaTable th, #laporanSiswaTable td { padding: 14px 18px; border-bottom: 1px solid var(--border-color); text-align: left; white-space: nowrap; }
+        #laporanSiswaTable th { background-color: #F7F9FC; color: var(--secondary-color); position: sticky; top: 0; z-index: 2; font-weight: 600; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; border-bottom: 2px solid var(--border-color); }
+        #laporanSiswaTable tfoot td { background-color: var(--dark-color); color: white; font-weight: 600; border-top: 2px solid var(--primary-color); }
+        #laporanSiswaTable tbody tr { transition: background-color 0.3s; }
+        #laporanSiswaTable tbody tr:hover { background-color: #EFF8FF; }
+
+        #edit-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; max-height: 60vh; overflow-y: auto; padding: 20px; background-color: var(--background-color); border: 1px solid var(--border-color); border-radius: 8px; }
+        .checklist-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; padding-top: 5px; }
+        .checklist-option { display: flex; align-items: center; gap: 10px; background-color: #fff; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .full-width { grid-column: 1 / -1; }
+    </style>
+</head>
+<body>
+    <div id="login-container">
+        <div class="login-card">
+            <h2><i class="fas fa-shield-halved"></i> Admin Panel</h2>
+            <form id="loginForm">
+                <div class="form-group"><input type="text" id="username" required placeholder="Username"></div>
+                <div class="form-group"><input type="password" id="password" required placeholder="Password"></div>
+                <button type="submit" id="loginButton" class="submit-button">Login</button>
+				<a href="./" class="home-link" title="Back"><i class="fas fa-home"></i></a>
+            </form>
+        </div>
+    </div>
+    
+    <div id="dashboard-container" style="display: none;">
+        <aside class="sidebar">
+            <div class="sidebar-header"><h2>Admin Menu</h2></div>
+            <nav class="sidebar-nav">
+                <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Home</a>
+
+                <div class="nav-group">
+                    <a class="nav-group-toggle"><i class="fas fa-chart-line"></i> 7KAIH <i class="fas fa-chevron-down nav-arrow"></i></a>
+                    <div class="submenu">
+                        <a href="#" class="nav-link" data-page="page-grafik"><i class="fas fa-chart-pie"></i> Grafik 7KAIH</a>
+                        <a href="#" class="nav-link" data-page="page-data-global"><i class="fas fa-chart-bar"></i> Data 7KAIH</a>
+                        <a href="#" class="nav-link" data-page="page-analisis-rinci"><i class="fas fa-search-plus"></i> Analisis Rinci</a>
+                        <a href="#" class="nav-link" data-page="page-laporan-siswa"><i class="fas fa-file-signature"></i> Laporan Siswa</a>
+                    </div>
+                </div>
+
+                <div class="nav-group">
+                    <a class="nav-group-toggle"><i class="fas fa-chalkboard-teacher"></i> Kelas <i class="fas fa-chevron-down nav-arrow"></i></a>
+                    <div class="submenu">
+                        <a href="#" class="nav-link" data-page="page-galeri"><i class="fas fa-images"></i> Galeri</a>
+                        <a href="#" class="nav-link" data-page="page-kelas"><i class="fas fa-chalkboard"></i> Info Kelas</a>
+                        <a href="#" class="nav-link" data-page="page-siswa"><i class="fas fa-user-graduate"></i> Data Siswa</a>
+                    </div>
+                </div>
+
+                <div class="nav-group">
+                    <a class="nav-group-toggle"><i class="fas fa-cogs"></i> Sekolah <i class="fas fa-chevron-down nav-arrow"></i></a>
+                    <div class="submenu">
+                        <a href="#" class="nav-link" data-page="page-settings"><i class="fas fa-school"></i> Data Sekolah</a>
+                        <a href="#" class="nav-link" data-page="page-users"><i class="fas fa-users-cog"></i> Data User</a>
+                        <a href="#" class="nav-link" data-page="page-data-aplikasi"><i class="fas fa-database"></i> Data Aplikasi</a>
+                    </div>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logoutButton" class="submit-button"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div id="filter-card" class="card">
+                 <div class="filters-container" style="margin-bottom:0;">
+                    <div class="filter-group">
+                        <label for="startDate">Dari:</label> <input type="date" id="startDate">
+                        <label for="endDate">Sampai:</label> <input type="date" id="endDate">
+                    </div>
+                    <div class="filter-group">
+                         <label for="kelasFilter">Kelas:</label> <select id="kelasFilter"></select>
+                    </div>
+                     <button class="btn btn-primary" onclick="applyAndRenderAll()"><i class="fas fa-filter"></i> Terapkan Filter</button>
+                 </div>
+            </div>
+
+            <div id="page-grafik" class="page active">
+                <div class="page-header"><h1>Grafik 7 Kebiasaan Anak Indonesia Hebat</h1></div>
+                <div class="card">
+                     <div class="chart-container">
+                         <canvas id="globalChart"></canvas>
+                     </div>
+                </div>
+            </div>
+            <div id="page-data-global" class="page">
+                <div class="page-header">
+                    <h1>Rekap 7 Kebiasaan Anak Indonesia Hebat</h1>
+                    <div class="page-header-actions">
+                        <button class="btn btn-success" onclick="downloadGlobalRekapPDF()"><i class="fas fa-file-pdf"></i> Download Laporan</button>
+                    </div>
+                </div>
+                <div class="card">
+                     <div class="table-wrapper"><table id="globalRekapTable"></table></div>
+                </div>
+                 <div class="card" style="margin-top: 30px;">
+                    <h2 style="margin-bottom: 20px; font-size: 20px; font-weight: 600; border-bottom: 2px solid #E5E7EB; padding-bottom: 10px;"><i class="fas fa-percentage"></i> Persentase Perolehan Setiap Kategori</h2>
+                    <div class="table-wrapper"><table id="percentageTable"></table></div>
+                </div>
+            </div>
+            <div id="page-analisis-rinci" class="page">
+                <div class="page-header"><h1>Analisis Rinci Laporan</h1></div>
+                <div class="card"><h2 style="font-size: 20px; font-weight: 600;">Rincian Data Laporan Siswa</h2><div class="table-wrapper"><table id="analisisLaporanTable"></table></div></div>
+                <div class="card"><h2 style="font-size: 20px; font-weight: 600;">Grafik Persentase Pelaksanaan Ibadah</h2><div id="ibadah-charts-container" style="margin-top:20px;"></div></div>
+                <div class="card"><h2 style="font-size: 20px; font-weight: 600;">Grafik Bangun Pagi dan Tidur Cepat</h2><div id="waktu-charts-container" style="margin-top:20px;"></div></div>
+                <div class="card"><h2 style="font-size: 20px; font-weight: 600;">Grafik Berolahraga dan Bermasyarakat</h2><div id="kegiatan-charts-container" style="margin-top:20px;"></div></div>
+                <div class="card"><h2 style="font-size: 20px; font-weight: 600;">Grafik Belajar dan Makanan Sehat</h2><div id="belajar-makanan-charts-container" style="margin-top:20px;"></div></div>
+            </div>
+            <div id="page-laporan-siswa" class="page">
+                <div class="card">
+                    <h2><i class="fas fa-table"></i> Data Laporan Siswa</h2>
+                    <div id="laporan-controls-wrapper">
+                        <div id="laporan-view-switcher">
+                            <button id="btnData" class="btn active" onclick="switchLaporanView('data', this)"><i class="fas fa-table"></i> Data Asli</button>
+                            <button id="btnNilai" class="btn" onclick="switchLaporanView('nilai', this)"><i class="fas fa-star-half-alt"></i> Nilai Harian</button>
+                            <button id="btnRekap" class="btn" onclick="switchLaporanView('rekap', this)"><i class="fas fa-chart-pie"></i> Rekap Kategori</button>
+                            <button id="btnPredikat" class="btn" onclick="switchLaporanView('predikat', this)"><i class="fas fa-award"></i> Rekap Predikat</button>
+                            <button class="btn btn-success" onclick="downloadLaporanSiswaPDF()"><i class="fas fa-file-pdf"></i> Download Laporan</button>
+                        </div>
+
+                        <div id="laporan-filters-container">
+                            <div class="filter-group">
+                                <label for="laporanKelasFilter">Kelas:</label>
+                                <select id="laporanKelasFilter"></select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="laporanStartDate">Dari:</label> <input type="date" id="laporanStartDate">
+                                <label for="laporanEndDate">Sampai:</label> <input type="date" id="laporanEndDate">
+                                <button class="btn btn-primary" onclick="applyLaporanFilter()"><i class="fas fa-filter"></i> Filter</button>
+                            </div>
+                            <div class="search-wrapper">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="laporanSearchSiswaInput" onkeyup="filterLaporanTable()" placeholder="Cari Nama Siswa...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="laporanSiswaTable">
+                            <thead></thead>
+                            <tbody></tbody>
+                            <tfoot></tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+             <div id="page-settings" class="page">
+                <div class="page-header"><h1>Data Sekolah</h1></div>
+                <div class="card">
+                    <form id="settingsForm"></form>
+                    <button class="btn btn-success" style="margin-top: 20px; grid-column: 1 / -1;" onclick="saveSettings()"><i class="fas fa-save"></i> Simpan Pengaturan</button>
+                </div>
+            </div>
+            <div id="page-galeri" class="page">
+                <div class="page-header">
+                    <h1>Galeri Homepage</h1>
+                </div>
+                <div class="card">
+                    <p style="margin-bottom: 25px; color: var(--secondary-color);">Upload hingga 10 foto untuk ditampilkan pada bagian galeri di halaman utama website.</p>
+                    <form id="galeriForm"></form>
+                    <h2 style="margin-top: 40px;"><i class="fab fa-youtube"></i> Video Youtube</h2>
+                    <div id="youtube-links-container" class="form-grid" style="grid-template-columns: 1fr;"></div>
+                    <button class="btn btn-success" style="margin-top: 20px;" onclick="saveGaleri()"><i class="fas fa-save"></i> Simpan Galeri & Video</button>
+                </div>
+            </div>
+            <div id="page-users" class="page">
+                <div class="page-header">
+                    <h1>Data User</h1>
+                </div>
+                <div class="card">
+                    <div class="table-wrapper"><table id="usersTable"></table></div>
+                </div>
+            </div>
+            <div id="page-siswa" class="page">
+                <div class="page-header">
+                    <h1>Data Siswa</h1>
+                    <div class="page-header-actions">
+                         <button class="btn btn-success" onclick="openModal('excelModal')"><i class="fas fa-file-excel"></i> Kelola via Excel</button>
+                         <button class="btn btn-primary" onclick="openModal('siswaModal')"><i class="fas fa-plus"></i> Tambah Manual</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="table-wrapper"><table id="siswaTable"></table></div>
+                </div>
+            </div>
+            <div id="page-data-aplikasi" class="page">
+                <div class="page-header">
+                    <h1>Data Aplikasi</h1>
+                </div>
+                <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+                    <div class="card">
+                        <h3 style="display: flex; align-items: center; gap: 10px; font-size: 1.2em; margin-bottom: 15px;"><i class="fas fa-download text-success"></i> Backup Data</h3>
+                        <p style="margin-bottom: 20px;">Cadangkan seluruh data aplikasi (pengaturan, pengguna, siswa, dan laporan) ke dalam satu file JSON. Simpan file ini di tempat yang aman untuk keperluan restorasi di kemudian hari.</p>
+                        <button class="btn btn-success" onclick="backupAllData()"><i class="fas fa-download"></i> Mulai Backup</button>
+                    </div>
+                    <div class="card">
+                        <h3 style="display: flex; align-items: center; gap: 10px; font-size: 1.2em; margin-bottom: 15px;"><i class="fas fa-upload text-primary"></i> Restore Data</h3>
+                        <p style="margin-bottom: 20px;">Pulihkan data dari file backup JSON. <strong>Perhatian:</strong> Proses ini akan menimpa seluruh data yang ada saat ini dengan data dari file backup.</p>
+                         <input type="file" id="restoreFileInput" accept=".json" style="display: none;">
+                        <button class="btn btn-primary" onclick="document.getElementById('restoreFileInput').click()"><i class="fas fa-file-upload"></i> Pilih File & Mulai Restore</button>
+                    </div>
+                    <div class="card">
+                        <h3 style="display: flex; align-items: center; gap: 10px; font-size: 1.2em; margin-bottom: 15px;"><i class="fas fa-exclamation-triangle text-danger"></i> Opsi Reset Data</h3>
+                        <p style="margin-bottom: 20px;">Pilih jenis reset yang ingin Anda lakukan. Tindakan ini tidak dapat diurungkan, maka gunakan dengan hati-hati.</p>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                             <button class="btn btn-warning" onclick="confirmResetLaporan()"><i class="fas fa-file-alt"></i> Reset Data Laporan</button>
+                             <button class="btn btn-warning" style="background-color: #f97316; border-color: #f97316;" onmouseover="this.style.backgroundColor='#ea580c'" onmouseout="this.style.backgroundColor='#f97316'" onclick="confirmResetSiswaLaporan()"><i class="fas fa-user-graduate"></i> Reset Data Siswa & Laporan</button>
+                             <button class="btn btn-warning" style="background-color: #d97706; border-color: #d97706;" onmouseover="this.style.backgroundColor='#b45309'" onmouseout="this.style.backgroundColor='#d97706'" onclick="confirmResetSupervisi()"><i class="fas fa-user-shield"></i> Reset Data Supervisi</button>
+                             <button class="btn btn-danger" onclick="confirmResetAllData()"><i class="fas fa-server"></i> Reset Semua Data Aplikasi</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="page-kelas" class="page">
+                <div class="page-header">
+                    <h1>Info Kelas</h1>
+                </div>
+                <div class="card">
+                    <form id="kelasForm">
+                        <div class="form-group">
+                            <label for="url-jadwal-pelajaran">URL Gambar Jadwal Pelajaran</label>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input type="text" id="url-jadwal-pelajaran" placeholder="URL akan muncul di sini" style="flex-grow: 1;">
+                                <input type="file" id="file-jadwal-pelajaran" accept="image/*" style="display: none;">
+                                <button type="button" class="btn btn-secondary" onclick="document.getElementById('file-jadwal-pelajaran').click()"><i class="fas fa-folder-open"></i></button>
+                                <button type="button" class="btn btn-primary" onclick="uploadFileToDrive('file-jadwal-pelajaran', 'url-jadwal-pelajaran', this)"><i class="fas fa-upload"></i></button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="url-jadwal-piket">URL Gambar Jadwal Piket</label>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input type="text" id="url-jadwal-piket" placeholder="URL akan muncul di sini" style="flex-grow: 1;">
+                                <input type="file" id="file-jadwal-piket" accept="image/*" style="display: none;">
+                                <button type="button" class="btn btn-secondary" onclick="document.getElementById('file-jadwal-piket').click()"><i class="fas fa-folder-open"></i></button>
+                                <button type="button" class="btn btn-primary" onclick="uploadFileToDrive('file-jadwal-piket', 'url-jadwal-piket', this)"><i class="fas fa-upload"></i></button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="url-struktur-organisasi">URL Gambar Struktur Organisasi</label>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input type="text" id="url-struktur-organisasi" placeholder="URL akan muncul di sini" style="flex-grow: 1;">
+                                <input type="file" id="file-struktur-organisasi" accept="image/*" style="display: none;">
+                                <button type="button" class="btn btn-secondary" onclick="document.getElementById('file-struktur-organisasi').click()"><i class="fas fa-folder-open"></i></button>
+                                <button type="button" class="btn btn-primary" onclick="uploadFileToDrive('file-struktur-organisasi', 'url-struktur-organisasi', this)"><i class="fas fa-upload"></i></button>
+                            </div>
+                        </div>
+                        <!-- Added Kesepakatan Kelas -->
+                        <div class="form-group">
+                            <label for="url-kesepakatan-kelas">URL Gambar Kesepakatan Kelas</label>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input type="text" id="url-kesepakatan-kelas" placeholder="URL akan muncul di sini" style="flex-grow: 1;">
+                                <input type="file" id="file-kesepakatan-kelas" accept="image/*" style="display: none;">
+                                <button type="button" class="btn btn-secondary" onclick="document.getElementById('file-kesepakatan-kelas').click()"><i class="fas fa-folder-open"></i></button>
+                                <button type="button" class="btn btn-primary" onclick="uploadFileToDrive('file-kesepakatan-kelas', 'url-kesepakatan-kelas', this)"><i class="fas fa-upload"></i></button>
+                            </div>
+                        </div>
+                    </form>
+                    <button class="btn btn-success" style="margin-top: 20px;" onclick="saveKelasInfo()"><i class="fas fa-save"></i> Simpan Info Kelas</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3 id="userModalTitle">Tambah Pengguna</h3><span class="close" onclick="closeModal('userModal')">×</span></div>
+            <form id="userForm">
+                <input type="hidden" id="userId">
+                <div class="form-grid">
+                    <div class="form-group"><label>Nama Lengkap</label><input type="text" id="userNama" placeholder="Nama Lengkap" required></div>
+                    <div class="form-group"><label>Username</label><input type="text" id="userUsername" placeholder="Username (untuk login)" required></div>
+                    <div class="form-group"><label>Password</label><input type="text" id="userPassword" placeholder="Password" required></div>
+                    <div class="form-group"><label>NIP (Opsional)</label><input type="text" id="userNip" placeholder="NIP"></div>
+                    <div class="form-group"><label>Kelas</label><input type="text" id="userKelas" placeholder="Kelas yang Diajar (kosongi jika Admin)"></div>
+                    <div class="form-group"><label>Role</label><select id="userRole" required><option value="Kepsek">Kepsek</option><option value="Guru">Guru</option><option value="Admin">Admin</option></select></div>
+                </div>
+                 <div class="form-group" style="margin-top: 20px;">
+                    <label for="userFoto">Foto Guru</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="text" id="userFoto" placeholder="URL akan muncul di sini setelah upload" style="flex-grow: 1;">
+                        <input type="file" id="user-foto-file-input" accept="image/*" style="display: none;">
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('user-foto-file-input').click()"><i class="fas fa-folder-open"></i></button>
+                        <button type="button" class="btn btn-primary" onclick="uploadFileToDrive('user-foto-file-input', 'userFoto', this)"><i class="fas fa-upload"></i></button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Simpan</button>
+            </form>
+        </div>
+    </div>
+    <div id="siswaModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3 id="siswaModalTitle">Tambah Siswa</h3><span class="close" onclick="closeModal('siswaModal')">×</span></div>
+            <form id="siswaForm">
+                <input type="hidden" id="siswaId">
+                 <div class="form-grid">
+                    <div class="form-group"><input type="text" id="siswaNama" placeholder="Nama Siswa" required></div>
+                    <div class="form-group"><input type="text" id="siswaNomorInduk" placeholder="Nomor Induk" required></div>
+                    <div class="form-group"><input type="text" id="siswaKelas" placeholder="Kelas" required></div>
+                    <div class="form-group"><input type="text" id="siswaAgama" placeholder="Agama" required></div>
+                </div>
+                <div class="form-group" style="margin-top: 20px;">
+                    <label for="siswaFoto">Foto Siswa</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="text" id="siswaFoto" placeholder="URL akan muncul di sini setelah upload" style="flex-grow: 1;">
+                        <input type="file" id="siswa-foto-file-input" accept="image/*" style="display: none;">
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('siswa-foto-file-input').click()"><i class="fas fa-folder-open"></i></button>
+                        <button type="button" class="btn btn-primary" onclick="uploadFileToDrive('siswa-foto-file-input', 'siswaFoto', this)"><i class="fas fa-upload"></i></button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Simpan</button>
+            </form>
+        </div>
+    </div>
+    <div id="excelModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Kelola Siswa via Excel</h3><span class="close" onclick="closeModal('excelModal')">×</span></div>
+            <div class="modal-section">
+                <h4>Langkah 1: Download Format</h4>
+                <p>Download format Excel yang sudah berisi data siswa saat ini. Edit file ini untuk menambah atau mengubah data.</p>
+                <button class="btn btn-success" onclick="downloadExcelFormat()"><i class="fas fa-download"></i> Download Format</button>
+            </div>
+            <div class="modal-section">
+                <h4>Langkah 2: Upload File</h4>
+                <p>Pilih file Excel yang sudah Anda edit untuk di-upload ke sistem.</p>
+                <input type="file" id="siswaExcelInput" accept=".xlsx, .xls" style="display: none;">
+                <label for="siswaExcelInput" class="btn btn-primary"><i class="fas fa-file-upload"></i> Pilih File</label>
+                <span id="fileName" style="margin-left: 10px;">Tidak ada file dipilih</span>
+                <div id="uploadStatus" style="display: none; margin-top: 15px;"></div>
+                <button class="btn btn-primary" style="margin-top: 10px;" onclick="uploadExcel()"><i class="fas fa-upload"></i> Mulai Upload</button>
+            </div>
+        </div>
+    </div>
+    <div id="editLaporanModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-pencil-alt"></i> Edit Laporan Siswa</h3>
+                <span class="close" onclick="closeModal('editLaporanModal')">×</span>
+            </div>
+            <form id="editLaporanForm">
+                <input type="hidden" id="editDocId">
+                <div id="edit-form-grid"></div>
+                <div style="text-align: right; margin-top: 20px;">
+                    <button type="button" class="btn btn-primary" onclick="saveLaporanChanges()"><i class="fas fa-save"></i> Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="infoModal" class="modal">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3 id="infoModalTitle">Pemberitahuan</h3>
+                <span class="close" onclick="closeModal('infoModal')">×</span>
+            </div>
+            <div class="modal-body" style="padding: 20px 5px;">
+                <p id="infoModalMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button id="infoModalCancelBtn" class="btn btn-secondary" style="display: none;">Batal</button>
+                <button id="infoModalConfirmBtn" class="btn btn-primary">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://ztcdcxqbffobonlubiga.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_Tlt7BdyANH_U1j_wVXLcnw_ltkzm-Bb";
+        // MENGHINDARI KONFLIK VARIABEL: Gunakan 'supabaseClient' bukan 'supabase'
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let currentCollection = '';
+        let siswaDataFromExcel = [];
+        let globalSettings = {};
+        let allLaporanData = [];
+        let dataLoaded = false;
+        let chartInstances = {};
+
+        let allUsersData = [];
+        let allLaporanSiswaData = [];
+        let filteredLaporanSiswaData = [];
+        let activeLaporanView = 'data';
+        let isLaporanSiswaLoaded = false;
+
+
+        const loginContainer = document.getElementById('login-container');
+        const dashboardContainer = document.getElementById('dashboard-container');
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('show');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+        
+        function showInfoModal(message, title = 'Pemberitahuan', onConfirm) {
+            document.getElementById('infoModalTitle').textContent = title;
+            document.getElementById('infoModalMessage').textContent = message;
+            const confirmBtn = document.getElementById('infoModalConfirmBtn');
+            const cancelBtn = document.getElementById('infoModalCancelBtn');
+            confirmBtn.textContent = 'OK';
+            confirmBtn.onclick = () => {
+                closeModal('infoModal');
+                if (onConfirm) onConfirm();
+            };
+            cancelBtn.style.display = 'none';
+            openModal('infoModal');
+        }
+
+        function showConfirmModal(message, title = 'Konfirmasi', onConfirmCallback) {
+            document.getElementById('infoModalTitle').textContent = title;
+            document.getElementById('infoModalMessage').textContent = message;
+            const confirmBtn = document.getElementById('infoModalConfirmBtn');
+            const cancelBtn = document.getElementById('infoModalCancelBtn');
+            confirmBtn.textContent = 'Ya';
+            cancelBtn.textContent = 'Tidak';
+            cancelBtn.style.display = 'inline-block';
+            confirmBtn.onclick = () => {
+                closeModal('infoModal');
+                if (onConfirmCallback) onConfirmCallback();
+            };
+            cancelBtn.onclick = () => closeModal('infoModal');
+            document.querySelector('#infoModal .close').onclick = () => closeModal('infoModal');
+            openModal('infoModal');
+        }
+        
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwc9cOPEvpl1dVb-qIcHEaokHTUXtT10fyn1X8f8Cga-gHkQcb4DpzmQ75sVK84BtqKAQ/exec";
+
+        async function uploadFileToDrive(fileInputId, urlInputId, buttonElement) {
+            const fileInput = document.getElementById(fileInputId);
+            if (fileInput.files.length === 0) {
+                showInfoModal('Silakan pilih file terlebih dahulu.', 'Peringatan');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const originalButtonText = buttonElement.innerHTML;
+            buttonElement.disabled = true;
+            buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengupload...';
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const base64Data = e.target.result.split(',')[1];
+                    const payload = {
+                        fileName: file.name,
+                        mimeType: file.type,
+                        fileData: base64Data
+                    };
+
+                    const response = await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.status === 'success' && result.url) {
+                        document.getElementById(urlInputId).value = result.url;
+                        const previewId = urlInputId.replace('setting-galeri-url', 'galeri-preview');
+                        if(document.getElementById(previewId)) {
+                             document.getElementById(previewId).src = result.url;
+                        }
+                        showInfoModal('File berhasil diupload dan URL diperbarui.', 'Sukses');
+                    } else {
+                        throw new Error(result.message || 'Terjadi kesalahan saat upload.');
+                    }
+                } catch (error) {
+                    console.error('Upload error:', error);
+                    showInfoModal('Gagal mengupload file: ' + error.message, 'Error');
+                } finally {
+                    buttonElement.disabled = false;
+                    buttonElement.innerHTML = originalButtonText;
+                    fileInput.value = '';
+                }
+            };
+            reader.onerror = (error) => {
+                 console.error('File reading error:', error);
+                 showInfoModal('Gagal membaca file.', 'Error');
+                 buttonElement.disabled = false;
+                 buttonElement.innerHTML = originalButtonText;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function updatePageAppearance(settings) {
+            if (settings && settings.infoSekolah) {
+                const namaSekolah = settings.infoSekolah.namaSekolah || 'Admin Dashboard';
+                const logo = settings.infoSekolah.logo;
+                
+                document.title = `Admin - ${namaSekolah}`;
+                
+                if (logo) {
+                    const favicon = document.querySelector('link[rel="icon"]');
+                    if (favicon) {
+                        favicon.href = logo;
+                    }
+                }
+            }
+        }
+
+        async function handleLogin(username, password) {
+            document.getElementById('loginButton').disabled = true;
+            try {
+                // Gunakan Supabase untuk login (Query tabel 'users')
+                const { data: userData, error } = await supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('username', username)
+                    .single();
+
+                if (error || !userData) throw new Error("Username tidak ditemukan.");
+                
+                // Cek password (plain text, sesuai script SQL)
+                if (password !== userData.password) throw new Error("Password salah.");
+                
+                if (userData.role !== 'Admin') throw new Error("Akses ditolak. Anda bukan Admin.");
+                
+                sessionStorage.setItem('isAdminLoggedIn', 'true');
+                await showDashboard();
+            } catch (error) {
+                showInfoModal('Login Gagal: ' + error.message, 'Login Gagal');
+            } finally {
+                document.getElementById('loginButton').disabled = false;
+            }
+        }
+
+        async function showDashboard() {
+            loginContainer.style.display = 'none';
+            dashboardContainer.style.display = 'flex';
+            
+            showInfoModal('Memuat data, mohon tunggu...', 'Informasi');
+            await ensureDataLoaded();
+            navigateTo('page-grafik'); 
+            applyAndRenderAll();
+            closeModal('infoModal');
+        }
+
+        window.onload = async () => { 
+            if (sessionStorage.getItem('isAdminLoggedIn') === 'true') {
+                await showDashboard(); 
+            }
+            document.getElementById('restoreFileInput').addEventListener('change', handleRestoreFile);
+        };
+
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            handleLogin(document.getElementById('username').value, document.getElementById('password').value);
+        });
+        document.getElementById('logoutButton').addEventListener('click', () => {
+            sessionStorage.clear();
+            window.location.reload();
+        });
+
+        document.querySelectorAll('.nav-group-toggle').forEach(toggle => {
+            toggle.addEventListener('click', e => {
+                e.preventDefault();
+                const parentGroup = toggle.parentElement;
+                
+                document.querySelectorAll('.nav-group.open').forEach(openGroup => {
+                    if (openGroup !== parentGroup) {
+                        openGroup.classList.remove('open');
+                    }
+                });
+                parentGroup.classList.toggle('open');
+            });
+        });
+        
+        const navLinks = document.querySelectorAll('.nav-link[data-page]');
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                navigateTo(link.dataset.page);
+            });
+        });
+
+        function navigateTo(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            
+            const activeLink = document.querySelector(`.nav-link[data-page="${pageId}"]`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+                
+                const parentSubmenu = activeLink.closest('.submenu');
+                if (parentSubmenu) {
+                    const parentGroup = parentSubmenu.closest('.nav-group');
+                    if (parentGroup && !parentGroup.classList.contains('open')) {
+                         document.querySelectorAll('.nav-group.open').forEach(openGroup => openGroup.classList.remove('open'));
+                         parentGroup.classList.add('open');
+                    }
+                }
+            }
+            
+            if (pageId === 'page-users') loadCollectionData('users', 'usersTable', ['Foto', 'Nama', 'Username', 'Password', 'NIP', 'Kelas', 'Role']);
+            if (pageId === 'page-siswa') loadCollectionData('siswa', 'siswaTable', ['Foto', 'Nama', 'No. Induk', 'Kelas', 'Agama']);
+            if (pageId === 'page-settings') loadSettings();
+            if (pageId === 'page-galeri') loadGaleriPage();
+            if (pageId === 'page-laporan-siswa') loadLaporanSiswaPage();
+            if (pageId === 'page-kelas') loadKelasPage();
+        }
+
+        async function loadCollectionData(collectionName, tableId, headers) {
+            currentCollection = collectionName;
+            const table = document.getElementById(tableId);
+            table.innerHTML = `<thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}<th>Aksi</th></tr></thead><tbody><tr><td colspan="${headers.length + 1}">Memuat...</td></tr></tbody>`;
+            
+            // Supabase Select
+            const { data: results, error } = await supabaseClient
+                .from(collectionName)
+                .select('*');
+
+            if (error) {
+                console.error("Error fetching data:", error);
+                table.querySelector('tbody').innerHTML = `<tr><td colspan="${headers.length + 1}">Gagal memuat data: ${error.message}</td></tr>`;
+                return;
+            }
+
+            const tbody = table.querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            results.forEach(data => {
+                const tr = document.createElement('tr');
+                if (collectionName === 'users') {
+                    const fotoUrl = data.foto || 'https://placehold.co/60x60/EFEFEF/AAAAAA?text=Foto';
+                    tr.innerHTML = `
+                        <td><img src="${fotoUrl}" alt="Foto ${data.nama || ''}" class="teacher-photo"></td>
+                        <td>${data.nama || ''}</td>
+                        <td>${data.username || ''}</td>
+                        <td>${data.password || '****'}</td>
+                        <td>${data.nip || '-'}</td>
+                        <td>${data.kelas || '-'}</td>
+                        <td>${data.role || ''}</td>`;
+                } else if (collectionName === 'siswa') {
+                    const fotoUrl = data.foto || 'https://placehold.co/60x60/EFEFEF/AAAAAA?text=Foto';
+                    // Note: Supabase field is snake_case 'nomor_induk'
+                    tr.innerHTML = `
+                        <td><img src="${fotoUrl}" alt="Foto ${data.nama || ''}" class="teacher-photo"></td>
+                        <td>${data.nama || ''}</td>
+                        <td>${data.nomor_induk || ''}</td>
+                        <td>${data.kelas || ''}</td>
+                        <td>${data.agama || ''}</td>`;
+                }
+                tr.innerHTML += `<td class="actions-cell"><button class="btn btn-success" onclick="editDoc('${data.id}')"><i class="fas fa-edit"></i></button><button class="btn btn-danger" onclick="deleteDoc('${data.id}')"><i class="fas fa-trash"></i></button></td>`;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        function openEditModal(modalId, docId = null) {
+            const modal = document.getElementById(modalId);
+            const form = modal.querySelector('form');
+            if(form) form.reset();
+
+            if (modalId === 'userModal') {
+                document.getElementById('userModalTitle').textContent = docId ? 'Edit Pengguna' : 'Tambah Pengguna';
+                document.getElementById('userId').value = docId || '';
+            } else if (modalId === 'siswaModal') {
+                document.getElementById('siswaModalTitle').textContent = docId ? 'Edit Siswa' : 'Tambah Siswa';
+                document.getElementById('siswaId').value = docId || '';
+            }
+            openModal(modalId);
+        }
+
+        async function editDoc(docId) {
+            const { data, error } = await supabaseClient.from(currentCollection).select('*').eq('id', docId).single();
+            if (error) {
+                showInfoModal('Gagal mengambil data untuk diedit.', 'Error');
+                return;
+            }
+
+            if (currentCollection === 'users') {
+                openEditModal('userModal', docId);
+                document.getElementById('userNama').value = data.nama || '';
+                document.getElementById('userUsername').value = data.username || '';
+                document.getElementById('userPassword').value = data.password || '';
+                document.getElementById('userNip').value = data.nip || '';
+                document.getElementById('userKelas').value = data.kelas || '';
+                document.getElementById('userRole').value = data.role || 'Guru';
+                document.getElementById('userFoto').value = data.foto || '';
+            } else if (currentCollection === 'siswa') {
+                openEditModal('siswaModal', docId);
+                document.getElementById('siswaNama').value = data.nama || '';
+                document.getElementById('siswaNomorInduk').value = data.nomor_induk || ''; // snake_case
+                document.getElementById('siswaKelas').value = data.kelas || '';
+                document.getElementById('siswaAgama').value = data.agama || '';
+                document.getElementById('siswaFoto').value = data.foto || '';
+            }
+        }
+
+        function deleteDoc(docId) {
+            showConfirmModal('Apakah Anda yakin ingin menghapus data ini?', 'Konfirmasi Hapus', async () => {
+                const { error } = await supabaseClient.from(currentCollection).delete().eq('id', docId);
+                if (error) showInfoModal('Gagal menghapus: ' + error.message, 'Error');
+                else navigateTo('page-' + currentCollection);
+            });
+        }
+
+        document.getElementById('userForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('userId').value;
+            const data = { 
+                nama: document.getElementById('userNama').value, 
+                username: document.getElementById('userUsername').value, 
+                password: document.getElementById('userPassword').value, 
+                nip: document.getElementById('userNip').value, 
+                kelas: document.getElementById('userKelas').value, 
+                role: document.getElementById('userRole').value,
+                foto: document.getElementById('userFoto').value
+            };
+            
+            let error;
+            if (id) {
+                const res = await supabaseClient.from('users').update(data).eq('id', id);
+                error = res.error;
+            } else {
+                const res = await supabaseClient.from('users').insert([data]);
+                error = res.error;
+            }
+
+            if (error) showInfoModal('Gagal menyimpan: ' + error.message, 'Error');
+            else {
+                closeModal('userModal');
+                loadCollectionData('users', 'usersTable', ['Foto', 'Nama', 'Username', 'Password', 'NIP', 'Kelas', 'Role']);
+            }
+        });
+
+        document.getElementById('siswaForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('siswaId').value;
+            const data = { 
+                nama: document.getElementById('siswaNama').value, 
+                nomor_induk: document.getElementById('siswaNomorInduk').value, // snake_case
+                kelas: document.getElementById('siswaKelas').value, 
+                agama: document.getElementById('siswaAgama').value,
+                foto: document.getElementById('siswaFoto').value
+            };
+            
+            let error;
+            if (id) {
+                const res = await supabaseClient.from('siswa').update(data).eq('id', id);
+                error = res.error;
+            } else {
+                const res = await supabaseClient.from('siswa').insert([data]);
+                error = res.error;
+            }
+            
+            if (error) showInfoModal('Gagal menyimpan: ' + error.message, 'Error');
+            else {
+                closeModal('siswaModal');
+                loadCollectionData('siswa', 'siswaTable', ['Foto', 'Nama', 'No. Induk', 'Kelas', 'Agama']);
+            }
+        });
+
+        const excelInput = document.getElementById('siswaExcelInput');
+        excelInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) { document.getElementById('fileName').textContent = 'Tidak ada file dipilih'; return; };
+            document.getElementById('fileName').textContent = file.name;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+                const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                if (jsonData.length === 0) { return; }
+                const requiredHeaders = ['nama', 'nomorInduk', 'kelas', 'agama', 'foto'];
+                const fileHeaders = Object.keys(jsonData[0]);
+                const isValid = requiredHeaders.every(h => fileHeaders.includes(h));
+                if (!isValid) { 
+                    showInfoModal('Format Excel tidak valid. Pastikan kolom berikut ada: ' + requiredHeaders.join(', '), 'Error');
+                    return; 
+                }
+                siswaDataFromExcel = jsonData.map(row => ({ 
+                    nama: row.nama || '', 
+                    nomor_induk: String(row.nomorInduk || ''), // Map to snake_case
+                    kelas: row.kelas || '', 
+                    agama: row.agama || '',
+                    foto: row.foto || ''
+                })).filter(s => s.nama && s.nomor_induk);
+                const statusEl = document.getElementById('uploadStatus');
+                statusEl.textContent = `${siswaDataFromExcel.length} data siswa siap. Klik "Mulai Upload".`;
+                statusEl.style.display = 'block';
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        async function downloadExcelFormat() {
+            try {
+                const { data: students, error } = await supabaseClient.from('siswa').select('*');
+                if (error) throw error;
+                
+                const studentsData = students.map(data => ({
+                    nama: data.nama || '', 
+                    nomorInduk: data.nomor_induk || '', 
+                    kelas: data.kelas || '', 
+                    agama: data.agama || '',
+                    foto: data.foto || ''
+                }));
+                
+                const worksheet = XLSX.utils.json_to_sheet(studentsData, { header: ["nama", "nomorInduk", "kelas", "agama", "foto"] });
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "DataSiswa");
+                XLSX.writeFile(workbook, "Format_Data_Siswa.xlsx");
+            } catch (error) {
+                showInfoModal('Gagal mendownload format: ' + error.message, 'Error');
+            }
+        }
+
+        async function uploadExcel() {
+            if (siswaDataFromExcel.length === 0) {
+                showInfoModal('Pilih file Excel yang valid terlebih dahulu.', 'Peringatan');
+                return;
+            }
+            const uploadStatus = document.getElementById('uploadStatus');
+            uploadStatus.textContent = `Mengupload ${siswaDataFromExcel.length} data...`;
+            try {
+                // Bulk insert Supabase
+                const { error } = await supabaseClient.from('siswa').insert(siswaDataFromExcel);
+                if (error) throw error;
+                
+                uploadStatus.textContent = `Berhasil! ${siswaDataFromExcel.length} data siswa telah ditambahkan.`;
+                loadCollectionData('siswa', 'siswaTable', ['Foto', 'Nama', 'No. Induk', 'Kelas', 'Agama']);
+            } catch (error) {
+                uploadStatus.textContent = 'Error saat mengupload: ' + error.message;
+            }
+        }
+        
+        function addSupervisiItem(type, item = { id: '', nama: '', aktif: true }) {
+            const container = document.getElementById(`${type}-settings-container`);
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'supervisi-item';
+
+            const uniqueId = item.id || `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            itemDiv.dataset.id = uniqueId; 
+
+            const checkboxId = `check-${uniqueId}`;
+
+            itemDiv.innerHTML = `
+                <input type="text" class="form-control" value="${item.nama}" placeholder="Nama Item...">
+                <input type="checkbox" id="${checkboxId}" ${item.aktif ? 'checked' : ''}>
+                <label for="${checkboxId}" style="margin-bottom:0; white-space:nowrap;">Aktif</label>
+                <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()"><i class="fas fa-trash"></i></button>
+            `;
+            container.appendChild(itemDiv);
+        }
+        
+        async function loadSettings() {
+            const form = document.getElementById('settingsForm');
+            form.innerHTML = 'Memuat pengaturan...';
+            
+            // Supabase: Fetch JSONB data from 'pengaturan' table, key 'global'
+            const { data: doc, error } = await supabaseClient
+                .from('pengaturan')
+                .select('data')
+                .eq('key', 'global')
+                .single();
+
+            if (error || !doc) { 
+                form.innerHTML = 'Pengaturan global tidak ditemukan. Silakan simpan pengaturan baru untuk membuatnya.';
+                // Initialize empty data if needed
+                globalSettings = {};
+            } else {
+                globalSettings = doc.data;
+            }
+            
+            const data = globalSettings || {};
+            form.innerHTML = ''; 
+
+            const infoSekolahData = data.infoSekolah || {};
+            const visiMisiData = infoSekolahData.visiMisi || {};
+            const pengumumanData = infoSekolahData.pengumuman || {};
+
+            let infoHtml = `
+                <h2><i class="fas fa-school"></i> Info Sekolah</h2>
+                <div class="form-grid" style="grid-column: 1 / -1;">
+                    <div class="form-group"><label for="setting-infoSekolah.namaSekolah">Nama Sekolah</label><input type="text" id="setting-infoSekolah.namaSekolah" value="${infoSekolahData.namaSekolah || ''}"></div>
+                    <div class="form-group"><label for="setting-infoSekolah.npsn">NPSN</label><input type="text" id="setting-infoSekolah.npsn" value="${infoSekolahData.npsn || ''}"></div>
+                    <div class="form-group"><label for="setting-infoSekolah.jenjang">Jenjang</label><input type="text" id="setting-infoSekolah.jenjang" value="${infoSekolahData.jenjang || ''}"></div>
+                    <div class="form-group"><label for="setting-infoSekolah.alamat">Alamat</label><input type="text" id="setting-infoSekolah.alamat" value="${infoSekolahData.alamat || ''}"></div>
+                    <div class="form-group"><label for="setting-infoSekolah.namaTempat">Tempat (untuk TTD)</label><input type="text" id="setting-infoSekolah.namaTempat" value="${infoSekolahData.namaTempat || ''}"></div>
+                    <div class="form-group"><label for="setting-infoSekolah.namaKepsek">Nama Kepala Sekolah</label><input type="text" id="setting-infoSekolah.namaKepsek" value="${infoSekolahData.namaKepsek || ''}"></div>
+                    <div class="form-group"><label for="setting-infoSekolah.nipKepsek">NIP Kepala Sekolah</label><input type="text" id="setting-infoSekolah.nipKepsek" value="${infoSekolahData.nipKepsek || ''}"></div>
+                    <div class="form-group"><label for="setting-infoSekolah.hpAdmin">No. HP Admin</label><input type="text" id="setting-infoSekolah.hpAdmin" value="${infoSekolahData.hpAdmin || ''}"></div>
+                    <div class="form-group"><label for="setting-infoSekolah.facebook">URL Facebook</label><input type="text" id="setting-infoSekolah.facebook" value="${infoSekolahData.facebook || ''}"></div>
+                    <div class="form-group"><label for="setting-infoSekolah.instagram">URL Instagram</label><input type="text" id="setting-infoSekolah.instagram" value="${infoSekolahData.instagram || ''}"></div>
+                    <div class="form-group"><label for="setting-infoSekolah.youtube">URL Youtube</label><input type="text" id="setting-infoSekolah.youtube" value="${infoSekolahData.youtube || ''}"></div>
+                </div>
+                
+                <div class="form-grid" style="grid-template-columns: 1fr; grid-column: 1 / -1; margin-top: 15px;">
+                    <div class="form-group">
+                        <label for="setting-infoSekolah.logo">Logo Sekolah</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="text" id="setting-infoSekolah.logo" value="${infoSekolahData.logo || ''}" placeholder="URL akan muncul di sini setelah upload" style="flex-grow: 1;">
+                            <input type="file" id="logo-file-input" accept="image/*" style="display: none;">
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('logo-file-input').click()"><i class="fas fa-folder-open"></i> Pilih File</button>
+                            <button type="button" class="btn btn-primary" onclick="uploadFileToDrive('logo-file-input', 'setting-infoSekolah.logo', this)"><i class="fas fa-upload"></i> Upload</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="setting-infoSekolah.fotoSekolah">Foto Gedung Sekolah</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="text" id="setting-infoSekolah.fotoSekolah" value="${infoSekolahData.fotoSekolah || ''}" placeholder="URL akan muncul di sini setelah upload" style="flex-grow: 1;">
+                            <input type="file" id="sekolah-file-input" accept="image/*" style="display: none;">
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('sekolah-file-input').click()"><i class="fas fa-folder-open"></i> Pilih File</button>
+                            <button type="button" class="btn btn-primary" onclick="uploadFileToDrive('sekolah-file-input', 'setting-infoSekolah.fotoSekolah', this)"><i class="fas fa-upload"></i> Upload</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="setting-infoSekolah.fotoKepsek">Foto Kepala Sekolah</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="text" id="setting-infoSekolah.fotoKepsek" value="${infoSekolahData.fotoKepsek || ''}" placeholder="URL akan muncul di sini setelah upload" style="flex-grow: 1;">
+                            <input type="file" id="kepsek-file-input" accept="image/*" style="display: none;">
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('kepsek-file-input').click()"><i class="fas fa-folder-open"></i> Pilih File</button>
+                            <button type="button" class="btn btn-primary" onclick="uploadFileToDrive('kepsek-file-input', 'setting-infoSekolah.fotoKepsek', this)"><i class="fas fa-upload"></i> Upload</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            form.insertAdjacentHTML('beforeend', infoHtml);
+
+            let profilHtml = '<h2><i class="fas fa-bullhorn"></i> Profil & Sambutan</h2><div class="form-grid" style="grid-column: 1 / -1;">';
+            profilHtml += `<div class="form-group textarea-full-width"><label for="setting-infoSekolah.sambutanKepsek">Sambutan Kepala Sekolah</label><textarea id="setting-infoSekolah.sambutanKepsek" rows="6">${infoSekolahData.sambutanKepsek || ''}</textarea></div>`;
+            profilHtml += `<div class="form-group textarea-full-width"><label for="setting-infoSekolah.visiMisi.visi">Visi</label><textarea id="setting-infoSekolah.visiMisi.visi" rows="4">${visiMisiData.visi || ''}</textarea></div>`;
+            profilHtml += `<div class="form-group textarea-full-width"><label for="setting-infoSekolah.visiMisi.misi">Misi</label><textarea id="setting-infoSekolah.visiMisi.misi" rows="8">${visiMisiData.misi || ''}</textarea></div>`;
+            profilHtml += `<div class="form-group textarea-full-width"><label for="setting-infoSekolah.visiMisi.tujuan">Tujuan</label><textarea id="setting-infoSekolah.visiMisi.tujuan" rows="8">${visiMisiData.tujuan || ''}</textarea></div>`;
+            profilHtml += '</div>';
+            form.insertAdjacentHTML('beforeend', profilHtml);
+
+            let pengumumanHtml = '<h2><i class="fas fa-bell"></i> Pengumuman</h2><div class="form-grid" style="grid-template-columns: 1fr; gap: 25px; grid-column: 1 / -1;">';
+            for (let i = 1; i <= 3; i++) {
+                const pData = pengumumanData[`pengumuman${i}`] || {};
+                pengumumanHtml += `
+                    <div class="card" style="padding: 20px;">
+                        <h3>Pengumuman ${i}</h3>
+                        <div class="form-grid" style="grid-template-columns: 1fr;">
+                            <div class="form-group"><label for="setting-pengumuman${i}Judul">Judul</label><input type="text" id="setting-pengumuman${i}Judul" value="${pData[`pengumuman${i}Judul`] || ''}"></div>
+                            <div class="form-group">
+                                <label for="setting-pengumuman${i}Gambar">URL Gambar</label>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <input type="text" id="setting-pengumuman${i}Gambar" value="${pData[`pengumuman${i}Gambar`] || ''}" placeholder="URL akan muncul di sini" style="flex-grow: 1;">
+                                    <input type="file" id="pengumuman-file-input-${i}" accept="image/*" style="display: none;">
+                                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('pengumuman-file-input-${i}').click()"><i class="fas fa-folder-open"></i></button>
+                                    <button type="button" class="btn btn-primary" onclick="uploadFileToDrive('pengumuman-file-input-${i}', 'setting-pengumuman${i}Gambar', this)"><i class="fas fa-upload"></i></button>
+                                </div>
+                            </div>
+                            <div class="form-group"><label for="setting-pengumuman${i}Dokumen">URL Dokumen/Link</label><input type="text" id="setting-pengumuman${i}Dokumen" value="${pData[`pengumuman${i}Dokumen`] || ''}"></div>
+                            <div class="form-group textarea-full-width"><label for="setting-pengumuman${i}Text">Teks Pengumuman</label><textarea id="setting-pengumuman${i}Text" rows="4">${pData[`pengumuman${i}Text`] || ''}</textarea></div>
+                        </div>
+                    </div>`;
+            }
+            pengumumanHtml += '</div>';
+            form.insertAdjacentHTML('beforeend', pengumumanHtml);
+
+            form.insertAdjacentHTML('beforeend', '<h2><i class="fas fa-pray"></i> Pengaturan Ibadah</h2>');
+            const ibadahGrid = document.createElement('div');
+            ibadahGrid.className = 'ibadah-grid';
+            for (let i = 1; i <= 7; i++) {
+                const isEnabled = data.ibadahSettings && data.ibadahSettings[i-1];
+                const options = data.ibadahOptions && data.ibadahOptions[`ibadah${i}`] ? data.ibadahOptions[`ibadah${i}`].join('\n') : '';
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'ibadah-item form-group';
+                itemDiv.innerHTML = `<div class="ibadah-checkbox"><input type="checkbox" id="ibadah-setting-${i}" ${isEnabled ? 'checked' : ''}><label for="ibadah-setting-${i}">Aktifkan Ibadah ${i}</label></div><textarea id="ibadah-option-${i}" rows="4" placeholder="Opsi..." style="display: ${isEnabled ? 'block' : 'none'};">${options}</textarea>`;
+                ibadahGrid.appendChild(itemDiv);
+            }
+            form.appendChild(ibadahGrid);
+            ibadahGrid.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.addEventListener('change', e => {
+                document.getElementById(`ibadah-option-${e.target.id.split('-')[2]}`).style.display = e.target.checked ? 'block' : 'none';
+            }));
+
+            const predikatData = data.predikat || {};
+            form.insertAdjacentHTML('beforeend', `
+                <h2><i class="fas fa-award"></i> Pengaturan Predikat</h2>
+                <div class="form-grid" style="grid-template-columns: repeat(5, 1fr); grid-column: 1 / -1;">
+                    <div class="form-group"><label for="setting-predikat.taatText">Teks Taat</label><input type="text" id="setting-predikat.taatText" value="${predikatData.taatText || ''}"></div>
+                    <div class="form-group"><label for="setting-predikat.taatValue">Nilai Taat (%)</label><input type="number" id="setting-predikat.taatValue" value="${predikatData.taatValue || ''}"></div>
+                    <div class="form-group"><label for="setting-predikat.terbiasaText">Teks Terbiasa</label><input type="text" id="setting-predikat.terbiasaText" value="${predikatData.terbiasaText || ''}"></div>
+                    <div class="form-group"><label for="setting-predikat.terbiasaValue">Nilai Terbiasa (%)</label><input type="number" id="setting-predikat.terbiasaValue" value="${predikatData.terbiasaValue || ''}"></div>
+                    <div class="form-group"><label for="setting-predikat.kurangText">Teks Kurang</label><input type="text" id="setting-predikat.kurangText" value="${predikatData.kurangText || ''}"></div>
+                </div>
+            `);
+
+            const waktuData = data.waktu || {};
+            form.insertAdjacentHTML('beforeend', `
+                <h2><i class="fas fa-clock"></i> Pengaturan Waktu</h2>
+                <div class="form-grid" style="grid-column: 1 / -1;">
+                    <div class="form-group"><label for="setting-waktu.bangunPagi">Batas Bangun Pagi</label><input type="time" id="setting-waktu.bangunPagi" value="${waktuData.bangunPagi || ''}"></div>
+                    <div class="form-group"><label for="setting-waktu.tidurCepat">Batas Tidur Cepat</label><input type="time" id="setting-waktu.tidurCepat" value="${waktuData.tidurCepat || ''}"></div>
+                </div>
+            `);
+            
+            form.insertAdjacentHTML('beforeend', `
+                <h2><i class="fas fa-user-shield"></i> Pengaturan Supervisi</h2>
+                <div class="supervisi-settings-group">
+                    <div class="form-group">
+                        <h4><i class="fas fa-folder-open"></i> Item Administrasi Guru</h4>
+                        <div id="administrasi-settings-container" class="supervisi-item-container"></div>
+                        <button type="button" class="btn btn-secondary" style="margin-top:10px;" onclick="addSupervisiItem('administrasi')"><i class="fas fa-plus"></i> Tambah Item</button>
+                    </div>
+                    <div class="form-group">
+                        <h4><i class="fas fa-chalkboard-teacher"></i> Item Kegiatan Supervisi</h4>
+                        <div id="kegiatan-settings-container" class="supervisi-item-container"></div>
+                        <button type="button" class="btn btn-secondary" style="margin-top:10px;" onclick="addSupervisiItem('kegiatan')"><i class="fas fa-plus"></i> Tambah Item</button>
+                    </div>
+                </div>
+            `);
+            const supervisiSettings = data.supervisiSettings || { administrasi: [], kegiatan: [] };
+            if (supervisiSettings.administrasi && Array.isArray(supervisiSettings.administrasi)) {
+                supervisiSettings.administrasi.forEach(item => addSupervisiItem('administrasi', item));
+            }
+            if (supervisiSettings.kegiatan && Array.isArray(supervisiSettings.kegiatan)) {
+                supervisiSettings.kegiatan.forEach(item => addSupervisiItem('kegiatan', item));
+            }
+        }
+
+        async function saveSettings() {
+            const updatedData = JSON.parse(JSON.stringify(globalSettings));
+
+            if (!updatedData.infoSekolah) updatedData.infoSekolah = {};
+            const infoSekolahInputs = document.querySelectorAll('#settingsForm input[id^="setting-infoSekolah."], #settingsForm textarea[id^="setting-infoSekolah."]');
+            infoSekolahInputs.forEach(input => {
+                const keys = input.id.replace('setting-infoSekolah.', '').split('.');
+                let currentLevel = updatedData.infoSekolah;
+                for (let i = 0; i < keys.length - 1; i++) {
+                    if (!currentLevel[keys[i]]) currentLevel[keys[i]] = {};
+                    currentLevel = currentLevel[keys[i]];
+                }
+                currentLevel[keys[keys.length - 1]] = input.value;
+            });
+
+             if (!updatedData.infoSekolah.pengumuman) updatedData.infoSekolah.pengumuman = {};
+            for (let i = 1; i <= 3; i++) {
+                const judul = document.getElementById(`setting-pengumuman${i}Judul`).value;
+                const gambar = document.getElementById(`setting-pengumuman${i}Gambar`).value;
+				const text = document.getElementById(`setting-pengumuman${i}Text`).value;
+                const dokumen = document.getElementById(`setting-pengumuman${i}Dokumen`).value;
+                updatedData.infoSekolah.pengumuman[`pengumuman${i}`] = {
+                    [`pengumuman${i}Judul`]: judul,
+                    [`pengumuman${i}Gambar`]: gambar,
+					[`pengumuman${i}Text`]: text,
+                    [`pengumuman${i}Dokumen`]: dokumen
+                };
+            }
+
+            if (!updatedData.ibadahSettings) updatedData.ibadahSettings = [];
+            if (!updatedData.ibadahOptions) updatedData.ibadahOptions = {};
+            updatedData.ibadahSettings = [];
+            for (let i = 1; i <= 7; i++) {
+                const isEnabled = document.getElementById(`ibadah-setting-${i}`).checked;
+                updatedData.ibadahSettings.push(isEnabled);
+                if (isEnabled) {
+                    updatedData.ibadahOptions[`ibadah${i}`] = document.getElementById(`ibadah-option-${i}`).value.split('\n').map(s => s.trim()).filter(Boolean);
+                }
+            }
+
+             if (!updatedData.predikat) updatedData.predikat = {};
+             if (!updatedData.waktu) updatedData.waktu = {};
+            document.querySelectorAll('#settingsForm input[id^="setting-predikat."], #settingsForm input[id^="setting-waktu."]').forEach(input => {
+                const [category, key] = input.id.replace('setting-', '').split('.');
+                if (updatedData[category]) {
+                    updatedData[category][key] = input.type === 'number' ? Number(input.value) : input.value;
+                }
+            });
+            
+            if (!updatedData.supervisiSettings) updatedData.supervisiSettings = {};
+            updatedData.supervisiSettings.administrasi = [];
+            updatedData.supervisiSettings.kegiatan = [];
+            
+            document.querySelectorAll('#administrasi-settings-container .supervisi-item').forEach(item => {
+                const nama = item.querySelector('input[type="text"]').value.trim();
+                const aktif = item.querySelector('input[type="checkbox"]').checked;
+                const id = item.dataset.id;
+                if (nama) {
+                    updatedData.supervisiSettings.administrasi.push({ id, nama, aktif });
+                }
+            });
+            
+            document.querySelectorAll('#kegiatan-settings-container .supervisi-item').forEach(item => {
+                const nama = item.querySelector('input[type="text"]').value.trim();
+                const aktif = item.querySelector('input[type="checkbox"]').checked;
+                const id = item.dataset.id;
+                if (nama) {
+                    updatedData.supervisiSettings.kegiatan.push({ id, nama, aktif });
+                }
+            });
+
+            // Supabase Update
+            const { error } = await supabaseClient.from('pengaturan').upsert({ key: 'global', data: updatedData });
+
+            if (error) showInfoModal('Gagal menyimpan pengaturan: ' + error.message, 'Error');
+            else showInfoModal('Pengaturan berhasil disimpan!', 'Sukses');
+        }
+
+        async function loadGaleriPage() {
+            const form = document.getElementById('galeriForm');
+            const youtubeContainer = document.getElementById('youtube-links-container');
+            form.innerHTML = 'Memuat galeri...';
+            youtubeContainer.innerHTML = '';
+            
+            const { data: doc } = await supabaseClient.from('pengaturan').select('data').eq('key', 'global').single();
+            if (!doc) {
+                form.innerHTML = 'Pengaturan tidak ditemukan.';
+                return;
+            }
+            
+            const data = doc.data;
+            const infoSekolahData = data.infoSekolah || {};
+            const galeriData = infoSekolahData.galeri || [];
+            const youtubeLinksData = infoSekolahData.youtubeLinks || [];
+            
+            form.innerHTML = ''; 
+
+            let galeriHtml = '<div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">';
+            for (let i = 1; i <= 10; i++) {
+                const imageUrl = galeriData[i - 1] || '';
+                const placeholder = 'https://placehold.co/600x400/F3F4F6/AAAAAA?text=Pilih+Gambar';
+                galeriHtml += `
+                    <div class="card" style="padding: 20px;">
+                        <h3 style="margin-bottom: 15px;">Foto Galeri ${i}</h3>
+                        <img src="${imageUrl || placeholder}" class="gallery-preview" id="galeri-preview-${i}" onerror="this.src='${placeholder}'">
+                        <div class="form-group">
+                            <label for="setting-galeri-url-${i}">URL Gambar</label>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input type="text" id="setting-galeri-url-${i}" value="${imageUrl}" oninput="document.getElementById('galeri-preview-${i}').src = this.value || '${placeholder}'" placeholder="URL Gambar">
+                                <input type="file" id="galeri-file-input-${i}" accept="image/*" style="display: none;">
+                                <button type="button" class="btn btn-secondary" style="padding: 10px 14px;" onclick="document.getElementById('galeri-file-input-${i}').click()"><i class="fas fa-folder-open"></i></button>
+                                <button type="button" class="btn btn-primary" style="padding: 10px 14px;" onclick="uploadFileToDrive('galeri-file-input-${i}', 'setting-galeri-url-${i}', this)"><i class="fas fa-upload"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            galeriHtml += '</div>';
+            form.innerHTML = galeriHtml;
+
+            const defaultYoutubeLinks = [
+                "https://youtu.be/JbrdxfMHx-8?si=LuEKK6c7lkfn6wxy",
+                "https://youtu.be/9yXqbsR9lAo?si=I7jssN9eMJmIAV7o",
+                "https://youtu.be/hBo5WV84PFM?si=kuT9_kiZvAnLjBS7"
+            ];
+            for (let i = 1; i <= 3; i++) {
+                const youtubeUrl = youtubeLinksData[i-1] || defaultYoutubeLinks[i-1];
+                youtubeContainer.innerHTML += `
+                    <div class="form-group">
+                        <label for="setting-youtube-url-${i}">Link Youtube ${i}</label>
+                        <input type="text" id="setting-youtube-url-${i}" value="${youtubeUrl}" placeholder="https://youtu.be/...">
+                    </div>
+                `;
+            }
+        }
+
+        async function saveGaleri() {
+            // First fetch current settings to preserve other data
+            const { data: currentDoc } = await supabaseClient.from('pengaturan').select('data').eq('key', 'global').single();
+            const currentData = currentDoc ? currentDoc.data : {};
+            
+            const galeriArray = [];
+            for (let i = 1; i <= 10; i++) {
+                const imageUrl = document.getElementById(`setting-galeri-url-${i}`).value;
+                if (imageUrl) {
+                    galeriArray.push(imageUrl);
+                }
+            }
+            
+            const youtubeLinks = [];
+            for (let i = 1; i <= 3; i++) {
+                const youtubeUrl = document.getElementById(`setting-youtube-url-${i}`).value;
+                if (youtubeUrl) {
+                    youtubeLinks.push(youtubeUrl);
+                }
+            }
+
+            if (!currentData.infoSekolah) currentData.infoSekolah = {};
+            currentData.infoSekolah.galeri = galeriArray;
+            currentData.infoSekolah.youtubeLinks = youtubeLinks;
+
+            const { error } = await supabaseClient.from('pengaturan').upsert({ key: 'global', data: currentData });
+
+            if (error) showInfoModal('Gagal menyimpan galeri: ' + error.message, 'Error');
+            else showInfoModal('Galeri dan video berhasil disimpan!', 'Sukses');
+        }
+
+        async function ensureDataLoaded() {
+            if(dataLoaded) return;
+            try {
+                // Fetch Settings
+                const { data: settingsDoc } = await supabaseClient.from('pengaturan').select('data').eq('key', 'global').single();
+                if (settingsDoc) {
+                    globalSettings = settingsDoc.data;
+                    updatePageAppearance(globalSettings);
+                }
+                
+                // Fetch Laporan
+                const { data: laporan, error } = await supabaseClient.from('laporan').select('*').order('created_at', { ascending: false });
+                if (error) throw error;
+                
+                // Map snake_case to camelCase for UI compatibility if needed, OR adjust UI code.
+                // Adjusting data mapping here to match existing UI logic which uses camelCase
+                allLaporanData = laporan.map(d => ({
+                    ...d,
+                    namaSiswa: d.nama_siswa,
+                    tanggalKegiatan: d.tanggal_kegiatan,
+                    bangunPagi: d.bangun_pagi,
+                    tidurCepat: d.tidur_cepat,
+                    rincianOlahraga: d.rincian_olahraga,
+                    tempatBelajar: d.tempat_belajar,
+                    materiBelajar: d.materi_belajar,
+                    kegiatanMasyarakat: d.kegiatan_masyarakat,
+                    makananKarbo: d.makanan_karbo,
+                    makananSayur: d.makanan_sayur,
+                    makananSusu: d.makanan_susu,
+                    makananLauk: d.makanan_lauk,
+                    makananAir: d.makanan_air
+                }));
+
+                const kelasSet = new Set(allLaporanData.map(item => item.kelas).filter(Boolean));
+                const sortedKelas = [...kelasSet].sort();
+                
+                const kelasFilter = document.getElementById('kelasFilter');
+                kelasFilter.innerHTML = '<option value="">Semua Kelas</option>';
+                sortedKelas.forEach(kelas => {
+                    const option = document.createElement('option');
+                    option.value = kelas;
+                    option.textContent = kelas;
+                    kelasFilter.appendChild(option);
+                });
+                
+                dataLoaded = true;
+            } catch (error) {
+                 showInfoModal('Gagal memuat data awal: ' + error.message, 'Error');
+            }
+        }
+
+        function applyAndRenderAll() {
+            if (!dataLoaded) { return; }
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const selectedKelas = document.getElementById('kelasFilter').value;
+
+            let filteredLaporan = [...allLaporanData];
+            if (startDate && endDate) {
+                const start = new Date(startDate);
+                const end = new Date(endDate); end.setHours(23, 59, 59, 999);
+                filteredLaporan = filteredLaporan.filter(row => row.tanggalKegiatan && new Date(row.tanggalKegiatan) >= start && new Date(row.tanggalKegiatan) <= end);
+            }
+            
+            let detailFilteredLaporan = [...filteredLaporan];
+            if (selectedKelas) { detailFilteredLaporan = detailFilteredLaporan.filter(row => row.kelas === selectedKelas); }
+
+            let studentRekap = processStudentData(filteredLaporan);
+            if (selectedKelas) {
+                 const filteredRekap = {};
+                 for (const key in studentRekap) { if (studentRekap[key].kelas === selectedKelas) filteredRekap[key] = studentRekap[key]; }
+                 studentRekap = filteredRekap;
+            }
+            const classRekap = processClassData(studentRekap);
+
+            Object.values(chartInstances).forEach(chart => { if (chart) chart.destroy(); });
+            chartInstances = {};
+
+            renderGlobalChart(classRekap, selectedKelas);
+            processAndRenderGlobalRekap(classRekap, studentRekap);
+            renderAnalisisLaporanTable(detailFilteredLaporan);
+            renderAnalisisIbadahCharts(detailFilteredLaporan);
+            renderWaktuCharts(detailFilteredLaporan);
+            renderKegiatanCharts(detailFilteredLaporan);
+            renderBelajarMakananCharts(detailFilteredLaporan);
+        }
+
+        function processAndRenderGlobalRekap(classRekap, studentRekap) {
+            renderGlobalRekapTable(classRekap);
+            renderPercentageTable(classRekap, studentRekap);
+        }
+
+        function renderGlobalRekapTable(classRekap) {
+            const table = document.getElementById('globalRekapTable');
+            const headers = ["Kelas", "Beribadah", "Tidur Cepat", "Bangun Pagi", "Olahraga", "Belajar", "Bermasyarakat", "Makan Bergizi"];
+            table.innerHTML = `<thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody></tbody>`;
+            const tbody = table.querySelector('tbody');
+            if (Object.keys(classRekap).length === 0) { tbody.innerHTML = `<tr><td colspan="${headers.length}" style="text-align:center;">Tidak ada data.</td></tr>`; return; }
+            Object.keys(classRekap).sort().forEach(kelas => {
+                const row = tbody.insertRow(); row.insertCell().textContent = kelas;
+                const keys = ["beribadah", "tidurCepat", "bangunPagi", "olahraga", "belajar", "bermasyarakat", "makanBergizi"];
+                keys.forEach(key => {
+                    const cell = row.insertCell(); const counts = classRekap[kelas][key]; let dom = 'N/A', max = 0;
+                    if (counts) { for(const p in counts) { if (counts[p] > max) { max = counts[p]; dom = p; } } } cell.textContent = dom;
+                });
+            });
+        }
+        
+        function renderPercentageTable(classRekap, studentRekap) {
+            const table = document.getElementById('percentageTable');
+            const { predikat = {} } = globalSettings; 
+            const t = predikat.taatText || 'Anak Hebat'; 
+            const b = predikat.terbiasaText || 'Terbiasa'; 
+            const k = predikat.kurangText || 'Perlu Peningkatan';
+            const headers = ["Kategori", t, b, k];
+            table.innerHTML = `<thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody></tbody>`;
+            const tbody = table.querySelector('tbody');
+            const totalStudents = Object.keys(studentRekap).length;
+            if (totalStudents === 0) { tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Tidak ada data.</td></tr>`; return; }
+            const labels = ["Beribadah", "Tidur Cepat", "Bangun Pagi", "Olahraga", "Belajar", "Bermasyarakat", "Makan Bergizi"];
+            const keys = ["beribadah", "tidurCepat", "bangunPagi", "olahraga", "belajar", "bermasyarakat", "makanBergizi"];
+            keys.forEach((key, index) => {
+                let totalT = 0, totalB = 0, totalK = 0;
+                Object.values(classRekap).forEach(d => { if (d[key]) { totalT += d[key][t] || 0; totalB += d[key][b] || 0; totalK += d[key][k] || 0; } });
+                const pT = (totalT / totalStudents) * 100; const pB = (totalB / totalStudents) * 100; const pK = (totalK / totalStudents) * 100;
+                const row = tbody.insertRow();
+                row.insertCell().textContent = labels[index];
+                row.insertCell().textContent = `${pT.toFixed(1)}% (${totalT} siswa)`;
+                row.insertCell().textContent = `${pB.toFixed(1)}% (${totalB} siswa)`;
+                row.insertCell().textContent = `${pK.toFixed(1)}% (${totalK} siswa)`;
+            });
+        }
+
+        function downloadGlobalRekapPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape' });
+            const infoSekolah = globalSettings.infoSekolah || {};
+            
+            const startDateValue = document.getElementById('startDate').value;
+            const endDateValue = document.getElementById('endDate').value;
+            let periode = (startDateValue && endDateValue) ? `Periode: ${startDateValue} s/d ${endDateValue}` : '';
+
+            doc.setFontSize(16); doc.setFont("helvetica", "bold"); doc.text(infoSekolah.namaSekolah || "Laporan 7KAIH", doc.internal.pageSize.getWidth() / 2, 15, { align: "center" });
+            if (periode) { doc.setFontSize(12); doc.setFont("helvetica", "normal"); doc.text(periode, doc.internal.pageSize.getWidth() / 2, 22, { align: "center" }); }
+
+            doc.autoTable({ html: '#globalRekapTable', startY: 35, theme: 'grid', headStyles: { fillColor: [31, 41, 55] } });
+            let lastY = doc.autoTable.previous.finalY;
+            doc.autoTable({ html: '#percentageTable', startY: lastY + 10, theme: 'grid', headStyles: { fillColor: [31, 41, 55] } });
+            
+            doc.save(`Laporan_7KAIH_${Date.now()}.pdf`);
+        }
+
+        function processStudentData(laporanData) {
+            const { ibadahSettings = [], waktu = {} } = globalSettings;
+            const ibadahThreshold = ibadahSettings.filter(s => s).length; const bbp = waktu.bangunPagi || '05:00'; const btc = waktu.tidurCepat || '21:00';
+            const rekap = {};
+            laporanData.forEach(d => {
+                if (!d.kelas || !d.namaSiswa) return;
+                const key = `${d.kelas}-${d.namaSiswa}`;
+                if (!rekap[key]) rekap[key] = { kelas: d.kelas, nama: d.namaSiswa, totalHari: 0, beribadah: 0, tidurCepat: 0, bangunPagi: 0, olahraga: 0, belajar: 0, bermasyarakat: 0, makanBergizi: 0 };
+                const data = rekap[key]; data.totalHari++; let ibadahPoint = 0;
+                for(let j=0; j<7; j++) { if(ibadahSettings[j] && String(d[`ibadah${j+1}`]||'').trim()) ibadahPoint++; }
+                if(ibadahThreshold > 0 && ibadahPoint >= ibadahThreshold) data.beribadah++;
+                if (d.bangunPagi && d.bangunPagi <= bbp) data.bangunPagi++; if (d.tidurCepat && d.tidurCepat <= btc) data.tidurCepat++;
+                if (String(d.rincianOlahraga || '').trim()) data.olahraga++; if (String(d.tempatBelajar || '').trim() && String(d.materiBelajar || '').trim()) data.belajar++;
+                if (String(d.kegiatanMasyarakat || '').trim()) data.bermasyarakat++; if (d.makananKarbo && d.makananSayur && d.makananSusu && d.makananLauk && d.makananAir) data.makanBergizi++;
+            });
+            return rekap;
+        }
+
+        function processClassData(studentRekap) {
+             const { predikat = {} } = globalSettings; const rekap = {};
+             const keys = ["beribadah", "tidurCepat", "bangunPagi", "olahraga", "belajar", "bermasyarakat", "makanBergizi"];
+            for(const key in studentRekap) {
+                const data = studentRekap[key]; if (!rekap[data.kelas]) { rekap[data.kelas] = {}; keys.forEach(k => rekap[data.kelas][k] = {}); }
+                keys.forEach(catKey => {
+                    let p_text = predikat.kurangText || 'Perlu Peningkatan';
+                    if (data.totalHari > 0) { const prob = (data[catKey] / data.totalHari) * 100;
+                        if (prob >= (predikat.taatValue || 85)) { p_text = predikat.taatText || 'Anak Hebat'; }
+                        else if (prob >= (predikat.terbiasaValue || 70)) { p_text = predikat.terbiasaText || 'Terbiasa'; }
+                    }
+                    rekap[data.kelas][catKey][p_text] = (rekap[data.kelas][catKey][p_text] || 0) + 1;
+                });
+            }
+            return rekap;
+        }
+
+        function renderGlobalChart(classRekap, selectedKelas) {
+            const { predikat = {} } = globalSettings; const t = predikat.taatText || 'Anak Hebat'; const b = predikat.terbiasaText || 'Terbiasa'; const k = predikat.kurangText || 'Perlu Peningkatan';
+            const labels = ["Beribadah", "Tidur Cepat", "Bangun Pagi", "Olahraga", "Belajar", "Bermasyarakat", "Makan Bergizi"];
+            const keys = ["beribadah", "tidurCepat", "bangunPagi", "olahraga", "belajar", "bermasyarakat", "makanBergizi"];
+            const tData = [], bData = [], kData = [];
+            keys.forEach(key => {
+                let totalT = 0, totalB = 0, totalK = 0;
+                Object.values(classRekap).forEach(d => { if (d[key]) { totalT += d[key][t] || 0; totalB += d[key][b] || 0; totalK += d[key][k] || 0; } });
+                tData.push(totalT); bData.push(totalB); kData.push(totalK);
+            });
+            const ctx = document.getElementById('globalChart').getContext('2d');
+            chartInstances.global = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [{ label: t, data: tData, backgroundColor: 'rgba(22, 163, 74, 0.7)' }, { label: b, data: bData, backgroundColor: 'rgba(245, 158, 11, 0.7)' }, { label: k, data: kData, backgroundColor: 'rgba(239, 68, 68, 0.7)' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Jumlah Siswa' } } }, plugins: { title: { display: true, text: `Grafik Predikat - ${selectedKelas || 'Semua Sekolah'}`, font: { size: 18 } }, tooltip: { mode: 'index' } } } });
+        }
+        
+        function renderAnalisisLaporanTable(laporanData) {
+            const table = document.getElementById('analisisLaporanTable');
+            const headers = ["Kelas", "Nama Siswa", "Ibadah 1", "Ibadah 2", "Ibadah 3", "Ibadah 4", "Ibadah 5", "Ibadah 6", "Ibadah 7", "Bangun Pagi", "Tidur Cepat", "Olahraga", "Masyarakat", "Belajar", "Karbo", "Sayur/Buah", "Susu", "Lauk Pauk", "Air Putih"];
+            table.innerHTML = `<thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody></tbody>`;
+            const tbody = table.querySelector('tbody');
+            if (laporanData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${headers.length}" style="text-align:center;">Tidak ada data laporan untuk filter yang dipilih.</td></tr>`;
+                return;
+            }
+            laporanData.forEach(data => {
+                const row = tbody.insertRow();
+                const cells = [data.kelas, data.namaSiswa, data.ibadah1, data.ibadah2, data.ibadah3, data.ibadah4, data.ibadah5, data.ibadah6, data.ibadah7, data.bangunPagi, data.tidurCepat, data.rincianOlahraga, data.kegiatanMasyarakat, `${data.tempatBelajar || ''} - ${data.materiBelajar || ''}`.substring(0, 30), data.makananKarbo, data.makananSayur, data.makananSusu, data.makananLauk, data.makananAir];
+                cells.forEach((cell, i) => {
+                    const cellEl = row.insertCell();
+                    if (typeof cell === 'boolean') cellEl.textContent = cell ? 'Ya' : 'Tidak';
+                    else cellEl.textContent = cell || '-';
+                });
+            });
+        }
+        function renderAnalisisIbadahCharts(laporanData) {
+            const container = document.getElementById('ibadah-charts-container'); container.innerHTML = '';
+            const { ibadahSettings, ibadahOptions } = globalSettings;
+            if (!ibadahSettings || !ibadahOptions) { container.innerHTML = '<p>Pengaturan ibadah tidak ditemukan.</p>'; return; }
+            const totalLaporan = laporanData.length; if (totalLaporan === 0) { container.innerHTML = '<p>Tidak ada data laporan untuk ditampilkan.</p>'; return; }
+            for (let i = 1; i <= 7; i++) {
+                if (!ibadahSettings[i - 1]) continue;
+                const ibadahKey = `ibadah${i}`; const options = ibadahOptions[ibadahKey] || []; const title = `Analisis Ibadah ${i}`;
+                const counts = {}; options.forEach(opt => counts[opt] = 0); let tidakMelaksanakan = 0;
+                laporanData.forEach(l => { const v = l[ibadahKey]; if (v && options.includes(v)) { counts[v]++; } else { tidakMelaksanakan++; } });
+                const chartLabels = []; const chartData = []; const backgroundColors = ['rgba(75, 192, 192, 0.7)','rgba(255, 159, 64, 0.7)','rgba(255, 205, 86, 0.7)','rgba(54, 162, 235, 0.7)','rgba(153, 102, 255, 0.7)','rgba(255, 99, 132, 0.7)'];
+                for (const option in counts) { if (counts[option] > 0) { chartLabels.push(option); chartData.push(counts[option]); } }
+                if (tidakMelaksanakan > 0) { chartLabels.push('Tidak Melaksanakan'); chartData.push(tidakMelaksanakan); }
+                if (chartData.length === 0) continue;
+                const wrapper = document.createElement('div'); wrapper.className = 'chart-wrapper'; const canvas = document.createElement('canvas'); wrapper.appendChild(canvas); container.appendChild(wrapper);
+                chartInstances[`ibadah${i}`] = new Chart(canvas.getContext('2d'), { type: 'pie', data: { labels: chartLabels, datasets: [{ data: chartData, backgroundColor: backgroundColors, borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: title, font: { size: 16 } }, legend: { position: 'top' } } } });
+            }
+        }
+        function renderWaktuCharts(laporanData) {
+            const container = document.getElementById('waktu-charts-container'); container.innerHTML = '';
+            const { waktu = {} } = globalSettings; const bbp = waktu.bangunPagi || '05:00'; const btc = waktu.tidurCepat || '21:00';
+            const total = laporanData.length; if (total === 0) { container.innerHTML = '<p>Tidak ada data.</p>'; return; }
+            let bpt = 0; laporanData.forEach(l => { if (l.bangunPagi && l.bangunPagi <= bbp) bpt++; });
+            let tct = 0; laporanData.forEach(l => { if (l.tidurCepat && l.tidurCepat <= btc) tct++; });
+            const configs = [{ title: 'Analisis Bangun Pagi', labels: ['Tepat Waktu', 'Tidak Tepat'], data: [bpt, total - bpt] }, { title: 'Analisis Tidur Cepat', labels: ['Tepat Waktu', 'Tidak Tepat'], data: [tct, total - tct] }];
+            configs.forEach((config, i) => {
+                const wrapper = document.createElement('div'); wrapper.className = 'chart-wrapper'; const canvas = document.createElement('canvas'); wrapper.appendChild(canvas); container.appendChild(wrapper);
+                chartInstances[`waktu${i}`] = new Chart(canvas.getContext('2d'), { type: 'pie', data: { labels: config.labels, datasets: [{ data: config.data, backgroundColor: ['rgba(75, 192, 192, 0.7)', 'rgba(255, 99, 132, 0.7)'], borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: config.title, font: { size: 16 } } } } });
+            });
+        }
+        function renderKegiatanCharts(laporanData) {
+            const container = document.getElementById('kegiatan-charts-container'); container.innerHTML = '';
+            const total = laporanData.length; if (total === 0) { container.innerHTML = '<p>Tidak ada data.</p>'; return; }
+            const configs = [{ key: 'rincianOlahraga', title: 'Kegiatan Olahraga' }, { key: 'kegiatanMasyarakat', title: 'Kegiatan Bermasyarakat' }];
+            configs.forEach((config, i) => {
+                let count = 0; laporanData.forEach(l => { if (l[config.key] && l[config.key].trim()) count++; });
+                const wrapper = document.createElement('div'); wrapper.className = 'chart-wrapper'; const canvas = document.createElement('canvas'); wrapper.appendChild(canvas); container.appendChild(wrapper);
+                chartInstances[`kegiatan${i}`] = new Chart(canvas.getContext('2d'), { type: 'doughnut', data: { labels: ['Melaksanakan', 'Tidak Melaksanakan'], datasets: [{ data: [count, total - count], backgroundColor: ['rgba(54, 162, 235, 0.7)', 'rgba(201, 203, 207, 0.7)'], borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: config.title, font: { size: 16 } } } } });
+            });
+        }
+        function renderBelajarMakananCharts(laporanData) {
+            const container = document.getElementById('belajar-makanan-charts-container'); container.innerHTML = '';
+            const total = laporanData.length; if (total === 0) { container.innerHTML = '<p>Tidak ada data.</p>'; return; }
+            let belajarCount = 0; laporanData.forEach(l => { if ((l.tempatBelajar && l.tempatBelajar.trim()) || (l.materiBelajar && l.materiBelajar.trim())) belajarCount++; });
+            const belajarWrapper = document.createElement('div'); belajarWrapper.className = 'chart-wrapper'; const belajarCanvas = document.createElement('canvas'); belajarWrapper.appendChild(belajarCanvas); container.appendChild(belajarWrapper);
+            chartInstances.belajar = new Chart(belajarCanvas.getContext('2d'), { type: 'pie', data: { labels: ['Belajar', 'Tidak'], datasets: [{ data: [belajarCount, total - belajarCount], backgroundColor: ['rgba(153, 102, 255, 0.7)', 'rgba(201, 203, 207, 0.7)'], borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Kegiatan Belajar', font: { size: 16 } } } } });
+            const makananCounts = { 'Karbo': 0, 'Sayur/Buah': 0, 'Susu': 0, 'Lauk Pauk': 0, 'Air Putih': 0 };
+            laporanData.forEach(l => { if (l.makananKarbo) makananCounts['Karbo']++; if (l.makananSayur) makananCounts['Sayur/Buah']++; if (l.makananSusu) makananCounts['Susu']++; if (l.makananLauk) makananCounts['Lauk Pauk']++; if (l.makananAir) makananCounts['Air Putih']++; });
+            const makananWrapper = document.createElement('div'); makananWrapper.className = 'chart-wrapper'; const makananCanvas = document.createElement('canvas'); makananWrapper.appendChild(makananCanvas); container.appendChild(makananWrapper);
+            chartInstances.makanan = new Chart(makananCanvas.getContext('2d'), { type: 'bar', data: { labels: Object.keys(makananCounts), datasets: [{ label: 'Jumlah Laporan', data: Object.values(makananCounts), backgroundColor: 'rgba(255, 159, 64, 0.7)', borderWidth: 1 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'Makanan Sehat', font: { size: 16 } } } } });
+        }
+
+        async function loadLaporanSiswaPage() {
+            if (isLaporanSiswaLoaded) {
+                applyLaporanFilter();
+                return;
+            }
+
+            const tableBody = document.querySelector("#laporanSiswaTable tbody");
+            tableBody.innerHTML = `<tr><td colspan="20">Memuat data...</td></tr>`;
+
+            try {
+                if (!globalSettings.infoSekolah) {
+                    const { data: settingsDoc } = await supabaseClient.from('pengaturan').select('data').eq('key', 'global').single();
+                    if (settingsDoc) {
+                        globalSettings = settingsDoc.data;
+                    }
+                }
+
+                // Fetch data using Supabase
+                const { data: users } = await supabaseClient.from('users').select('*');
+                allUsersData = users;
+
+                const { data: laporan, error } = await supabaseClient.from('laporan').select('*').order('created_at', { ascending: false });
+                if (error) throw error;
+
+                const headers = ["ID Laporan", "Nama Siswa", "Kelas", "Tanggal Kegiatan", "Ibadah 1", "Ibadah 2", "Ibadah 3", "Ibadah 4", "Ibadah 5", "Ibadah 6", "Ibadah 7", "Bangun Pagi", "Tidur Cepat", "Olahraga", "Tempat Belajar", "Materi yang Dipelajari", "Bermasyarakat", "Karbo", "Sayur/Buah", "Susu", "Protein", "Air Putih"];
+                
+                const dataArray = [headers];
+                const kelasSet = new Set();
+                laporan.forEach(data => {
+                    kelasSet.add(data.kelas);
+                    dataArray.push([
+                        data.id, data.nama_siswa, data.kelas, data.tanggal_kegiatan,
+                        data.ibadah1 || '', data.ibadah2 || '', data.ibadah3 || '', data.ibadah4 || '', data.ibadah5 || '', data.ibadah6 || '', data.ibadah7 || '',
+                        data.bangun_pagi || '', data.tidur_cepat || '', data.rincian_olahraga || '',
+                        data.tempat_belajar || '', data.materi_belajar || '', data.kegiatan_masyarakat || '',
+                        data.makanan_karbo ? 'Ya' : '', data.makanan_sayur ? 'Ya' : '',
+                        data.makanan_susu ? 'Ya' : '', data.makanan_lauk ? 'Ya' : '', data.makanan_air ? 'Ya' : ''
+                    ]);
+                });
+                allLaporanSiswaData = dataArray;
+                
+                const kelasFilter = document.getElementById('laporanKelasFilter');
+                kelasFilter.innerHTML = '<option value="">Semua Kelas</option>';
+                [...kelasSet].sort().forEach(kelas => {
+                    if(kelas) kelasFilter.innerHTML += `<option value="${kelas}">${kelas}</option>`;
+                });
+
+                isLaporanSiswaLoaded = true;
+                applyLaporanFilter();
+            } catch(error) {
+                console.error("Error loading Laporan Siswa page:", error);
+                tableBody.innerHTML = `<tr><td colspan="20" style="text-align:center;color:red;">Gagal memuat data: ${error.message}</td></tr>`;
+            }
+        }
+
+        function applyLaporanFilter() {
+            const startDate = document.getElementById('laporanStartDate').value;
+            const endDate = document.getElementById('laporanEndDate').value;
+            const selectedKelas = document.getElementById('laporanKelasFilter').value;
+
+            let dataRows = allLaporanSiswaData.slice(1);
+
+            if (selectedKelas) {
+                dataRows = dataRows.filter(row => row[2] === selectedKelas);
+            }
+
+            if (startDate && endDate) {
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                dataRows = dataRows.filter(row => {
+                    if(!row[3]) return false;
+                    const rowDate = new Date(row[3]);
+                    return rowDate >= start && rowDate <= end;
+                });
+            }
+            
+            filteredLaporanSiswaData = [allLaporanSiswaData[0], ...dataRows];
+            const activeButton = document.querySelector('#laporan-view-switcher .btn.active') || document.getElementById('btnData');
+            switchLaporanView(activeLaporanView, activeButton);
+        }
+
+        function switchLaporanView(viewType, clickedButton) {
+            document.querySelectorAll('#laporan-view-switcher .btn').forEach(btn => btn.classList.remove('active'));
+            clickedButton.classList.add('active');
+            activeLaporanView = viewType;
+            populateLaporanTable(viewType);
+            filterLaporanTable(); 
+        }
+
+        function filterLaporanTable() {
+            const searchTerm = document.getElementById('laporanSearchSiswaInput').value.toLowerCase();
+            const tableBody = document.querySelector("#laporanSiswaTable tbody");
+            const rows = tableBody.getElementsByTagName('tr');
+            const nameColumnIndex = (activeLaporanView === 'data' || activeLaporanView === 'nilai') ? 1 : 0;
+            for (let i = 0; i < rows.length; i++) {
+                const nameCell = rows[i].getElementsByTagName('td')[nameColumnIndex];
+                if (nameCell) {
+                    rows[i].style.display = nameCell.textContent.toLowerCase().includes(searchTerm) ? "" : "none";
+                }
+            }
+        }
+        
+        function populateLaporanTable(viewType) {
+            const tableHead = document.querySelector("#laporanSiswaTable thead");
+            const tableBody = document.querySelector("#laporanSiswaTable tbody");
+            const tableFoot = document.querySelector("#laporanSiswaTable tfoot");
+            tableHead.innerHTML = ""; tableBody.innerHTML = ""; tableFoot.innerHTML = "";
+
+            if (filteredLaporanSiswaData.length <= 1) {
+                tableBody.innerHTML = `<tr><td colspan="20" style="text-align:center;">Tidak ada data laporan untuk filter yang dipilih.</td></tr>`;
+                return;
+            }
+                const dataToDisplay = filteredLaporanSiswaData.slice(1);
+            
+            if (viewType === 'data') {
+                const headerRow = document.createElement('tr');
+                filteredLaporanSiswaData[0].forEach(h => headerRow.appendChild(document.createElement('th')).textContent = h);
+                headerRow.appendChild(document.createElement('th')).textContent = "Aksi";
+                tableHead.appendChild(headerRow);
+
+                dataToDisplay.forEach(rowData => {
+                    const row = document.createElement('tr');
+                    rowData.forEach(cellData => row.insertCell().textContent = cellData);
+                    const docId = rowData[0];
+                    row.insertCell().innerHTML = `<button class="btn btn-success" onclick="openLaporanEditModal('${docId}')"><i class="fas fa-edit"></i></button> <button class="btn btn-danger" onclick="deleteLaporan('${docId}')"><i class="fas fa-trash"></i></button>`;
+                    tableBody.appendChild(row);
+                });
+            } else if (viewType === 'nilai' || viewType === 'rekap' || viewType === 'predikat') {
+                const { ibadahSettings = [], predikat: predikatSettings = {}, waktu = {} } = globalSettings;
+                const ibadahThreshold = ibadahSettings.filter(s => s === true).length;
+                const batasBangunPagi = waktu.bangunPagi || '05:00';
+                const batasTidurCepat = waktu.tidurCepat || '21:00';
+                
+                if (viewType === 'nilai') {
+                     const nilaiHeaders = ["Nama Siswa", "Kelas", "Tanggal", "Ibadah 1", "Ibadah 2", "Ibadah 3", "Ibadah 4", "Ibadah 5", "Ibadah 6", "Ibadah 7", "Bangun Pagi", "Tidur Cepat", "Olahraga", "Belajar", "Bermasyarakat", "Makanan Sehat"];
+                    tableHead.innerHTML = `<tr>${nilaiHeaders.map(h => `<th>${h}</th>`).join('')}</tr>`;
+                    
+                    dataToDisplay.forEach(rowData => {
+                        const row = tableBody.insertRow();
+                        row.insertCell().textContent = rowData[1];
+                        row.insertCell().textContent = rowData[2];
+                        row.insertCell().textContent = rowData[3];
+                        for(let j = 4; j <= 10; j++) { row.insertCell().textContent = String(rowData[j]).trim() ? 1 : 0; }
+                        row.insertCell().textContent = (rowData[11] && rowData[11] <= batasBangunPagi) ? 1 : 0;
+                        row.insertCell().textContent = (rowData[12] && rowData[12] <= batasTidurCepat) ? 1 : 0;
+                        row.insertCell().textContent = String(rowData[13]).trim() ? 1 : 0;
+                        row.insertCell().textContent = (String(rowData[14]).trim() && String(rowData[15]).trim()) ? 1 : 0;
+                        row.insertCell().textContent = String(rowData[16]).trim() ? 1 : 0;
+                        row.insertCell().textContent = rowData.slice(17, 22).every(val => val === 'Ya') ? 1 : 0;
+                    });
+                } else { 
+                    const rekapHeaders = ["Nama Siswa", "Kelas", "Beribadah", "Tidur Cepat", "Bangun Pagi", "Olahraga", "Belajar", "Bermasyarakat", "Makan Bergizi"];
+                    if (viewType === 'predikat') rekapHeaders.push("Aksi");
+                    tableHead.innerHTML = `<tr>${rekapHeaders.map(h => `<th>${h}</th>`).join('')}</tr>`;
+                    const rekapData = {};
+                    dataToDisplay.forEach(rowData => {
+                        const namaSiswa = rowData[1];
+                        const kelasSiswa = rowData[2];
+                        const key = `${namaSiswa}-${kelasSiswa}`;
+                        if (!rekapData[key]) rekapData[key] = { nama: namaSiswa, kelas: kelasSiswa, totalHari: 0, beribadah: 0, tidurCepat: 0, bangunPagi: 0, olahraga: 0, belajar: 0, bermasyarakat: 0, makanBergizi: 0 };
+                        rekapData[key].totalHari++;
+                        let ibadahPoint = 0;
+                        for(let j = 0; j < 7; j++) { if(ibadahSettings[j] === true && String(rowData[j+4]).trim()) ibadahPoint++; }
+                        if(ibadahThreshold > 0 && ibadahPoint >= ibadahThreshold) rekapData[key].beribadah++;
+                        if (rowData[12] && rowData[12] <= batasTidurCepat) rekapData[key].tidurCepat++;
+                        if (rowData[11] && rowData[11] <= batasBangunPagi) rekapData[key].bangunPagi++;
+                        if (String(rowData[13]).trim()) rekapData[key].olahraga++;
+                        if (String(rowData[14]).trim() && String(rowData[15]).trim()) rekapData[key].belajar++;
+                        if (String(rowData[16]).trim()) rekapData[key].bermasyarakat++;
+                        if (rowData.slice(17, 22).every(val => val === 'Ya')) rekapData[key].makanBergizi++;
+                    });
+
+                    Object.values(rekapData).forEach(data => {
+                        const row = tableBody.insertRow();
+                        row.insertCell().textContent = data.nama;
+                        row.insertCell().textContent = data.kelas;
+                        const kategoriKeys = ["beribadah", "tidurCepat", "bangunPagi", "olahraga", "belajar", "bermasyarakat", "makanBergizi"];
+                        const predicatesForPdf = {};
+                        kategoriKeys.forEach(key => {
+                            const cell = row.insertCell();
+                            if (viewType === 'rekap') {
+                                cell.textContent = `${data[key]} dari ${data.totalHari} hari`;
+                            } else {
+                                let predikat = predikatSettings.kurangText || 'Kurang';
+                                if(data.totalHari > 0) {
+                                    const prob = (data[key] / data.totalHari) * 100;
+                                    if (prob >= (predikatSettings.taatValue || 85)) {
+                                        predikat = predikatSettings.taatText || 'Taat';
+                                    } else if (prob >= (predikatSettings.terbiasaValue || 70)) {
+                                        predikat = predikatSettings.terbiasaText || 'Terbiasa';
+                                    }
+                                }
+                                cell.textContent = predikat;
+                                predicatesForPdf[key] = predikat;
+                            }
+                        });
+                         if (viewType === 'predikat') {
+                            const aksiTd = row.insertCell();
+                            const dataString = JSON.stringify(predicatesForPdf);
+                            aksiTd.innerHTML = `<button class="btn btn-secondary" style="padding: 5px 10px;" onclick='downloadIndividualPDF("${data.nama.replace(/'/g, "\\'")}", "${data.kelas}", ${dataString})'><i class="fas fa-download"></i></button>`;
+                        }
+                    });
+                }
+            }
+        }
+
+        function downloadLaporanSiswaPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape' });
+            const infoSekolah = globalSettings.infoSekolah || {};
+            const viewTitle = document.querySelector('#laporan-view-switcher .btn.active').textContent.trim();
+            const selectedKelas = document.getElementById('laporanKelasFilter').value || 'Semua Kelas';
+            const startDate = document.getElementById('laporanStartDate').value;
+            const endDate = document.getElementById('laporanEndDate').value;
+            let periode = (startDate && endDate) ? `${startDate} s/d ${endDate}` : 'Keseluruhan';
+            
+            doc.setFontSize(16); doc.setFont("helvetica", "bold"); doc.text(infoSekolah.namaSekolah || "Laporan Sekolah", doc.internal.pageSize.getWidth() / 2, 15, { align: "center" });
+            doc.setFontSize(12); doc.setFont("helvetica", "normal");
+            doc.text(`Rekap Laporan Siswa - Tampilan ${viewTitle}`, doc.internal.pageSize.getWidth() / 2, 22, { align: "center" });
+            doc.text(`Kelas: ${selectedKelas} | Periode: ${periode}`, doc.internal.pageSize.getWidth() / 2, 29, { align: "center" });
+
+            const tableToExport = document.getElementById('laporanSiswaTable').cloneNode(true);
+            const lastHeader = tableToExport.querySelector('thead th:last-child');
+             if (lastHeader && lastHeader.textContent.trim().toLowerCase() === 'aksi') {
+                lastHeader.remove();
+                tableToExport.querySelectorAll('tbody tr').forEach(row => {
+                    const lastCell = row.querySelector('td:last-child');
+                    if (lastCell) lastCell.remove();
+                });
+            }
+            
+            doc.autoTable({ html: tableToExport, startY: 40, theme: 'grid', headStyles: { fillColor: [31, 41, 55] } });
+            
+            let finalY = doc.lastAutoTable.finalY + 20;
+            if (finalY > 160) { doc.addPage(); finalY = 20; }
+            
+            const today = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+            const place = infoSekolah.namaTempat || 'Tempat';
+            const namaKepsek = infoSekolah.namaKepsek || 'Nama Kepala Sekolah';
+            const nipKepsek = `NIP. ${infoSekolah.nipKepsek || '-'}`;
+            const leftColX = 20;
+            const rightColX = doc.internal.pageSize.getWidth() - 20;
+
+            doc.setFontSize(10);
+            
+            doc.text('Mengetahui,', leftColX, finalY + 7);
+            doc.text('Kepala Sekolah', leftColX, finalY + 14);
+            doc.text(namaKepsek, leftColX, finalY + 37, {align: 'left'});
+            doc.text(nipKepsek, leftColX, finalY + 44, {align: 'left'});
+
+            if (selectedKelas && selectedKelas !== 'Semua Kelas') {
+                const teacher = findTeacherForClass(selectedKelas);
+                doc.text(`${place}, ${today}`, rightColX, finalY, { align: 'right' });
+                doc.text(`Guru Kelas ${selectedKelas}`, rightColX, finalY + 7, { align: 'right' });
+                doc.text(teacher.name, rightColX, finalY + 37, { align: 'right' });
+                doc.text(`NIP. ${teacher.nip}`, rightColX, finalY + 44, { align: 'right' });
+            } else {
+                 doc.text(`${place}, ${today}`, rightColX, finalY, { align: 'right' });
+            }
+            
+            doc.save(`Laporan_Siswa_${selectedKelas}_${viewTitle}.pdf`);
+        }
+        
+        function findTeacherForClass(className) {
+            if (!className || !allUsersData.length) return { name: 'N/A', nip: 'N/A' };
+            const teacher = allUsersData.find(user => user.role === 'Guru' && user.kelas === className);
+            return teacher ? { name: teacher.nama || 'N/A', nip: teacher.nip || 'N/A' } : { name: 'N/A', nip: 'N/A' };
+        }
+        
+        function downloadIndividualPDF(studentName, studentClass, predicateData) {
+            const { jsPDF } = window.jspdf; const doc = new jsPDF();
+            const startDate = document.getElementById('laporanStartDate').value;
+            const endDate = document.getElementById('laporanEndDate').value;
+            const periode = (startDate && endDate) ? `${startDate} s/d ${endDate}` : 'Keseluruhan';
+            
+            doc.setFontSize(16); doc.text(globalSettings.infoSekolah.namaSekolah || "Laporan Siswa", 105, 20, null, null, "center");
+            doc.setFontSize(12); doc.text(`Periode: ${periode}`, 105, 28, null, null, "center");
+            
+            doc.setFontSize(11);
+            doc.text(`Nama Siswa: ${studentName}`, 14, 45);
+            doc.text(`Kelas: ${studentClass}`, 14, 52);
+
+            const tableData = Object.entries(predicateData).map(([key, value]) => {
+                 const formattedKey = key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1').trim();
+                 return [formattedKey, value];
+            });
+
+            doc.autoTable({
+                startY: 60,
+                head: [['Kategori', 'Predikat']],
+                body: tableData,
+                theme: 'grid',
+                headStyles: { fillColor: [31, 41, 55] }
+            });
+            
+            let finalY = doc.lastAutoTable.finalY + 20;
+            const today = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+            const place = globalSettings.infoSekolah.namaTempat || 'Tempat';
+            const teacher = findTeacherForClass(studentClass);
+            
+            const leftColX = 14;
+            const rightColX = 196;
+
+            doc.text('Mengetahui,', leftColX, finalY + 7);
+            doc.text('Kepala Sekolah', leftColX, finalY + 14);
+            doc.text(globalSettings.infoSekolah.namaKepsek || 'Nama Kepala Sekolah', leftColX, finalY + 37);
+            doc.text(`NIP. ${globalSettings.infoSekolah.nipKepsek || '-'}`, leftColX, finalY + 44);
+
+            doc.text(`${place}, ${today}`, rightColX, finalY, { align: 'right' });
+            doc.text('Guru Kelas,', rightColX, finalY + 7, { align: 'right' });
+            doc.text(teacher.name, rightColX, finalY + 37, { align: 'right' });
+            doc.text(`NIP. ${teacher.nip}`, rightColX, finalY + 44, { align: 'right' });
+
+            doc.save(`Laporan_${studentName}_${periode}.pdf`);
+        }
+
+        async function openLaporanEditModal(docId) {
+             try {
+                // Fetch from Supabase
+                const { data, error } = await supabaseClient.from('laporan').select('*').eq('id', docId).single();
+                if (error || !data) { showInfoModal('Data tidak ditemukan.', 'Error'); return; }
+
+                const formGrid = document.getElementById('edit-form-grid');
+                formGrid.innerHTML = '';
+                document.getElementById('editDocId').value = docId;
+                
+                const ibadahSettings = globalSettings.ibadahSettings || [];
+                const ibadahOptions = globalSettings.ibadahOptions || {};
+
+                // Use camelCase keys if data was mapped or snake_case if raw. 
+                // Since I fetch raw, use snake_case
+                formGrid.innerHTML += `
+                    <div class="form-group"><label>Nama Siswa</label><input type="text" value="${data.nama_siswa || ''}" readonly></div>
+                    <div class="form-group"><label>Tanggal Kegiatan</label><input type="date" id="edit-tanggalKegiatan" value="${data.tanggal_kegiatan || ''}"></div>
+                `;
+
+                let ibadahHtml = '<div class="form-group full-width"><label>Ibadah</label><div class="checklist-container">';
+                for(let i=1; i<=7; i++) {
+                    if(ibadahSettings[i-1]){
+                        ibadahHtml += `<div><label>Ibadah ${i}</label><select id="edit-ibadah${i}">`;
+                        ibadahHtml += '<option value="">- Pilih -</option>';
+                        ibadahOptions[`ibadah${i}`]?.forEach(opt => {
+                             ibadahHtml += `<option value="${opt}" ${data[`ibadah${i}`] === opt ? 'selected' : ''}>${opt}</option>`;
+                        });
+                        ibadahHtml += '</select></div>';
+                    }
+                }
+                ibadahHtml += '</div></div>';
+                formGrid.innerHTML += ibadahHtml;
+
+                formGrid.innerHTML += `
+                    <div class="form-group"><label>Bangun Pagi</label><input type="time" id="edit-bangunPagi" value="${data.bangun_pagi ? data.bangun_pagi.substring(0,5) : ''}"></div>
+                    <div class="form-group"><label>Tidur Cepat</label><input type="time" id="edit-tidurCepat" value="${data.tidur_cepat ? data.tidur_cepat.substring(0,5) : ''}"></div>
+                    <div class="form-group"><label>Olahraga</label><input type="text" id="edit-rincianOlahraga" value="${data.rincian_olahraga || ''}"></div>
+                    <div class="form-group"><label>Tempat Belajar</label><input type="text" id="edit-tempatBelajar" value="${data.tempat_belajar || ''}"></div>
+                    <div class="form-group"><label>Materi Belajar</label><input type="text" id="edit-materiBelajar" value="${data.materi_belajar || ''}"></div>
+                    <div class="form-group"><label>Bermasyarakat</label><input type="text" id="edit-kegiatanMasyarakat" value="${data.kegiatan_masyarakat || ''}"></div>
+                `;
+
+                let makananHtml = '<div class="form-group full-width"><label>Makanan Sehat</label><div class="checklist-container">';
+                const makananItems = [
+                    { key: 'makanan_karbo', label: 'Karbo' },
+                    { key: 'makanan_sayur', label: 'Sayur' },
+                    { key: 'makanan_susu', label: 'Susu' },
+                    { key: 'makanan_lauk', label: 'Lauk' },
+                    { key: 'makanan_air', label: 'Air' }
+                ];
+                makananItems.forEach(item => {
+                    makananHtml += `<div class="checklist-option"><input type="checkbox" id="edit-${item.key}" ${data[item.key] ? 'checked' : ''}><label for="edit-${item.key}">${item.label}</label></div>`;
+                });
+                makananHtml += '</div></div>';
+                formGrid.innerHTML += makananHtml;
+                
+                openModal('editLaporanModal');
+            } catch (error) {
+                console.error("Error opening edit modal:", error);
+                showInfoModal('Gagal memuat data untuk diedit.', 'Error');
+            }
+        }
+        
+        async function saveLaporanChanges() {
+            const docId = document.getElementById('editDocId').value;
+            if(!docId) return;
+
+            const updatedData = {
+                tanggal_kegiatan: document.getElementById('edit-tanggalKegiatan').value,
+                bangun_pagi: document.getElementById('edit-bangunPagi').value,
+                tidur_cepat: document.getElementById('edit-tidurCepat').value,
+                rincian_olahraga: document.getElementById('edit-rincianOlahraga').value,
+                tempat_belajar: document.getElementById('edit-tempatBelajar').value,
+                materi_belajar: document.getElementById('edit-materiBelajar').value,
+                kegiatan_masyarakat: document.getElementById('edit-kegiatanMasyarakat').value,
+                makanan_karbo: document.getElementById('edit-makanan_karbo').checked,
+                makanan_sayur: document.getElementById('edit-makanan_sayur').checked,
+                makanan_susu: document.getElementById('edit-makanan_susu').checked,
+                makanan_lauk: document.getElementById('edit-makanan_lauk').checked,
+                makanan_air: document.getElementById('edit-makanan_air').checked,
+            };
+
+            for (let i = 1; i <= 7; i++) {
+                if (globalSettings.ibadahSettings[i-1]) {
+                    updatedData[`ibadah${i}`] = document.getElementById(`edit-ibadah${i}`).value;
+                }
+            }
+
+            try {
+                const { error } = await supabaseClient.from('laporan').update(updatedData).eq('id', docId);
+                if (error) throw error;
+                showInfoModal('Data berhasil disimpan!', 'Sukses', () => {
+                    closeModal('editLaporanModal');
+                    isLaporanSiswaLoaded = false; 
+                    loadLaporanSiswaPage();
+                });
+            } catch (error) {
+                showInfoModal(`Gagal menyimpan: ${error.message}`, 'Error');
+            }
+        }
+        
+        function deleteLaporan(docId) {
+            showConfirmModal('Apakah Anda yakin ingin menghapus laporan ini?', 'Konfirmasi Hapus', async () => {
+                try {
+                    const { error } = await supabaseClient.from('laporan').delete().eq('id', docId);
+                    if (error) throw error;
+                    showInfoModal('Laporan berhasil dihapus.', 'Sukses', () => {
+                        isLaporanSiswaLoaded = false; 
+                        loadLaporanSiswaPage();
+                    });
+                } catch(error) {
+                    showInfoModal(`Gagal menghapus: ${error.message}`, 'Error');
+                }
+            });
+        }
+        
+        async function loadKelasPage() {
+            try {
+                // Fetch from Supabase
+                const { data: doc, error } = await supabaseClient.from('pengaturan').select('data').eq('key', 'global').single();
+                if (error || !doc) throw new Error("Dokumen pengaturan global tidak ditemukan.");
+
+                const data = doc.data;
+                const infoKelasData = data.infoSekolah?.infoKelas || {};
+                
+                document.getElementById('url-jadwal-pelajaran').value = infoKelasData.jadwalPelajaran || '';
+                document.getElementById('url-jadwal-piket').value = infoKelasData.jadwalPiket || '';
+                document.getElementById('url-struktur-organisasi').value = infoKelasData.strukturOrganisasi || '';
+                // Added Kesepakatan Kelas logic
+                document.getElementById('url-kesepakatan-kelas').value = infoKelasData.kesepakatanKelas || '';
+
+            } catch(error) {
+                console.error("Error loading Info Kelas:", error);
+                document.getElementById('kelasForm').innerHTML = `<p style="color:red">Gagal memuat data: ${error.message}</p>`;
+            }
+        }
+
+        async function saveKelasInfo() {
+            const { data: currentDoc } = await supabaseClient.from('pengaturan').select('data').eq('key', 'global').single();
+            const currentData = currentDoc ? currentDoc.data : {};
+
+            const kelasInfoData = {
+                jadwalPelajaran: document.getElementById('url-jadwal-pelajaran').value,
+                jadwalPiket: document.getElementById('url-jadwal-piket').value,
+                strukturOrganisasi: document.getElementById('url-struktur-organisasi').value,
+                // Added Kesepakatan Kelas logic
+                kesepakatanKelas: document.getElementById('url-kesepakatan-kelas').value
+            };
+
+            if (!currentData.infoSekolah) currentData.infoSekolah = {};
+            currentData.infoSekolah.infoKelas = kelasInfoData;
+
+            try {
+                const { error } = await supabaseClient.from('pengaturan').upsert({ key: 'global', data: currentData });
+                if (error) throw error;
+                showInfoModal('Info Kelas berhasil disimpan!', 'Sukses');
+            } catch (error) {
+                console.error("Error saving Info Kelas:", error);
+                showInfoModal('Gagal menyimpan Info Kelas: ' + error.message, 'Error');
+            }
+        }
+
+        async function backupAllData() {
+            showInfoModal('Memulai proses backup... Ini mungkin memakan waktu beberapa saat.', 'Proses Backup');
+            try {
+                const backupData = {};
+                // Tables in Supabase
+                const tablesToBackup = ['users', 'siswa', 'laporan'];
+
+                const { data: settingsDoc } = await supabaseClient.from('pengaturan').select('data').eq('key', 'global').single();
+                if (settingsDoc) {
+                    backupData.pengaturan = { global: settingsDoc.data };
+                }
+
+                for (const tableName of tablesToBackup) {
+                    const { data } = await supabaseClient.from(tableName).select('*');
+                    backupData[tableName] = {};
+                    data.forEach(row => {
+                        backupData[tableName][row.id] = row;
+                    });
+                }
+
+                const jsonString = JSON.stringify(backupData, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+                a.href = url;
+                a.download = `backup-7kaih-${timestamp}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                closeModal('infoModal');
+                showInfoModal('Backup data berhasil diunduh.', 'Backup Berhasil');
+
+            } catch (error) {
+                console.error("Error saat backup data: ", error);
+                showInfoModal('Gagal melakukan backup: ' + error.message, 'Error');
+            }
+        }
+
+        function handleRestoreFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const dataToRestore = JSON.parse(e.target.result);
+                    if (!dataToRestore.pengaturan || !dataToRestore.users || !dataToRestore.siswa) {
+                        throw new Error('Format file backup tidak valid.');
+                    }
+                    
+                    showConfirmModal(
+                        'Anda akan menimpa SEMUA data saat ini dengan data dari file backup. Tindakan ini tidak dapat diurungkan. Lanjutkan?',
+                        'Konfirmasi Restore Data',
+                        () => executeRestore(dataToRestore)
+                    );
+
+                } catch (error) {
+                    showInfoModal('Gagal membaca file backup: ' + error.message, 'Error');
+                } finally {
+                    event.target.value = null;
+                }
+            };
+            reader.readAsText(file);
+        }
+    
+
+async function executeRestore(data) {
+    showInfoModal('Memulai proses restore... JANGAN tutup halaman ini.', 'Proses Restore');
+    try {
+        const collectionsToRestore = ['users', 'siswa', 'laporan'];
+        
+        // 1. Bersihkan data lama di Supabase menggunakan filter ID dummy
+        for(const col of collectionsToRestore) {
+            await supabase.from(col).delete().neq('id', '00000000-0000-0000-0000-000000000000'); 
+        }
+
+        // 2. Restore Pengaturan Global
+        if (data.pengaturan && data.pengaturan.global) {
+             await supabase.from('pengaturan').upsert({ key: 'global', data: data.pengaturan.global });
+        }
+
+        // 3. Restore Data Koleksi (Bulk Insert)
+        for (const colName of collectionsToRestore) {
+            if (data[colName]) {
+                const rows = Object.values(data[colName]);
+                if (rows.length > 0) {
+                    // Supabase menangani array of objects untuk bulk insert
+                    const { error } = await supabase.from(colName).insert(rows);
+                    if (error) throw error;
+                }
+            }
+        }
+
+        closeModal('infoModal');
+        showInfoModal('Data berhasil direstore! Halaman akan dimuat ulang.', 'Restore Berhasil');
+        setTimeout(() => window.location.reload(), 2000);
+
+    } catch (error) {
+        console.error("Restore error: ", error);
+        showInfoModal('Gagal melakukan restore: ' + error.message, 'Error');
+    }
+}
+
+
+
+        const defaultSettings = {
+          "pengaturan": {
+            "global": {
+              "infoSekolah": {
+                "instagram": "https://www.instagram.com/bangbin2025?igsh=NnN1cXZ2YTJsZTJi",
+                "namaKepsek": "Dr. Bangbin, Edd",
+                "visiMisi": {
+                  "misi": `<ol>
+						<li>Menanamkan nilai-nilai keimanan, ketaqwaan, dan akhlak mulia melalui pembiasaan sikap terpuji, keteladanan, dan pendidikan karakter.</li>
+						<li>Meningkatkan kecerdasan peserta didik dengan pembelajaran yang aktif, kreatif, inovatif, dan berbasis teknologi.</li>
+						<li>Melestarikan dan mengembangkan budaya luhur bangsa melalui kegiatan seni, adat, bahasa daerah, dan nilai-nilai kearifan lokal.</li>
+						<li>⁠Mendorong prestasi akademik dan non-akademik melalui pembinaan minat, bakat, dan potensi diri secara optimal.</li>
+						<li>⁠Menumbuhkan kepedulian terhadap lingkungan melalui pembiasaan hidup bersih, sehat, hemat energi, dan berwawasan lingkungan.</li>
+						<li>Membangun sikap gotong royong, toleransi, dan rasa kebangsaan dalam kehidupan sehari-hari di sekolah.</li>
+						<li>Mengembangkan keterampilan abad 21 seperti berpikir kritis, kreatif, kolaboratif, dan komunikatif untuk menghadapi tantangan global.</li>
+						<li>Menyelenggarakan pembelajaran yang bermakna, menyenangkan, dan kontekstual agar peserta didik mampu menyelesaikan permasalahan dalam kehidupan nyata dan mengembangkan potensi dirinya secara optimal.</li>
+						</ol>`,
+					"tujuan": `<ol>
+						<li>Terwujudnya peserta didik yang taat beragama, berakhlak mulia, dan membiasakan perilaku positif dalam kehidupan sehari-hari.</li>
+						<li>Terwujudnya lulusan yang cerdas, berpikir kritis, kreatif, dan mampu memanfaatkan teknologi secara bijak.</li>
+						<li>⁠Terciptanya pelestarian dan pengembangan budaya luhur bangsa melalui keterlibatan aktif peserta didik dalam kegiatan seni, bahasa daerah, dan tradisi lokal.</li>
+						<li>Tercapainya prestasi yang optimal dibidang akademik maupun non-akademik melalui pembinaan yang terencana dan berkelanjutan.</li>
+						<li>Terbentuknya karakter peduli lingkungan dengan perilaku hidup bersih, sehat, hemat energi, dan berwawasan lingkungan.</li>
+						<li>Terbentuknya sikap gotong royong, toleransi, disiplin, dan rasa kebangsaan yang tinggi di lingkungan sekolah dan masyarakat.</li>
+						<li>⁠Terwujudnya keterampilan abad 21 yang meliputi kolaborasi, komunikasi, kreativitas, dan pemecahan masalah.</li>
+						<li>Terciptanya proses pembelajaran yang bermakna, menyenangkan, dan kontekstual untuk mengembangkan potensi peserta didik secara optimal.</li>
+						</ol>`,
+                  "visi": "Terwujudnya Murid yang Berakhlak Mulia, Cerdas, Luhur Berbudaya, Berprestasi, dan Peduli Lingkungan"
+                },
+                "npsn": "123456789",
+                "logo": "https://lh3.googleusercontent.com/d/16rll5zsRdwTbR3nF_NmPKwY51tg4tnOn",
+                "fotoSekolah": "",
+                "namaTempat": "Jakarta",
+                "nipKepsek": "6281310051985",
+                "facebook": "https://www.facebook.com/bintang.a.permana.1/",
+                "fotoKepsek": "https://lh3.googleusercontent.com/d/1JGu3OWlYZaGKzROgMjWPIakaOcBZNfn7",
+                "jenjang": "SDN",
+                "hpAdmin": "6281310051985",
+                "alamat": "Jl. Bangbin No. 1, Jakarta",
+                "namaSekolah": "SDN Bangbin Merdeka",
+                "pengumuman": {
+                  "pengumuman2": { "pengumuman2Judul": "Uhuuyyyyy", "pengumuman2Dokumen": "https://bangbin.web.app/","pengumuman2Text": "Bisa kaliiii.... Bisa kaliiii....Bisa kaliiii....Bisa kaliiii....Bisa kaliiii....Bisa kaliiii....Bisa kaliiii....\nBisa kaliiii....Bisa kaliiii....Bisa kaliiii....Bisa kaliiii....Bisa kaliiii....Bisa kaliiii....Bisa kaliiii....Bisa kaliiii....\nBisa kaliiii....Bisa kaliiii....Bisa kaliiii....Bisa kaliiii....Bisa kaliiii....Bisa kaliiii....Bisa kaliiii....Bisa kaliiii....\nBisa kaliiii....Bisa kaliiii....Bisa kaliiii....Bisa kaliiii....Bisa kaliiii....Bisa kaliiii....Bisa kaliiii....Bisa kaliiii....Bisa kaliiii....",
+				  "pengumuman2Gambar": "https://lh3.googleusercontent.com/d/1Vg0JTzE2m5kEYFOw2MNKFFvJ6Nfie3W-" },
+                  "pengumuman1": { "pengumuman1Judul": "Pengumuman 1", "pengumuman1Gambar": "https://lh3.googleusercontent.com/d/1JGu3OWlYZaGKzROgMjWPIakaOcBZNfn7", "pengumuman1Text": "", "pengumuman1Dokumen": "https://bangbin.web.app/" },
+                  "pengumuman3": { "pengumuman3Dokumen": "", "pengumuman3Judul": "", "pengumuman3Text": "", "pengumuman3Gambar": "" }
+                },
+				
+                "youtube": "https://www.youtube.com/@Bangbin_1",
+                "sambutanKepsek": `Assalamu'alaikum Warahmatullahi Wabarakatuh,\n\nPuji syukur kehadirat Tuhan Yang Maha Esa atas segala rahmat dan karunia-Nya. Selamat datang di portal digital sekolah kami. Portal ini kami hadirkan sebagai sarana informasi dan komunikasi antara sekolah, siswa, orang tua, dan masyarakat. Kami berharap, melalui platform ini, kita dapat bersinergi untuk meningkatkan kualitas pendidikan dan menciptakan lingkungan belajar yang inspiratif. Mari manfaatkan fasilitas ini dengan sebaik-baiknya untuk kemajuan bersama.\n\nWassalamu'alaikum Warahmatullahi Wabarakatuh.`
+              },
+              "predikat": { "kurangText": "Perlu Peningkatan", "taatValue": 91, "terbiasaText": "Mulai Terbiasa", "taatText": "Anak Hebat", "terbiasaValue": 50 },
+              "waktu": { "tidurCepat": "21:00", "bangunPagi": "05:00" },
+              "supervisiSettings": { "kegiatan": [ { "aktif": false, "nama": "Supervisi 1" }, { "nama": "Supervisi 2", "aktif": false }, { "aktif": false, "nama": "Supervisi 3" }, { "nama": "Supervisi 4", "aktif": false, } ], "administrasi": [ { "aktif": false, "nama": "Silabus", }, { "aktif": false, "nama": "Program", }, { "aktif": false, "nama": "RPP", }, { "aktif": false, "nama": "Bank Soal" }, { "aktif": false, "nama": "Ekstrakurikuler" }, { "aktif": false, "nama": "ADM Kelas" } ] },
+              "ibadahSettings": [ true, true, true, true, true, false, false ],
+              "ibadahOptions": { "ibadah5": [ "Isya", "Berdoa", "Sembahyang", "Berhalangan" ], "ibadah4": [ "Magrib", "Berdoa", "Sembahyang", "Berhalangan" ], "ibadah2": [ "Zuhur", "Berdoa", "Sembahyang", "Berhalangan" ], "ibadah1": [ "Subuh", "Berdoa", "Sembahyang", "Berhalangan" ], "ibadah3": [ "Asar", "Berdoa", "Sembahyang", "Berhalangan" ], "ibadah6": [ "Tadarus", "Berdoa", "Berhalangan" ] }
+            }
+          },
+          "users": {
+			"bangbin_guru6a": { "nama": "Guru 6A", "kelas": "6A", "nip": "guru6a", "role": "Guru", "username": "guru6a", "foto": "https://lh3.googleusercontent.com/d/1de5uSDDEc4rSA1cCi3TMOjKus3Z9eRVk" },
+			"bangbin_kepsek": { "nama": "Kepsek Uhuuy", "kelas": "", "nip": "kepsek123", "role": "Kepsek", "username": "kepsek", "foto": "http://lh3.googleusercontent.com/d/1dmM_aNudZZzmahHCkDZRtTdII-AKCzUk" },				
+			"bangbinAdmin": { "username": "admin", "nip": "admin123", "nama": "BangbinAdmin", "role": "Admin", "kelas": "", "foto": "https://lh3.googleusercontent.com/d/1de5uSDDEc4rSA1cCi3TMOjKus3Z9eRVk" }		
+          },
+		  
+          "siswa": {
+            "bangbin_Siswa1": { "nomorInduk": "1111", "foto": "https://lh3.googleusercontent.com/d/1NA33-IlbTvXEOMHSICifay4sKPl9FN_W", "nama": "Bianka Arsyla Permana", "kelas": "6A", "agama": "Islam" },
+            "bangbin_Siswa2": { "nomorInduk": "2222", "foto": "https://lh3.googleusercontent.com/d/1l76wnQNuqi_PfFKYk7MtDJnSicRzfXez", "nama": "Bachtiar Adya Permana", "kelas": "6A", "agama": "Islam" },
+            "bangbin_Siswa3": { "kelas": "6A", "agama": "Kristen", "foto": "https://lh3.googleusercontent.com/d/1ika4en9PFUa6aRIXKDbvQzil6bxIO5E9", "nama": "Buana Permana", "nomorInduk": "3333" }
+          }
+        };
+
+
+        async function resetSupervisiOnly() {
+            showInfoModal('Mereset Data Supervisi & Administrasi Guru... Mohon tunggu.', 'Proses Reset');
+            try {
+                await deleteCollection('administrasi_guru');
+                await deleteCollection('supervisi_guru');
+                closeModal('infoModal');
+                showInfoModal('Data Supervisi dan Administrasi Guru berhasil direset! Halaman akan dimuat ulang.', 'Reset Berhasil');
+                setTimeout(() => window.location.reload(), 2500);
+            } catch (error) {
+                console.error("Error saat mereset data supervisi: ", error);
+                showInfoModal('Terjadi kesalahan saat mereset data: ' + error.message, 'Error');
+            }
+        }
+
+        function confirmResetSupervisi() {
+            const message = 'PERINGATAN: Anda akan menghapus SEMUA Data Administrasi Guru dan Data Supervisi Guru. Tindakan ini tidak dapat diurungkan. Yakin ingin melanjutkan?';
+            const title = 'Konfirmasi Reset Data Supervisi';
+            showConfirmModal(message, title, resetSupervisiOnly);
+        }
+
+async function resetAllData() {
+    showInfoModal('Mereset semua data... Mohon tunggu.', 'Proses Reset');
+    try {
+        // 1. Hapus data di tabel utama sesuai skema SQL
+        await supabase.from('laporan').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        await supabase.from('siswa').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        await supabase.from('users').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+
+        // 2. Reset Pengaturan ke Default
+        await supabase.from('pengaturan').upsert({ 
+            key: 'global', 
+            data: defaultSettings.pengaturan.global 
+        });
+        
+        // 3. Masukkan kembali User Admin awal dari defaultSettings
+        const adminUsers = Object.values(defaultSettings.users);
+        await supabase.from('users').insert(adminUsers);
+
+        closeModal('infoModal');
+        showInfoModal('Semua data berhasil direset! Silakan login kembali.', 'Reset Berhasil');
+        setTimeout(() => {
+            sessionStorage.clear();
+            window.location.reload();
+        }, 2000);
+    } catch (error) {
+        console.error("Reset error: ", error);
+        showInfoModal('Gagal mereset data: ' + error.message, 'Error');
+    }
+}
+    </script>
+</body>
+</html>
