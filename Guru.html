@@ -174,7 +174,7 @@
     <div id="dashboard-container" style="display: none;">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h3><i class="fas fa-school"></i> IV-A/h3>
+                <h3><i class="fas fa-school"></i> IV-A</h3>
             </div>
             <nav class="sidebar-nav">
                 <a href="./"><i class="fas fa-home"></i> Home</a>
@@ -258,7 +258,7 @@
                 </div>
             </section>
 
-            <!-- Page Sekolah (NEW DESIGN) -->
+            <!-- Page Sekolah (UPDATED: Added Social Media & Contact Inputs) -->
             <section id="page-sekolah" class="page">
                 <div class="card animate-up">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -274,7 +274,7 @@
                 </div>
             </section>
 
-            <!-- Page Pengaturan (NEW DESIGN) -->
+            <!-- Page Pengaturan -->
             <section id="page-pengaturan" class="page">
                 <div class="card animate-up">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
@@ -457,6 +457,7 @@
         function renderSekolahForms() {
             const info = globalSettings.infoSekolah || {};
             const vm = info.visiMisi || {};
+            const sosmed = info.socialMedia || {}; // Get Social Media Data
             
             document.getElementById('sekolahForm').innerHTML = `
                 <div class="school-logo-preview-container">
@@ -476,6 +477,13 @@
                     <div class="form-group"><label>Nama Kepala Sekolah</label><input type="text" id="sk-kepsek" value="${info.namaKepsek||''}"></div>
                     <div class="form-group"><label>NIP Kepala Sekolah</label><input type="text" id="sk-nip" value="${info.nipKepsek||''}"></div>
                     <div class="form-group full-width"><label>Tempat (Untuk TTD Laporan)</label><input type="text" id="sk-tempat" value="${info.namaTempat||''}" placeholder="Contoh: Jakarta"></div>
+
+                    <!-- UPDATE: Media Sosial & Kontak -->
+                    <div class="settings-section-title">Media Sosial & Kontak Admin</div>
+                    <div class="form-group"><label>Facebook URL</label><input type="text" id="sk-fb" value="${sosmed.facebook||''}" placeholder="https://facebook.com/..."></div>
+                    <div class="form-group"><label>Instagram URL</label><input type="text" id="sk-ig" value="${sosmed.instagram||''}" placeholder="https://instagram.com/..."></div>
+                    <div class="form-group"><label>YouTube Channel URL</label><input type="text" id="sk-yt" value="${sosmed.youtube||''}" placeholder="https://youtube.com/..."></div>
+                    <div class="form-group"><label>WhatsApp Admin (Format: 628...)</label><input type="text" id="sk-wa" value="${sosmed.whatsapp||''}" placeholder="628123456789"></div>
                 </div>
             `;
             
@@ -490,6 +498,8 @@
         async function saveSekolahData() {
             if(!globalSettings.infoSekolah) globalSettings.infoSekolah = {};
             const i = globalSettings.infoSekolah;
+            
+            // Simpan Data Umum
             i.namaSekolah = document.getElementById('sk-nama').value; 
             i.npsn = document.getElementById('sk-npsn').value; 
             i.namaKepsek = document.getElementById('sk-kepsek').value; 
@@ -498,14 +508,24 @@
             i.logo = document.getElementById('sk-logo').value; 
             i.namaTempat = document.getElementById('sk-tempat').value;
             i.sambutanKepsek = document.getElementById('sk-sambutan').value;
+            
+            // Simpan Visi Misi
             i.visiMisi = { 
                 visi: document.getElementById('sk-visi').value, 
                 misi: document.getElementById('sk-misi').value, 
                 tujuan: document.getElementById('sk-tujuan').value 
             };
+
+            // UPDATE: Simpan Media Sosial
+            i.socialMedia = {
+                facebook: document.getElementById('sk-fb').value,
+                instagram: document.getElementById('sk-ig').value,
+                youtube: document.getElementById('sk-yt').value,
+                whatsapp: document.getElementById('sk-wa').value
+            };
             
             await supabaseClient.from('pengaturan').upsert({ key:'global', data: globalSettings });
-            showModal("Data Sekolah Berhasil Diperbarui!", "Sukses");
+            showModal("Data Sekolah & Kontak Berhasil Diperbarui!", "Sukses");
         }
 
         // --- RENDER PENGATURAN 7KAIH (UPDATED) ---
