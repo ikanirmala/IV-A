@@ -281,12 +281,15 @@
         /* --- SECTION SISWA --- */
         .student-grid { 
             display: grid; 
+            /* Ubah sesuai permintaan, tetapi untuk siswa biasanya kecil-kecil, 
+               biarkan auto-fill dengan minmax kecil agar rapat. */
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); 
             gap: 20px; justify-items: center; padding: 20px 0; width: 100%; 
         }
         .student-card { 
             text-align: center; cursor: pointer; transition: all 0.3s ease; 
             width: 100%; position: relative; 
+            /* Hapus background/padding jika hanya ingin foto */
             background: transparent; box-shadow: none; border: none;
         }
         .student-card:hover { transform: translateY(-10px); }
@@ -305,12 +308,14 @@
         }
         .student-img { width: 100%; height: 100%; object-fit: cover; }
         
+        /* Hapus style teks nama & id karena sudah tidak ditampilkan di grid */
         .student-name, .student-id { display: none; }
 
 
         /* --- SECTION GALERI & VIDEO (UPDATE: 5 GRID) --- */
         .gallery-grid { 
             display: grid; 
+            /* PERMINTAAN: 5 GRID */
             grid-template-columns: repeat(5, 1fr); 
             gap: 15px; margin-bottom: 60px; 
         }
@@ -344,9 +349,9 @@
             position: absolute; font-size: 400px; color: rgba(255,255,255,0.03); 
             top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; 
         }
-        .sambutan-content { position: relative; z-index: 2; max-width: 1200px; margin: 0 auto; }
-        .quote-icon { font-size: 3rem; color: var(--secondary); margin-bottom: 40px; display: inline-block; }
-        .quote-text { font-size: 1rem; font-style: italic; line-height: 1.8; margin-bottom: 50px; font-weight: 300; }
+        .sambutan-content { position: relative; z-index: 2; max-width: 1000px; margin: 0 auto; }
+        .quote-icon { font-size: 4rem; color: var(--secondary); margin-bottom: 40px; display: inline-block; }
+        .quote-text { font-size: 1.4rem; font-style: italic; line-height: 1.8; margin-bottom: 50px; font-weight: 300; }
         .quote-author { font-weight: 800; font-size: 1.3rem; letter-spacing: 2px; color: var(--secondary); text-transform: uppercase; }
 
         /* --- FOOTER --- */
@@ -402,14 +407,17 @@
             .teacher-card { order: 1; } .vision-box { order: 2; }
             .chart-section { grid-template-columns: 1fr; padding: 40px; }
             .info-grid { grid-template-columns: repeat(2, 1fr); }
+            /* Responsif Galeri: tablet jadi 3 kolom */
             .gallery-grid { grid-template-columns: repeat(3, 1fr); }
         }
 
         @media (max-width: 768px) {
             .hero h1 { font-size: 2.2rem; }
             section { padding: 60px 20px; }
-            .info-grid { grid-template-columns: 1fr; } 
+            .info-grid { grid-template-columns: 1fr; } /* Stack 3 box di mobile */
+            /* Responsif Galeri: mobile jadi 2 kolom */
             .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+            /* Responsif Siswa */
             .student-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
             .nav-card { padding: 20px; width: 100%; }
         }
@@ -588,10 +596,10 @@
         <div class="container">
             <p>&copy; 2024 SDN Setu 02 - Kelas 4 A. Dibuat dengan semangat belajar.</p>
             <div class="social-links">
-                <a href="#"><i class="fab fa-facebook"></i></a>
-                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
+                <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
                 <a href="https://wa.me/6281310051985" target="_blank" class="wa"><i class="fab fa-whatsapp"></i></a>
-                <a href="#"><i class="fab fa-youtube"></i></a>
+                <a href="#" target="_blank"><i class="fab fa-youtube"></i></a>
             </div>
         </div>
     </footer>
@@ -651,6 +659,7 @@
                     const pengumumanData = info.pengumuman || {};
                     const galeri = info.galeri || [];
                     const youtube = info.youtubeLinks || [];
+                    const sosmed = info.socialMedia || {}; // UPDATE: Ambil Data Sosmed
 
                     // Header
                     if(info.namaSekolah) document.querySelector('title').textContent = `WEB ${info.namaSekolah}`;
@@ -681,6 +690,33 @@
                             // Fallback jika hanya ada 1 gambar
                             document.getElementById('info-kelas-section').style.backgroundImage = `url('${validGallery[0]}')`;
                         }
+                    }
+
+                    // --- UPDATE FOOTER SOCIAL MEDIA ---
+                    const footerLinks = document.querySelectorAll('.social-links a');
+                    // Index: 0=FB, 1=IG, 2=WA, 3=YT
+                    
+                    if(footerLinks[0]) {
+                         footerLinks[0].href = sosmed.facebook || '#';
+                         if(!sosmed.facebook) footerLinks[0].style.display = 'none'; // Sembunyikan jika kosong (opsional)
+                         else footerLinks[0].style.display = 'flex';
+                    }
+                    if(footerLinks[1]) {
+                        footerLinks[1].href = sosmed.instagram || '#';
+                        if(!sosmed.instagram) footerLinks[1].style.display = 'none';
+                        else footerLinks[1].style.display = 'flex';
+                    }
+                    if(footerLinks[2]) {
+                        // Format WA: Hapus '+' dan ganti '08' jadi '628'
+                        let waNum = sosmed.whatsapp || '6281310051985'; // Default fallback
+                        waNum = waNum.replace(/\D/g,''); // Hapus non-digit
+                        if(waNum.startsWith('0')) waNum = '62' + waNum.substring(1);
+                        footerLinks[2].href = `https://wa.me/${waNum}`;
+                    }
+                    if(footerLinks[3]) {
+                        footerLinks[3].href = sosmed.youtube || '#';
+                        if(!sosmed.youtube) footerLinks[3].style.display = 'none';
+                        else footerLinks[3].style.display = 'flex';
                     }
 
                     // --- LOAD PENGUMUMAN DINAMIS ---
