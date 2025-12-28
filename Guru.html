@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link id="favicon" rel="icon" type="image/x-icon" href="https://lh3.googleusercontent.com/d/16rll5zsRdwTbR3nF_NmPKwY51tg4tnOn">
-    <title>Ika Nirmala</title>
+    <title>GURU - Dashboard Panel</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
@@ -349,6 +349,17 @@
 
             <!-- Page Aplikasi -->
             <section id="page-aplikasi" class="page">
+                <div class="card">
+                    <h3><i class="fas fa-user-edit"></i> Edit Profil & Akun</h3>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Nama Guru</label><input type="text" id="profile-nama"></div>
+                        <div class="form-group"><label>Username</label><input type="text" id="profile-username"></div>
+                        <div class="form-group"><label>Password</label><input type="text" id="profile-password"></div>
+                        <div class="form-group"><label>Kelas</label><input type="text" placeholder="Pastikan Nama Kelas Sama dengan Kelas Yang ada di Data Siswa" id="profile-kelas"></div>
+                    </div>
+                    <button class="btn btn-success" onclick="updateGuruProfile()" style="margin-top: 20px;"><i class="fas fa-save"></i> Perbarui Profil</button>
+                </div>
+
                 <div class="form-grid">
                     <div class="card">
                         <h3><i class="fas fa-cloud-download-alt"></i> Backup Data</h3>
@@ -456,8 +467,13 @@
             document.getElementById('login-container').style.display = 'none';
             document.getElementById('dashboard-container').style.display = 'flex';
             document.getElementById('guru-name-display').textContent = `${currentUser.nama} (${currentUser.kelas})`;
+            document.querySelector('.sidebar-header h3').innerHTML = `<i class="fas fa-school"></i> ${currentUser.kelas}`;
             document.getElementById('span-kelas').textContent = currentUser.kelas;
+            
             await loadGlobalSettings();
+            
+            // Populate profile form
+            populateProfileForm();
             
             // Default Open Laporan > Data
             openLaporanSub('data', document.querySelector('.sub-link')); 
@@ -844,9 +860,7 @@
                 grid.innerHTML += createChecklistGroup('olg', 'Olahraga', olgOpts, data.rincian_olahraga);
                 const masyOpts = ["Bermain bersama teman", "Membantu orang tua di rumah", "Belajar kelompok bersama teman", "Membersihkan lingkungan rumah", "Menolong teman"];
                 grid.innerHTML += createChecklistGroup('masy', 'Bermasyarakat', masyOpts, data.kegiatan_masyarakat);
-
                 grid.innerHTML += `<div class="form-group"><label>Tempat Belajar</label><input type="text" id="edit-tmpt" value="${data.tempat_belajar||''}"></div><div class="form-group full-width"><label>Materi</label><textarea id="edit-mat" rows="2">${data.materi_belajar||''}</textarea></div>`;
-
                 const mkn = [['makanan_karbo','Karbo','mKarbo'],['makanan_sayur','Sayur','mSayur'],['makanan_susu','Susu','mSusu'],['makanan_lauk','Protein','mProtein'],['makanan_air','Air','mAir']];
                 let mknHtml = '<div class="form-group full-width"><label style="font-weight:600; color:var(--primary-color);">Makanan Sehat</label><div class="checklist-container">';
                 mkn.forEach(m => { mknHtml += `<label class="checklist-option"><input type="checkbox" id="edit-${m[2]}" ${data[m[0]]?'checked':''}> <span>${m[1]}</span></label>`; });
@@ -913,14 +927,10 @@
             doc.setLineWidth(0.5); doc.line(20, 32, 190, 32); 
             
             doc.setFontSize(12); doc.text(`Nama: ${name}`, 20, 50); doc.text(`Kelas: ${currentUser.kelas}`, 20, 57);
-            
             const body = []; const map = {ib:"Beribadah", td:"Tidur Cepat", bg:"Bangun Pagi", ol:"Olahraga", bl:"Belajar", ms:"Bermasyarakat", mk:"Makan Bergizi"};
             for(let k in predicates) body.push([map[k], predicates[k]]);
-            
             doc.autoTable({ head:[['Kategori','Predikat']], body:body, startY:70, theme:'grid', headStyles: { fillColor: [74, 144, 226] } });
-
             let finalY = doc.lastAutoTable.finalY + 20; if (finalY > 250) { doc.addPage(); finalY = 20; }
-
             const today = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
             const place = info.namaTempat || 'Tempat';
             
@@ -1124,6 +1134,42 @@
                 btn.disabled = false; btn.innerHTML = old;
             };
             reader.readAsDataURL(file);
+        }
+
+        // --- PROFILE EDIT ---
+        function populateProfileForm() {
+            if(!currentUser) return;
+            document.getElementById('profile-nama').value = currentUser.nama;
+            document.getElementById('profile-username').value = currentUser.username;
+            document.getElementById('profile-password').value = currentUser.password;
+            document.getElementById('profile-kelas').value = currentUser.kelas;
+        }
+
+        async function updateGuruProfile() {
+            const nama = document.getElementById('profile-nama').value;
+            const username = document.getElementById('profile-username').value;
+            const password = document.getElementById('profile-password').value;
+            const kelas = document.getElementById('profile-kelas').value;
+
+            if(!nama || !username || !password || !kelas) return showModal("Semua kolom harus diisi!");
+
+            try {
+                const { error } = await supabaseClient.from('users').update({ nama, username, password, kelas }).eq('id', currentUser.id);
+                if(error) throw error;
+                
+                // Update Local Data
+                currentUser.nama = nama; currentUser.username = username; currentUser.password = password; currentUser.kelas = kelas;
+                sessionStorage.setItem('guruUser', JSON.stringify(currentUser));
+                
+                // Refresh UI Elements
+                document.getElementById('guru-name-display').textContent = `${currentUser.nama} (${currentUser.kelas})`;
+                document.querySelector('.sidebar-header h3').innerHTML = `<i class="fas fa-school"></i> ${currentUser.kelas}`;
+                document.getElementById('span-kelas').textContent = currentUser.kelas;
+
+                showModal("Profil berhasil diperbarui!", "Sukses");
+            } catch(e) {
+                showModal("Gagal memperbarui profil: " + e.message, "Error");
+            }
         }
 
         async function backupSystem() {
