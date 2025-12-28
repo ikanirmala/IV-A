@@ -88,6 +88,7 @@
         .btn-success { background: linear-gradient(135deg, #2ECC71, #27AE60); color: white; }
         .btn-danger { background: linear-gradient(135deg, #E74C3C, #C0392B); color: white; }
         .btn-info { background: linear-gradient(135deg, #3498DB, #2980B9); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #F1C40F, #F39C12); color: white; }
         .action-btn.edit { background-color: #EBF5FB; color: var(--info-color); box-shadow: none; }
         .action-btn.edit:hover { background-color: var(--info-color); color: white; }
         .action-btn.delete { background-color: #FDEDEC; color: var(--danger-color); box-shadow: none; }
@@ -501,7 +502,8 @@
                     </div>
                     <div class="table-wrapper">
                         <table id="siswaTable">
-                            <thead><tr><th>Foto</th><th>Nama Lengkap</th><th>No. Induk</th><th>Agama</th><th>Aksi</th></tr></thead>
+                            <!-- Header akan diisi secara dinamis oleh JS, tapi struktur dasar: -->
+                            <thead><tr><th>Foto</th><th>Nama Lengkap</th><th>No. Induk</th><th>L/P</th><th>Agama</th><th>Aksi</th></tr></thead>
                             <tbody></tbody>
                         </table>
                     </div>
@@ -566,7 +568,7 @@
                 <div class="card">
                     <h3><i class="fas fa-user-edit"></i> Edit Profil & Akun</h3>
                     
-                    <!-- NEW: Foto Guru Manager -->
+                    <!-- Foto Guru Manager -->
                     <div style="text-align: center; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #F1F5F9;">
                         <img src="https://placehold.co/150?text=Foto+Guru" id="preview-profile-foto" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid #E2E8F0; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
                         <div style="font-size: 13px; color: #64748B; margin-bottom: 10px; font-weight: 500;">Foto Profil Guru (Tampil di Homepage)</div>
@@ -593,11 +595,21 @@
                 </div>
 
                 <div class="form-grid">
+                    <!-- NEW: Backup & Restore Card -->
                     <div class="card">
-                        <h3><i class="fas fa-cloud-download-alt"></i> Backup Data</h3>
-                        <p style="font-size: 13px; color: #64748B; margin: 10px 0 20px;">Unduh seluruh data siswa, laporan, dan pengaturan dalam format JSON untuk cadangan keamanan.</p>
-                        <button class="btn btn-primary" onclick="backupSystem()"><i class="fas fa-download"></i> Unduh Backup</button>
+                        <h3><i class="fas fa-sync-alt"></i> Backup & Restore Data</h3>
+                        <p style="font-size: 13px; color: #64748B; margin: 10px 0 20px;">
+                            <strong>Backup:</strong> Unduh data (Siswa, Laporan, Pengaturan) ke file JSON.<br>
+                            <strong>Restore:</strong> Pulihkan data dari file JSON yang sudah di-backup.
+                        </p>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button class="btn btn-primary" onclick="backupSystem()"><i class="fas fa-download"></i> Unduh Backup</button>
+                            <button class="btn btn-warning" onclick="document.getElementById('restoreInput').click()" style="background-color: #F59E0B; color: white; border: none;"><i class="fas fa-upload"></i> Restore Data</button>
+                            <!-- Hidden Restore Input -->
+                            <input type="file" id="restoreInput" accept=".json" style="display: none;" onchange="handleRestoreFile(this)">
+                        </div>
                     </div>
+                    
                     <div class="card" style="border-color: #FECACA;">
                         <h3 style="color: var(--danger-color);"><i class="fas fa-exclamation-triangle"></i> Reset Laporan</h3>
                         <p style="font-size: 13px; color: #64748B; margin: 10px 0 20px;">Menghapus semua data laporan siswa di kelas ini. Tindakan ini <strong>tidak dapat dibatalkan</strong>.</p>
@@ -636,6 +648,17 @@
                 <div class="form-grid">
                     <div class="form-group"><label>Nama Lengkap</label><input type="text" id="siswaNama" required placeholder="Contoh: Budi Santoso"></div>
                     <div class="form-group"><label>No. Induk</label><input type="text" id="siswaInduk" required placeholder="NIS/NISN"></div>
+                    
+                    <!-- ADDED: Jenis Kelamin Input -->
+                    <div class="form-group">
+                        <label>Jenis Kelamin</label>
+                        <select id="siswaGender">
+                            <option value="">- Pilih -</option>
+                            <option value="Laki-laki">Laki-laki</option>
+                            <option value="Perempuan">Perempuan</option>
+                        </select>
+                    </div>
+                    
                     <div class="form-group"><label>Agama</label><select id="siswaAgama"><option>Islam</option><option>Kristen</option><option>Katolik</option><option>Hindu</option><option>Buddha</option><option>Konghucu</option></select></div>
                     <div class="form-group"><label>Foto Siswa</label><div style="display:flex;gap:10px"><input type="text" id="siswaFoto" placeholder="URL Foto"><button type="button" class="btn btn-info" onclick="document.getElementById('f-siswa').click()"><i class="fas fa-folder-open"></i></button><input type="file" id="f-siswa" style="display:none" onchange="handleFileUpload(this, 'siswaFoto')"></div></div>
                 </div>
@@ -648,7 +671,7 @@
         <div class="modal-content" style="max-width: 500px;">
             <div class="modal-header"><h3>Import Data via Excel</h3><span style="cursor:pointer; font-size: 24px;" onclick="closeModal('siswaExcelModal')">×</span></div>
             <div style="padding: 10px 0;">
-                <p style="font-size: 13px; color: #64748B; margin-bottom: 20px;">Unduh format, isi data siswa, lalu upload kembali.</p>
+                <p style="font-size: 13px; color: #64748B; margin-bottom: 20px;">Unduh format, isi data siswa (termasuk jenis kelamin), lalu upload kembali.</p>
                 <button class="btn btn-success" onclick="downloadSiswaExcel()" style="width: 100%; margin-bottom: 20px;"><i class="fas fa-download"></i> Download Format Excel</button>
                 <div style="border: 2px dashed #CBD5E1; padding: 30px; text-align: center; border-radius: 12px; background: #F8FAFC;">
                     <i class="fas fa-cloud-upload-alt" style="font-size: 40px; color: var(--primary-color); margin-bottom: 15px;"></i>
@@ -1088,7 +1111,8 @@
 
         function renderSekolahForms() {
             const info = globalSettings.infoSekolah || {};
-            const vm = info.visiMisi || {};
+            // FIX: Cek visiMisi di dalam infoSekolah (format baru) ATAU di root globalSettings (format database sql)
+            const vm = info.visiMisi || globalSettings.visiMisi || {};
             const sosmed = info.socialMedia || {}; // Get Social Media Data
             
             document.getElementById('sekolahForm').innerHTML = `
@@ -1529,7 +1553,8 @@
         // --- RENDER KELAS VISUAL FORM (DENGAN FORM PENGUMUMAN) ---
         function renderKelasVisualForm() {
             const ik = globalSettings.infoSekolah?.infoKelas || {};
-            const pengumumanData = globalSettings.infoSekolah?.pengumuman || {};
+            // FIX: Cek pengumuman di dalam infoSekolah (format baru) ATAU di root globalSettings (format database sql)
+            const pengumumanData = globalSettings.infoSekolah?.pengumuman || globalSettings.pengumuman || {};
             const form = document.getElementById('kelasVisualForm');
             
             let pengumumanFormHtml = `<div class="settings-section-title" style="margin-bottom: 20px;"><i class="fas fa-bullhorn"></i> Kelola Pengumuman Sekolah</div>`;
@@ -1574,36 +1599,103 @@
             form.innerHTML = pengumumanFormHtml + visualKelasHtml;
         }
 
+        // NEW: Fungsi untuk menyimpan data Pengumuman & Visual Kelas
+        async function saveKelasVisual() {
+            if(!globalSettings.infoSekolah) globalSettings.infoSekolah = {};
+            
+            // 1. Simpan Data Pengumuman
+            const pengumuman = {};
+            for(let i=1; i<=3; i++) {
+                pengumuman[`pengumuman${i}`] = {
+                    [`pengumuman${i}Judul`]: document.getElementById(`pengumuman-judul-${i}`).value,
+                    [`pengumuman${i}Gambar`]: document.getElementById(`pengumuman-gambar-${i}`).value,
+                    [`pengumuman${i}Dokumen`]: document.getElementById(`pengumuman-dokumen-${i}`).value,
+                    [`pengumuman${i}Text`]: document.getElementById(`pengumuman-text-${i}`).value
+                };
+            }
+            
+            globalSettings.infoSekolah.pengumuman = pengumuman;
+            
+            // 2. Simpan Data Visual Kelas
+            globalSettings.infoSekolah.infoKelas = {
+                jadwalPelajaran: document.getElementById('iv-jadwal').value,
+                strukturOrganisasi: document.getElementById('iv-struktur').value,
+                kesepakatanKelas: document.getElementById('iv-kesepakatan').value
+            };
+            
+            // Simpan ke Supabase
+            const { error } = await supabaseClient.from('pengaturan').upsert({ key:'global', data: globalSettings });
+            
+            if(!error) {
+                showModal("Informasi Kelas & Pengumuman berhasil disimpan!", "Sukses");
+            } else {
+                showModal("Gagal menyimpan: " + error.message, "Error");
+            }
+        }
+
         // --- SISWA EXCEL & UTILS ---
         async function loadSiswaData() {
             const tbody = document.querySelector("#siswaTable tbody"); tbody.innerHTML = '';
             const { data } = await supabaseClient.from('siswa').select('*').eq('kelas', currentUser.kelas);
             (data||[]).forEach(s => {
-                tbody.innerHTML += `<tr><td><img src="${s.foto||'https://placehold.co/30'}" style="width:35px;height:35px;border-radius:50%;object-fit:cover;border:1px solid #ddd"></td><td>${s.nama}</td><td>${s.nomor_induk}</td><td>${s.agama}</td><td><button class="action-btn edit" onclick="openSiswaModal('${s.id}')"><i class="fas fa-edit"></i></button> <button class="action-btn delete" onclick="deleteSiswa('${s.id}')"><i class="fas fa-trash"></i></button></td></tr>`;
+                // ADDED: Menampilkan jenis_kelamin di tabel
+                tbody.innerHTML += `<tr><td><img src="${s.foto||'https://placehold.co/30'}" style="width:35px;height:35px;border-radius:50%;object-fit:cover;border:1px solid #ddd"></td><td>${s.nama}</td><td>${s.nomor_induk}</td><td>${s.jenis_kelamin || '-'}</td><td>${s.agama}</td><td><button class="action-btn edit" onclick="openSiswaModal('${s.id}')"><i class="fas fa-edit"></i></button> <button class="action-btn delete" onclick="deleteSiswa('${s.id}')"><i class="fas fa-trash"></i></button></td></tr>`;
             });
         }
         
-        function downloadSiswaExcel() { const ws = XLSX.utils.json_to_sheet([{nama:"Nama Siswa", nomorInduk:"12345", agama:"Islam", foto:""}]); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Siswa"); XLSX.writeFile(wb, "Format_Siswa.xlsx"); }
+        // ADDED: jenisKelamin ke format Excel
+        function downloadSiswaExcel() { 
+            const ws = XLSX.utils.json_to_sheet([{nama:"Nama Siswa", nomorInduk:"12345", jenisKelamin: "Laki-laki", agama:"Islam", foto:""}]); 
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Siswa"); XLSX.writeFile(wb, "Format_Siswa.xlsx"); 
+        }
         
         async function uploadSiswaExcel() {
             const f = document.getElementById('excelInput').files[0]; if(!f) return showModal("Pilih file dulu.");
             const r = new FileReader();
             r.onload = async (e) => {
                 const wb = XLSX.read(e.target.result, {type:'binary'}); const d = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-                for(const row of d) { await supabaseClient.from('siswa').insert([{nama:row.nama, nomor_induk:row.nomorInduk, agama:row.agama, foto:row.foto, kelas:currentUser.kelas}]); }
+                // ADDED: Map jenisKelamin dari Excel ke Database
+                for(const row of d) { 
+                    await supabaseClient.from('siswa').insert([{
+                        nama: row.nama, 
+                        nomor_induk: row.nomorInduk, 
+                        jenis_kelamin: row.jenisKelamin, // Mapping
+                        agama: row.agama, 
+                        foto: row.foto, 
+                        kelas: currentUser.kelas
+                    }]); 
+                }
                 showModal("Import Berhasil!", "Sukses"); closeModal('siswaExcelModal'); loadSiswaData();
             }; r.readAsBinaryString(f);
         }
 
         async function openSiswaModal(id = null) {
             document.getElementById('siswaForm').reset(); document.getElementById('siswaId').value = id || '';
-            if (id) { const { data } = await supabaseClient.from('siswa').select('*').eq('id', id).single(); if (data) { document.getElementById('siswaNama').value = data.nama; document.getElementById('siswaInduk').value = data.nomor_induk; document.getElementById('siswaAgama').value = data.agama; document.getElementById('siswaFoto').value = data.foto||''; } }
+            if (id) { 
+                const { data } = await supabaseClient.from('siswa').select('*').eq('id', id).single(); 
+                if (data) { 
+                    document.getElementById('siswaNama').value = data.nama; 
+                    document.getElementById('siswaInduk').value = data.nomor_induk; 
+                    // ADDED: Populate jenis kelamin saat edit
+                    document.getElementById('siswaGender').value = data.jenis_kelamin || '';
+                    document.getElementById('siswaAgama').value = data.agama; 
+                    document.getElementById('siswaFoto').value = data.foto||''; 
+                } 
+            }
             openModal('siswaModal');
         }
 
         document.getElementById('siswaForm').addEventListener('submit', async (e) => {
             e.preventDefault(); const id = document.getElementById('siswaId').value;
-            const p = { nama: document.getElementById('siswaNama').value, nomor_induk: document.getElementById('siswaInduk').value, agama: document.getElementById('siswaAgama').value, foto: document.getElementById('siswaFoto').value, kelas: currentUser.kelas };
+            const p = { 
+                nama: document.getElementById('siswaNama').value, 
+                nomor_induk: document.getElementById('siswaInduk').value, 
+                // ADDED: Ambil value jenis kelamin
+                jenis_kelamin: document.getElementById('siswaGender').value,
+                agama: document.getElementById('siswaAgama').value, 
+                foto: document.getElementById('siswaFoto').value, 
+                kelas: currentUser.kelas 
+            };
             const { error } = id ? await supabaseClient.from('siswa').update(p).eq('id', id) : await supabaseClient.from('siswa').insert([p]);
             if (!error) { closeModal('siswaModal'); loadSiswaData(); showModal("Data Siswa Tersimpan!", "Sukses"); }
         });
@@ -1612,6 +1704,7 @@
             const file = input.files[0]; if(!file) return;
             const btn = input.previousElementSibling; 
 
+            // Find Spinner Logic
             let btnSpinner = null;
             if(input.nextElementSibling && input.nextElementSibling.tagName === 'BUTTON') btnSpinner = input.nextElementSibling;
             else if(input.previousElementSibling && input.previousElementSibling.tagName === 'BUTTON') btnSpinner = input.previousElementSibling;
@@ -1652,7 +1745,6 @@
             document.getElementById('profile-password').value = currentUser.password;
             document.getElementById('profile-kelas').value = currentUser.kelas;
             
-            // NEW: Populate Foto
             if(currentUser.foto) {
                 document.getElementById('preview-profile-foto').src = currentUser.foto;
                 document.getElementById('profile-foto-url').value = currentUser.foto;
@@ -1676,7 +1768,6 @@
                 // Update Local Data
                 currentUser.nama = nama; currentUser.username = username; currentUser.password = password; currentUser.kelas = kelas;
                 currentUser.foto = foto; // NEW
-                
                 sessionStorage.setItem('guruUser', JSON.stringify(currentUser));
                 
                 // Refresh UI Elements
@@ -1690,11 +1781,102 @@
             }
         }
 
+        // --- BACKUP & RESTORE LOGIC (UPDATED) ---
+
         async function backupSystem() {
-            const { data: siswaData } = await supabaseClient.from('siswa').select('*').eq('kelas', currentUser.kelas);
-            const backup = { settings: globalSettings, laporan: fullData, siswa: siswaData };
-            const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `backup_${currentUser.kelas}.json`; a.click();
+            // Mengambil tombol untuk indikator loading
+            const btn = document.querySelector('button[onclick="backupSystem()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+            btn.disabled = true;
+
+            try {
+                // Ambil data Siswa (Raw Data)
+                const { data: siswaData } = await supabaseClient.from('siswa').select('*').eq('kelas', currentUser.kelas);
+                
+                // Ambil data Laporan (Raw Data, bukan fullData tabel agar bisa di-restore dengan sempurna)
+                const { data: laporanData } = await supabaseClient.from('laporan').select('*').eq('kelas', currentUser.kelas);
+
+                const backup = { 
+                    meta: {
+                        version: "1.0",
+                        exported_at: new Date().toISOString(),
+                        exported_by: currentUser.username,
+                        kelas: currentUser.kelas
+                    },
+                    settings: globalSettings, 
+                    laporan: laporanData || [], // Simpan data mentah
+                    siswa: siswaData || []
+                };
+                
+                const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+                const a = document.createElement('a'); 
+                a.href = URL.createObjectURL(blob); 
+                a.download = `Backup_${currentUser.kelas}_${new Date().toISOString().slice(0,10)}.json`; 
+                a.click();
+                
+                showModal("Backup data berhasil diunduh!", "Sukses");
+            } catch (err) {
+                showModal("Gagal melakukan backup: " + err.message, "Error");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function handleRestoreFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            // Reset input agar file yang sama bisa dipilih lagi jika gagal/batal
+            input.value = '';
+
+            showConfirmModal("Apakah Anda yakin ingin memulihkan data dari file ini? Data yang ada mungkin akan diperbarui atau ditimpa.", async () => {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const backupData = JSON.parse(e.target.result);
+                        let successCount = 0;
+
+                        // Validasi sederhana
+                        if (!backupData.settings && !backupData.siswa && !backupData.laporan) {
+                            throw new Error("Format file backup tidak valid.");
+                        }
+
+                        // 1. Restore Settings
+                        if (backupData.settings) {
+                            const { error: errSet } = await supabaseClient.from('pengaturan').upsert({ key: 'global', data: backupData.settings });
+                            if (errSet) console.error("Err Settings:", errSet);
+                            else successCount++;
+                        }
+
+                        // 2. Restore Siswa (Upsert berdasarkan ID)
+                        if (backupData.siswa && Array.isArray(backupData.siswa) && backupData.siswa.length > 0) {
+                            const { error: errSiswa } = await supabaseClient.from('siswa').upsert(backupData.siswa);
+                            if (errSiswa) throw new Error("Gagal restore siswa: " + errSiswa.message);
+                            else successCount++;
+                        }
+
+                        // 3. Restore Laporan (Upsert berdasarkan ID)
+                        if (backupData.laporan && Array.isArray(backupData.laporan) && backupData.laporan.length > 0) {
+                            const { error: errLap } = await supabaseClient.from('laporan').upsert(backupData.laporan);
+                            if (errLap) throw new Error("Gagal restore laporan: " + errLap.message);
+                            else successCount++;
+                        }
+
+                        if (successCount > 0) {
+                            showModal("Data berhasil dipulihkan! Halaman akan dimuat ulang.", "Sukses");
+                            setTimeout(() => window.location.reload(), 2000);
+                        } else {
+                            showModal("Tidak ada data yang dipulihkan. Pastikan file valid.", "Info");
+                        }
+
+                    } catch (err) {
+                        showModal("Gagal memproses file restore: " + err.message, "Error");
+                    }
+                };
+                reader.readAsText(file);
+            });
         }
 
         async function resetLaporan() { if(confirm("Hapus semua laporan di kelas ini?")) { await supabaseClient.from('laporan').delete().eq('kelas', currentUser.kelas); loadLaporanData(); } }
