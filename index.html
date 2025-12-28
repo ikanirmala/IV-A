@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IV-A - Web Kelas Digital</title>
+    <title>IV-A - Setu 02</title>
     
     <!-- Favicon dari Logo Sekolah -->
 	<link id="favicon" rel="icon" type="image/x-icon" href="https://lh3.googleusercontent.com/d/16rll5zsRdwTbR3nF_NmPKwY51tg4tnOn">
@@ -75,7 +75,6 @@
             position: relative; height: 100vh; 
             display: flex; align-items: center; justify-content: center; 
             text-align: center; color: white;
-            /* Placeholder Background, akan diganti JS dengan Galeri #1 */
             background-image: url('https://images.unsplash.com/photo-1509062522246-3755977927d7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
             background-attachment: fixed; 
             background-position: center; 
@@ -173,11 +172,9 @@
             background: white; padding: 60px; border-radius: 30px; 
             box-shadow: var(--shadow-md); border-left: 10px solid var(--secondary); 
             position: relative;
-            /* UPDATE: Menambahkan cursor pointer dan transisi untuk interaktivitas */
             cursor: pointer;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        /* UPDATE: Hover effect untuk vision box */
         .vision-box:hover {
             transform: translateY(-5px);
             box-shadow: var(--shadow-lg);
@@ -192,7 +189,6 @@
 
         /* --- SECTION INFO KELAS (PARALLAX & 3 GRID) --- */
         .parallax-section {
-            /* Fallback jika JS belum load */
             background-image: url('https://placehold.co/1920x1080?text=Background');
             background-attachment: fixed;
             background-position: center;
@@ -202,12 +198,11 @@
         }
         .parallax-section .parallax-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.85); /* Overlay Gelap agar konten terbaca */
+            background: rgba(15, 23, 42, 0.5); 
             z-index: 1;
         }
         .parallax-section .section-title { color: white; }
         
-        /* GRID 3 KOLOM SESUAI PERMINTAAN */
         .info-grid { 
             display: grid; 
             grid-template-columns: repeat(3, 1fr); 
@@ -290,15 +285,12 @@
         /* --- SECTION SISWA --- */
         .student-grid { 
             display: grid; 
-            /* Ubah sesuai permintaan, tetapi untuk siswa biasanya kecil-kecil, 
-               biarkan auto-fill dengan minmax kecil agar rapat. */
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); 
             gap: 20px; justify-items: center; padding: 20px 0; width: 100%; 
         }
         .student-card { 
             text-align: center; cursor: pointer; transition: all 0.3s ease; 
             width: 100%; position: relative; 
-            /* Hapus background/padding jika hanya ingin foto */
             background: transparent; box-shadow: none; border: none;
         }
         .student-card:hover { transform: translateY(-10px); }
@@ -315,16 +307,13 @@
             border-color: var(--primary); 
             transform: scale(1.1);
         }
-        .student-img { width: 100%; height: 100%; object-fit: cover; }
-        
-        /* Hapus style teks nama & id karena sudah tidak ditampilkan di grid */
+        .student-img { width: 100%; height: 100%; object-fit: cover; }        
         .student-name, .student-id { display: none; }
 
 
         /* --- SECTION GALERI & VIDEO (UPDATE: 5 GRID) --- */
         .gallery-grid { 
             display: grid; 
-            /* PERMINTAAN: 5 GRID */
             grid-template-columns: repeat(5, 1fr); 
             gap: 15px; margin-bottom: 60px; 
         }
@@ -359,8 +348,8 @@
             top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; 
         }
         .sambutan-content { position: relative; z-index: 2; max-width: 1000px; margin: 0 auto; }
-        .quote-icon { font-size: 4rem; color: var(--secondary); margin-bottom: 40px; display: inline-block; }
-        .quote-text { font-size: 1.4rem; font-style: italic; line-height: 1.8; margin-bottom: 50px; font-weight: 300; }
+        .quote-icon { font-size: 2rem; color: var(--secondary); margin-bottom: 40px; display: inline-block; }
+        .quote-text { font-size: 1rem; font-style: italic; line-height: 1.8; margin-bottom: 50px; font-weight: 300; }
         .quote-author { font-weight: 800; font-size: 1.3rem; letter-spacing: 2px; color: var(--secondary); text-transform: uppercase; }
 
         /* --- FOOTER --- */
@@ -416,17 +405,14 @@
             .teacher-card { order: 1; } .vision-box { order: 2; }
             .chart-section { grid-template-columns: 1fr; padding: 40px; }
             .info-grid { grid-template-columns: repeat(2, 1fr); }
-            /* Responsif Galeri: tablet jadi 3 kolom */
             .gallery-grid { grid-template-columns: repeat(3, 1fr); }
         }
 
         @media (max-width: 768px) {
             .hero h1 { font-size: 2.2rem; }
             section { padding: 60px 20px; }
-            .info-grid { grid-template-columns: 1fr; } /* Stack 3 box di mobile */
-            /* Responsif Galeri: mobile jadi 2 kolom */
+            .info-grid { grid-template-columns: 1fr; } 
             .gallery-grid { grid-template-columns: repeat(2, 1fr); }
-            /* Responsif Siswa */
             .student-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
             .nav-card { padding: 20px; width: 100%; }
         }
@@ -545,7 +531,7 @@
                 <div class="chart-text">
                     <h3>Grafik 7 KAIH</h3>
                     <p>Pemantauan perkembangan karakter siswa melalui 7 Kebiasaan Anak Indonesia Hebat (7KAIH). Data ini diambil secara <strong>real-time</strong> dari laporan harian siswa.</p>
-                    <div class="stat-badge"><i class="fas fa-chart-pie"></i> Analisis Data Kelas</div>
+                    <div class="stat-badge"><i class="fas fa-chart-pie"></i> Analisis Jurnal</div>
                     <ul class="check-list">
                         <li><i class="fas fa-check-circle" style="color: var(--secondary); font-size: 1.2rem;"></i> Ketaatan Beribadah</li>
                         <li><i class="fas fa-check-circle" style="color: var(--secondary); font-size: 1.2rem;"></i> Disiplin Waktu</li>
@@ -648,7 +634,6 @@
 
         document.querySelectorAll('.reveal, .reveal-scale').forEach(el => observer.observe(el));
 
-        // Variable Global untuk Visi Misi
         let globalVisiContent = "";
         let globalMisiContent = "";
 
@@ -673,7 +658,7 @@
                     const pengumumanData = info.pengumuman || {};
                     const galeri = info.galeri || [];
                     const youtube = info.youtubeLinks || [];
-                    const sosmed = info.socialMedia || {}; // UPDATE: Ambil Data Sosmed
+                    const sosmed = info.socialMedia || {}; 
 
                     // Header
                     if(info.namaSekolah) document.querySelector('title').textContent = `WEB ${info.namaSekolah}`;
@@ -694,32 +679,27 @@
                     // Info Visual (Images 3 Kotak)
                     if(visual.jadwalPelajaran) document.getElementById('img-jadwal-src').src = visual.jadwalPelajaran;
                     if(visual.strukturOrganisasi) document.getElementById('img-struktur-src').src = visual.strukturOrganisasi;
-                    // LOAD IMAGE KESEPAKATAN KELAS
                     if(visual.kesepakatanKelas) document.getElementById('img-kesepakatan-src').src = visual.kesepakatanKelas;
 
                     // --- LOAD BACKGROUND PARALLAX ---
                     const validGallery = galeri.filter(img => img && img.trim() !== "");
                     
                     if(validGallery.length > 0) {
-                        // 1. Hero Header = Gambar Pertama
                         document.querySelector('.hero').style.backgroundImage = `url('${validGallery[0]}')`;
                         
-                        // 2. Info Kelas Section = Gambar Kedua (Sesuai Permintaan)
                         if(validGallery.length > 1) {
                             document.getElementById('info-kelas-section').style.backgroundImage = `url('${validGallery[1]}')`;
                         } else {
-                            // Fallback jika hanya ada 1 gambar
                             document.getElementById('info-kelas-section').style.backgroundImage = `url('${validGallery[0]}')`;
                         }
                     }
 
                     // --- UPDATE FOOTER SOCIAL MEDIA ---
                     const footerLinks = document.querySelectorAll('.social-links a');
-                    // Index: 0=FB, 1=IG, 2=WA, 3=YT
                     
                     if(footerLinks[0]) {
                          footerLinks[0].href = sosmed.facebook || '#';
-                         if(!sosmed.facebook) footerLinks[0].style.display = 'none'; // Sembunyikan jika kosong (opsional)
+                         if(!sosmed.facebook) footerLinks[0].style.display = 'none'; 
                          else footerLinks[0].style.display = 'flex';
                     }
                     if(footerLinks[1]) {
@@ -728,9 +708,8 @@
                         else footerLinks[1].style.display = 'flex';
                     }
                     if(footerLinks[2]) {
-                        // Format WA: Hapus '+' dan ganti '08' jadi '628'
-                        let waNum = sosmed.whatsapp || '6281310051985'; // Default fallback
-                        waNum = waNum.replace(/\D/g,''); // Hapus non-digit
+                        let waNum = sosmed.whatsapp || '6281310051985'; 
+                        waNum = waNum.replace(/\D/g,''); 
                         if(waNum.startsWith('0')) waNum = '62' + waNum.substring(1);
                         footerLinks[2].href = `https://wa.me/${waNum}`;
                     }
@@ -820,7 +799,6 @@
             } catch (e) { console.error("Err Info:", e); }
         }
 
-        // Helper untuk convert URL YouTube ke Embed
         function getYoutubeEmbedUrl(url) {
             if(!url) return null;
             let videoId = "";
@@ -868,7 +846,6 @@
                 const safeName = s.nama.replace(/'/g, "\\'");
                 const safeFoto = s.foto || 'https://placehold.co/150?text=Siswa';
                 
-                // UPDATE: Menghapus div nama dan id agar hanya foto yang tampil
                 return `
                 <div class="student-card reveal delay-${(idx % 5) * 100}" onclick="openModal('${safeName}', '${safeFoto}', 'Siswa Kelas 4A - ${s.nomor_induk ? 'NIS: ' + s.nomor_induk : ''}')">
                     <div class="student-img-wrapper">
@@ -954,12 +931,10 @@
             setTimeout(() => modal.classList.add('show'), 10);
         }
 
-        // Fungsi Khusus untuk Membuka Modal Visi Misi
         function openVisiMisiModal() {
             modalTitle.textContent = "Visi & Misi Sekolah";
-            modalImg.style.display = 'none'; // Tidak perlu gambar header
+            modalImg.style.display = 'none'; 
             
-            // Format Konten Visi & Misi di dalam Modal
             const contentHtml = `
                 <div style="text-align: left;">
                     <h4 style="color: var(--primary); margin-bottom: 10px; font-weight: 700; font-size: 1.2rem;">Visi</h4>
@@ -973,7 +948,7 @@
             `;
             
             modalHtml.innerHTML = contentHtml;
-            modalAction.innerHTML = ''; // Tidak ada tombol aksi khusus
+            modalAction.innerHTML = ''; 
             modal.style.display = 'block';
             setTimeout(() => modal.classList.add('show'), 10);
         }
