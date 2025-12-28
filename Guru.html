@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link id="favicon" rel="icon" type="image/x-icon" href="https://lh3.googleusercontent.com/d/16rll5zsRdwTbR3nF_NmPKwY51tg4tnOn">
-    <title>IKA NIRMALA</title>
+    <title>GURU - Dashboard Panel</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
@@ -151,6 +151,11 @@
         .page { display: none; }
         .page.active { display: block; animation: fadeUp 0.4s ease; }
 
+        /* Charts Styles (NEW) */
+        .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-top: 20px; }
+        .chart-wrapper { position: relative; height: 350px; background: white; padding: 20px; border-radius: 12px; border: 1px solid #E2E8F0; box-shadow: var(--shadow-sm); }
+        .chart-title { font-size: 16px; font-weight: 600; color: var(--dark-color); margin-bottom: 15px; border-bottom: 1px solid #F1F5F9; padding-bottom: 10px; }
+
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .sidebar { width: 0; overflow: hidden; }
@@ -158,6 +163,7 @@
             .school-info-grid { grid-template-columns: 1fr; }
             .predikat-grid { grid-template-columns: 1fr; }
             .school-form-fields { grid-template-columns: 1fr; }
+            .chart-grid { grid-template-columns: 1fr; }
         }
 
         /* Other styles */
@@ -194,7 +200,9 @@
             <form id="loginForm">
                 <div class="form-group"><input type="text" id="username" placeholder="Username" required></div>
                 <div class="form-group"><input type="password" id="password" placeholder="Password" required></div>
-                <button type="submit" id="loginButton" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 15px; font-size: 15px; margin-top: 10px;">Masuk Dashboard</button>
+                <button type="submit" id="loginButton" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 15px; font-size: 15px; margin-top: 10px;">Masuk </button>
+                <a href="./" class="btn btn-danger" style="width: 50%; justify-content: center; padding: 15px; font-size: 15px; margin-top: 10px;"><i class="fas fa-home"></i></a>
+
             </form>
         </div>
     </div>
@@ -213,10 +221,12 @@
                         <i class="fas fa-file-invoice"></i> Laporan Siswa <i class="fas fa-chevron-right arrow-icon"></i>
                     </a>
                     <div class="sidebar-submenu" id="submenu-laporan" style="display: none;">
+                        <a href="javascript:void(0)" class="nav-link sub-link" onclick="openLaporanSub('grafik', this)"><i class="fas fa-chart-bar"></i> Grafik</a>
                         <a href="javascript:void(0)" class="nav-link sub-link" onclick="openLaporanSub('data', this)"><i class="fas fa-table"></i> Data</a>
                         <a href="javascript:void(0)" class="nav-link sub-link" onclick="openLaporanSub('nilai', this)"><i class="fas fa-star-half-alt"></i> Nilai</a>
                         <a href="javascript:void(0)" class="nav-link sub-link" onclick="openLaporanSub('rekap', this)"><i class="fas fa-chart-pie"></i> Rekap</a>
                         <a href="javascript:void(0)" class="nav-link sub-link" onclick="openLaporanSub('predikat', this)"><i class="fas fa-award"></i> Predikat</a>
+                        <a href="javascript:void(0)" class="nav-link sub-link" onclick="openLaporanSub('analisis', this)"><i class="fas fa-search-plus"></i> Analisis Rinci</a>
                     </div>
                 </div>
                 <!-- DROPDOWN MENU END -->
@@ -246,9 +256,65 @@
 
             <!-- Page Laporan -->
             <section id="page-laporan" class="page active">
-                <div class="card">
+                <!-- CHART SECTION: GRAFIK UTAMA -->
+                <div id="grafik-view" style="display:none; margin-bottom: 25px;">
+                    <div class="card">
+                        <div class="chart-title"><i class="fas fa-chart-bar"></i> Grafik 7 Kebiasaan Anak Indonesia Hebat (Kelas Ini)</div>
+                        <div style="position: relative; height: 400px; width: 100%;">
+                            <canvas id="guruGlobalChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CHART SECTION: ANALISIS RINCI -->
+                <div id="analisis-view" style="display:none; margin-bottom: 25px;">
+                    <!-- Ibadah Section -->
+                    <div class="settings-section-title">Analisis Ibadah</div>
+                    <div id="analisis-ibadah-rinci-container" class="chart-grid"></div>
+
+                    <!-- Waktu Section -->
+                    <div class="settings-section-title" style="margin-top: 30px;">Analisis Waktu</div>
+                    <div class="chart-grid">
+                        <div class="chart-wrapper">
+                            <div class="chart-title">Bangun Pagi</div>
+                            <canvas id="guruBangunChart"></canvas>
+                        </div>
+                        <div class="chart-wrapper">
+                            <div class="chart-title">Tidur Cepat</div>
+                            <canvas id="guruTidurChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Kegiatan Section -->
+                    <div class="settings-section-title" style="margin-top: 30px;">Analisis Kegiatan</div>
+                    <div class="chart-grid">
+                        <div class="chart-wrapper">
+                            <div class="chart-title">Olahraga</div>
+                            <canvas id="guruOlahragaChart"></canvas>
+                        </div>
+                        <div class="chart-wrapper">
+                            <div class="chart-title">Bermasyarakat</div>
+                            <canvas id="guruMasyarakatChart"></canvas>
+                        </div>
+                        <div class="chart-wrapper">
+                            <div class="chart-title">Belajar</div>
+                            <canvas id="guruBelajarChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Makanan Section -->
+                    <div class="settings-section-title" style="margin-top: 30px;">Analisis Makanan Sehat</div>
+                    <div class="card">
+                        <div class="chart-title">Detail Konsumsi Makanan Sehat</div>
+                        <div style="position: relative; height: 350px; width: 100%;">
+                            <canvas id="guruMakananChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TABLE SECTION -->
+                <div id="laporan-table-container" class="card">
                     <div class="controls-wrapper">
-                        
                         <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center; width: 100%;">
                             <div style="display: flex; align-items: center; gap: 10px; background: #F8FAFC; padding: 5px 10px; border-radius: 10px; border: 1px solid #E2E8F0;">
                                 <i class="far fa-calendar-alt" style="color: #94A3B8;"></i>
@@ -436,8 +502,10 @@
         let currentUser = null;
         let globalSettings = {};
         let fullData = [];
+        let rawLaporanData = []; // Store raw object data for charts
         let filteredData = [];
         let activeLaporanView = 'data';
+        let chartInstances = {}; // Store chart instances
 
         // --- AUTH ---
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -475,8 +543,8 @@
             // Populate profile form
             populateProfileForm();
             
-            // Default Open Laporan > Data
-            openLaporanSub('data', document.querySelector('.sub-link')); 
+            // Default Open Laporan > Grafik (Updated per request to start showing data, but default sub menu logic below)
+            openLaporanSub('grafik', document.querySelectorAll('.sub-link')[0]); 
             toggleSidebarDropdown(document.getElementById('nav-laporan-parent'));
         }
 
@@ -544,179 +612,6 @@
             if (pageId === 'page-kelas') renderKelasVisualForm();
         }
 
-        // --- RENDER DATA SEKOLAH (UPDATED) ---
-        function renderSekolahForms() {
-            const info = globalSettings.infoSekolah || {};
-            const vm = info.visiMisi || {};
-            const sosmed = info.socialMedia || {}; // Get Social Media Data
-            
-            document.getElementById('sekolahForm').innerHTML = `
-                <div class="school-logo-preview-container">
-                    <img src="${info.logo || 'https://placehold.co/150?text=Logo'}" class="school-logo-preview" id="preview-logo-sekolah">
-                    <div style="font-size: 12px; color: #64748B; margin-bottom: 10px;">Logo Sekolah</div>
-                    <button type="button" class="btn btn-info btn-sm" onclick="document.getElementById('f-logo').click()" style="width: 100%; justify-content: center;"><i class="fas fa-upload"></i> Upload Logo</button>
-                    <input type="file" id="f-logo" style="display:none" onchange="handleFileUpload(this, 'sk-logo'); document.getElementById('preview-logo-sekolah').src = window.URL.createObjectURL(this.files[0])">
-                    <input type="hidden" id="sk-logo" value="${info.logo||''}">
-                </div>
-                
-                <div class="school-form-fields">
-                    <div class="form-group full-width"><label>Nama Sekolah</label><input type="text" id="sk-nama" value="${info.namaSekolah||''}" placeholder="Contoh: SDN 1 Merdeka"></div>
-                    <div class="form-group"><label>NPSN</label><input type="text" id="sk-npsn" value="${info.npsn||''}"></div>
-                    <div class="form-group"><label>Alamat Lengkap</label><input type="text" id="sk-alamat" value="${info.alamat||''}"></div>
-                    
-                    <div class="settings-section-title">Kepala Sekolah (Untuk TTD Laporan)</div>
-                    <div class="form-group"><label>Nama Kepala Sekolah</label><input type="text" id="sk-kepsek" value="${info.namaKepsek||''}"></div>
-                    <div class="form-group"><label>NIP Kepala Sekolah</label><input type="text" id="sk-nip" value="${info.nipKepsek||''}"></div>
-                    <div class="form-group full-width"><label>Tempat (Untuk TTD Laporan)</label><input type="text" id="sk-tempat" value="${info.namaTempat||''}" placeholder="Contoh: Jakarta"></div>
-
-                    <!-- UPDATE: Media Sosial & Kontak -->
-                    <div class="settings-section-title">Media Sosial & Kontak Admin</div>
-                    <div class="form-group"><label>Facebook URL</label><input type="text" id="sk-fb" value="${sosmed.facebook||''}" placeholder="https://facebook.com/..."></div>
-                    <div class="form-group"><label>Instagram URL</label><input type="text" id="sk-ig" value="${sosmed.instagram||''}" placeholder="https://instagram.com/..."></div>
-                    <div class="form-group"><label>YouTube Channel URL</label><input type="text" id="sk-yt" value="${sosmed.youtube||''}" placeholder="https://youtube.com/..."></div>
-                    <div class="form-group"><label>WhatsApp Admin (Format: 628...)</label><input type="text" id="sk-wa" value="${sosmed.whatsapp||''}" placeholder="628123456789"></div>
-                </div>
-            `;
-            
-            document.getElementById('infoForm').innerHTML = `
-                <div class="form-group full-width"><label>Visi Sekolah</label><textarea id="sk-visi" rows="3" placeholder="Visi sekolah...">${vm.visi||''}</textarea></div>
-                <div class="form-group full-width"><label>Misi Sekolah</label><textarea id="sk-misi" rows="5" placeholder="Misi sekolah...">${vm.misi||''}</textarea></div>
-                <div class="form-group full-width"><label>Tujuan Sekolah</label><textarea id="sk-tujuan" rows="4" placeholder="Tujuan...">${vm.tujuan||''}</textarea></div>
-                <div class="form-group full-width"><label style="font-weight:700; color:var(--primary-color);">Kata Sambutan Guru (Tampil di Beranda)</label><textarea id="sk-sambutan" rows="4" placeholder="Tuliskan kata sambutan guru disini...">${info.sambutanKepsek||''}</textarea></div>
-            `;
-        }
-
-        async function saveSekolahData() {
-            if(!globalSettings.infoSekolah) globalSettings.infoSekolah = {};
-            const i = globalSettings.infoSekolah;
-            
-            // Simpan Data Umum
-            i.namaSekolah = document.getElementById('sk-nama').value; 
-            i.npsn = document.getElementById('sk-npsn').value; 
-            i.namaKepsek = document.getElementById('sk-kepsek').value; 
-            i.nipKepsek = document.getElementById('sk-nip').value; 
-            i.alamat = document.getElementById('sk-alamat').value; 
-            i.logo = document.getElementById('sk-logo').value; 
-            i.namaTempat = document.getElementById('sk-tempat').value;
-            i.sambutanKepsek = document.getElementById('sk-sambutan').value;
-            
-            // Simpan Visi Misi
-            i.visiMisi = { 
-                visi: document.getElementById('sk-visi').value, 
-                misi: document.getElementById('sk-misi').value, 
-                tujuan: document.getElementById('sk-tujuan').value 
-            };
-
-            // UPDATE: Simpan Media Sosial
-            i.socialMedia = {
-                facebook: document.getElementById('sk-fb').value,
-                instagram: document.getElementById('sk-ig').value,
-                youtube: document.getElementById('sk-yt').value,
-                whatsapp: document.getElementById('sk-wa').value
-            };
-            
-            await supabaseClient.from('pengaturan').upsert({ key:'global', data: globalSettings });
-            showModal("Data Sekolah & Kontak Berhasil Diperbarui!", "Sukses");
-        }
-
-        // --- RENDER PENGATURAN 7KAIH (UPDATED) ---
-        function renderPengaturanForms() {
-            const ibS = globalSettings.ibadahSettings || [false, false, false, false, false, false, false];
-            const ibO = globalSettings.ibadahOptions || {};
-            const pr = globalSettings.predikat || {};
-            const wk = globalSettings.waktu || {};
-            
-            let html = `<div class="settings-section-title"><i class="fas fa-praying-hands"></i> Konfigurasi Ibadah</div>
-                        <div class="ibadah-card-grid">`;
-            
-            for(let i=1; i<=7; i++) {
-                const isActive = ibS[i-1];
-                html += `
-                <div class="ibadah-card ${isActive ? 'active' : ''}">
-                    <div class="ibadah-header">
-                        <div class="ibadah-title">
-                            <div class="ibadah-icon">${i}</div>
-                            Ibadah ${i}
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="ib-check-${i}" ${isActive ? 'checked' : ''} onchange="this.closest('.ibadah-card').classList.toggle('active')">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="form-group" style="margin-bottom:0">
-                        <label style="font-size:11px;">Opsi Pilihan (Pisahkan dengan baris baru)</label>
-                        <textarea id="ib-opt-${i}" rows="3" style="font-size:12px; height:80px;">${(ibO['ibadah'+i]||[]).join('\n')}</textarea>
-                    </div>
-                </div>`;
-            }
-            html += `</div>`;
-
-            html += `<div class="settings-section-title" style="margin-top:40px;"><i class="fas fa-clock"></i> Batas Waktu & Predikat</div>
-            
-            <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
-                <div class="card" style="margin:0; background:#F8FAFC; border:1px solid #E2E8F0;">
-                    <div class="form-group"><label>Batas Bangun Pagi</label><input type="time" id="wk-bangun" value="${wk.bangunPagi||'05:00'}"></div>
-                </div>
-                <div class="card" style="margin:0; background:#F8FAFC; border:1px solid #E2E8F0;">
-                    <div class="form-group"><label>Batas Tidur Malam</label><input type="time" id="wk-tidur" value="${wk.tidurCepat||'21:00'}"></div>
-                </div>
-            </div>
-
-            <div class="predikat-grid">
-                <div class="predikat-card taat">
-                    <div class="predikat-icon"><i class="fas fa-award"></i></div>
-                    <h4 style="margin-bottom:10px;">Predikat Tinggi</h4>
-                    <div style="margin-bottom:5px; font-size:12px;">Minimal Nilai (%)</div>
-                    <input type="number" id="pr-t-val" class="predikat-input form-group" value="${pr.taatValue||90}" style="width:80px; display:inline-block; margin-bottom:10px;">
-                    <div style="margin-bottom:5px; font-size:12px;">Sebutan</div>
-                    <input type="text" id="pr-t-text" class="predikat-input form-group" value="${pr.taatText||'Anak Hebat'}">
-                </div>
-                <div class="predikat-card terbiasa">
-                    <div class="predikat-icon"><i class="fas fa-star-half-alt"></i></div>
-                    <h4 style="margin-bottom:10px;">Predikat Sedang</h4>
-                    <div style="margin-bottom:5px; font-size:12px;">Minimal Nilai (%)</div>
-                    <input type="number" id="pr-b-val" class="predikat-input form-group" value="${pr.terbiasaValue||50}" style="width:80px; display:inline-block; margin-bottom:10px;">
-                    <div style="margin-bottom:5px; font-size:12px;">Sebutan</div>
-                    <input type="text" id="pr-b-text" class="predikat-input form-group" value="${pr.terbiasaText||'Terbiasa'}">
-                </div>
-                <div class="predikat-card kurang">
-                    <div class="predikat-icon"><i class="fas fa-exclamation-circle"></i></div>
-                    <h4 style="margin-bottom:10px;">Predikat Rendah</h4>
-                    <div style="margin-bottom:5px; font-size:12px;">Di bawah standar</div>
-                    <div style="height: 48px; display:flex; align-items:center; justify-content:center; opacity:0.7;">Otomatis</div>
-                    <div style="margin-bottom:5px; font-size:12px;">Sebutan</div>
-                    <input type="text" id="pr-k-text" class="predikat-input form-group" value="${pr.kurangText||'Kurang'}">
-                </div>
-            </div>`;
-            
-            document.getElementById('pengaturan-container').innerHTML = html;
-        }
-
-        async function saveGlobalSettings() {
-            const ibS = []; const ibO = {};
-            for(let i=1; i<=7; i++) { 
-                ibS.push(document.getElementById(`ib-check-${i}`).checked); 
-                ibO['ibadah'+i] = document.getElementById(`ib-opt-${i}`).value.split('\n').filter(v=>v.trim()); 
-            }
-            
-            globalSettings.ibadahSettings = ibS; 
-            globalSettings.ibadahOptions = ibO;
-            globalSettings.waktu = { 
-                bangunPagi: document.getElementById('wk-bangun').value, 
-                tidurCepat: document.getElementById('wk-tidur').value 
-            };
-            globalSettings.predikat = { 
-                taatText: document.getElementById('pr-t-text').value, 
-                taatValue: document.getElementById('pr-t-val').value, 
-                terbiasaText: document.getElementById('pr-b-text').value, 
-                terbiasaValue: document.getElementById('pr-b-val').value, 
-                kurangText: document.getElementById('pr-k-text').value 
-            };
-            
-            await supabaseClient.from('pengaturan').upsert({ key:'global', data: globalSettings });
-            showModal("Pengaturan Sistem Berhasil Disimpan!", "Sukses");
-        }
-
         // --- OTHER FUNCTIONS ---
         
         async function loadLaporanData() {
@@ -725,6 +620,25 @@
             try {
                 const { data: laporanData, error } = await supabaseClient.from('laporan').select('*').eq('kelas', currentUser.kelas).order('created_at', { ascending: false });
                 if (error) throw error;
+                
+                // Map snake_case to camelCase for Charts Logic (consistency with Admin logic)
+                rawLaporanData = laporanData.map(d => ({
+                    ...d,
+                    namaSiswa: d.nama_siswa,
+                    tanggalKegiatan: d.tanggal_kegiatan,
+                    bangunPagi: d.bangun_pagi,
+                    tidurCepat: d.tidur_cepat,
+                    rincianOlahraga: d.rincian_olahraga,
+                    tempatBelajar: d.tempat_belajar,
+                    materiBelajar: d.materi_belajar,
+                    kegiatanMasyarakat: d.kegiatan_masyarakat,
+                    makananKarbo: d.makanan_karbo,
+                    makananSayur: d.makanan_sayur,
+                    makananSusu: d.makanan_susu,
+                    makananLauk: d.makanan_lauk,
+                    makananAir: d.makanan_air
+                }));
+
                 const headers = ["ID", "Nama Siswa", "Tanggal", "I1", "I2", "I3", "I4", "I5", "I6", "I7", "Pagi", "Tidur", "Olahraga", "Belajar", "Materi", "Masyarakat", "Karbo", "Sayur", "Susu", "Protein", "Air"];
                 const dataArray = [headers];
                 laporanData.forEach(d => {
@@ -746,6 +660,10 @@
                 filteredData = [fullData[0], ...result];
             }
             populateLaporanTable(activeLaporanView);
+            
+            // Re-render charts if view is chart
+            if (activeLaporanView === 'grafik') renderGuruGlobalChart();
+            if (activeLaporanView === 'analisis') renderGuruAnalisis();
         }
 
         function switchLaporanView(view) {
@@ -755,8 +673,232 @@
             const btnPdf = document.getElementById('btnDownloadRekap'); 
             if(btnPdf) btnPdf.style.display = (view === 'rekap' || view === 'predikat') ? 'inline-flex' : 'none';
 
-            populateLaporanTable(view);
+            // VISIBILITY TOGGLE (Chart vs Table)
+            const tableContainer = document.getElementById('laporan-table-container');
+            const grafikContainer = document.getElementById('grafik-view');
+            const analisisContainer = document.getElementById('analisis-view');
+
+            tableContainer.style.display = 'none';
+            grafikContainer.style.display = 'none';
+            analisisContainer.style.display = 'none';
+
+            if (view === 'grafik') {
+                grafikContainer.style.display = 'block';
+                renderGuruGlobalChart();
+            } else if (view === 'analisis') {
+                analisisContainer.style.display = 'block';
+                renderGuruAnalisis();
+            } else {
+                tableContainer.style.display = 'block';
+                populateLaporanTable(view);
+            }
         }
+
+        // --- CHART FUNCTIONS (ADAPTED FROM ADMIN) ---
+
+        function processGuruClassData() {
+            const { ibadahSettings = [], waktu = {}, predikat = {} } = globalSettings;
+            const ibadahThreshold = ibadahSettings.filter(s => s).length;
+            const bbp = waktu.bangunPagi || '05:00';
+            const btc = waktu.tidurCepat || '21:00';
+            
+            // Filter raw data based on date if filter applied (Basic implementation uses full rawData for now, but can be improved)
+            // For now using all raw data for charts as date filter logic for objects needs to be mirrored
+            let processedData = rawLaporanData;
+            const startDate = document.getElementById('rep-startDate').value;
+            const endDate = document.getElementById('rep-endDate').value;
+            
+            if (startDate && endDate) {
+                const start = new Date(startDate); const end = new Date(endDate);
+                processedData = rawLaporanData.filter(d => {
+                    const rowDate = new Date(d.tanggalKegiatan);
+                    return rowDate >= start && rowDate <= end;
+                });
+            }
+
+            const studentRekap = {};
+            processedData.forEach(d => {
+                if (!d.namaSiswa) return;
+                const key = d.namaSiswa; // Only one class, use name as key
+                if (!studentRekap[key]) studentRekap[key] = { totalHari: 0, beribadah: 0, tidurCepat: 0, bangunPagi: 0, olahraga: 0, belajar: 0, bermasyarakat: 0, makanBergizi: 0 };
+                
+                const data = studentRekap[key]; 
+                data.totalHari++; 
+                
+                let ibadahPoint = 0;
+                for(let j=0; j<7; j++) { if(ibadahSettings[j] && String(d[`ibadah${j+1}`]||'').trim()) ibadahPoint++; }
+                if(ibadahThreshold > 0 && ibadahPoint >= ibadahThreshold) data.beribadah++;
+                
+                if (d.bangunPagi && d.bangunPagi <= bbp) data.bangunPagi++; 
+                if (d.tidurCepat && d.tidurCepat <= btc) data.tidurCepat++;
+                if (String(d.rincianOlahraga || '').trim()) data.olahraga++; 
+                if (String(d.tempatBelajar || '').trim() && String(d.materiBelajar || '').trim()) data.belajar++;
+                if (String(d.kegiatanMasyarakat || '').trim()) data.bermasyarakat++; 
+                if (d.makananKarbo && d.makananSayur && d.makananSusu && d.makananLauk && d.makananAir) data.makanBergizi++;
+            });
+
+            // Aggregate Class Data (Taat, Terbiasa, Kurang)
+            const rekap = {
+                beribadah: {}, tidurCepat: {}, bangunPagi: {}, olahraga: {}, belajar: {}, bermasyarakat: {}, makanBergizi: {}
+            };
+            const keys = ["beribadah", "tidurCepat", "bangunPagi", "olahraga", "belajar", "bermasyarakat", "makanBergizi"];
+            
+            Object.values(studentRekap).forEach(data => {
+                keys.forEach(catKey => {
+                    let p_text = predikat.kurangText || 'Perlu Peningkatan';
+                    if (data.totalHari > 0) { 
+                        const prob = (data[catKey] / data.totalHari) * 100;
+                        if (prob >= (predikat.taatValue || 85)) { p_text = predikat.taatText || 'Anak Hebat'; }
+                        else if (prob >= (predikat.terbiasaValue || 70)) { p_text = predikat.terbiasaText || 'Terbiasa'; }
+                    }
+                    rekap[catKey][p_text] = (rekap[catKey][p_text] || 0) + 1;
+                });
+            });
+
+            return { rekap, processedData };
+        }
+
+        function renderGuruGlobalChart() {
+            const { rekap } = processGuruClassData();
+            const { predikat = {} } = globalSettings; 
+            const t = predikat.taatText || 'Anak Hebat'; 
+            const b = predikat.terbiasaText || 'Terbiasa'; 
+            const k = predikat.kurangText || 'Perlu Peningkatan';
+            
+            const labels = ["Beribadah", "Tidur Cepat", "Bangun Pagi", "Olahraga", "Belajar", "Bermasyarakat", "Makan Bergizi"];
+            const keys = ["beribadah", "tidurCepat", "bangunPagi", "olahraga", "belajar", "bermasyarakat", "makanBergizi"];
+            const tData = [], bData = [], kData = [];
+            
+            keys.forEach(key => {
+                tData.push(rekap[key][t] || 0);
+                bData.push(rekap[key][b] || 0);
+                kData.push(rekap[key][k] || 0);
+            });
+
+            const ctx = document.getElementById('guruGlobalChart').getContext('2d');
+            if (chartInstances.global) chartInstances.global.destroy();
+            
+            chartInstances.global = new Chart(ctx, { 
+                type: 'bar', 
+                data: { 
+                    labels: labels, 
+                    datasets: [
+                        { label: t, data: tData, backgroundColor: 'rgba(22, 163, 74, 0.7)' }, 
+                        { label: b, data: bData, backgroundColor: 'rgba(245, 158, 11, 0.7)' }, 
+                        { label: k, data: kData, backgroundColor: 'rgba(239, 68, 68, 0.7)' }
+                    ] 
+                }, 
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
+                    plugins: { tooltip: { mode: 'index' } }
+                } 
+            });
+        }
+
+        function renderGuruAnalisis() {
+            const { processedData: laporanData } = processGuruClassData();
+            const { ibadahSettings, ibadahOptions, waktu = {} } = globalSettings;
+            
+            // 1. Ibadah Breakdown
+            const container = document.getElementById('analisis-ibadah-rinci-container');
+            container.innerHTML = '';
+
+            for (let i = 1; i <= 7; i++) {
+                if (!ibadahSettings[i - 1]) continue;
+                const ibadahKey = `ibadah${i}`; const options = ibadahOptions[ibadahKey] || [];
+                const counts = {}; options.forEach(opt => counts[opt] = 0); let tidakMelaksanakan = 0;
+                
+                laporanData.forEach(l => { const v = l[ibadahKey]; if (v && options.includes(v)) { counts[v]++; } else { tidakMelaksanakan++; } });
+                
+                const chartLabels = []; const chartData = []; 
+                const backgroundColors = ['rgba(75, 192, 192, 0.7)','rgba(255, 159, 64, 0.7)','rgba(255, 205, 86, 0.7)','rgba(54, 162, 235, 0.7)','rgba(153, 102, 255, 0.7)','rgba(255, 99, 132, 0.7)'];
+                
+                for (const option in counts) { if (counts[option] > 0) { chartLabels.push(option); chartData.push(counts[option]); } }
+                if (tidakMelaksanakan > 0) { chartLabels.push('Tidak Melaksanakan'); chartData.push(tidakMelaksanakan); }
+                
+                if (chartData.length === 0) continue;
+                
+                const wrapper = document.createElement('div'); wrapper.className = 'chart-wrapper'; 
+                wrapper.innerHTML = `<div class="chart-title">Detail Ibadah ${i}</div>`;
+                const canvas = document.createElement('canvas'); wrapper.appendChild(canvas); container.appendChild(wrapper);
+                
+                new Chart(canvas.getContext('2d'), { 
+                    type: 'doughnut', 
+                    data: { labels: chartLabels, datasets: [{ data: chartData, backgroundColor: backgroundColors, borderWidth: 1 }] }, 
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } } 
+                });
+            }
+
+            // 2. Bangun Pagi (Pie)
+            const bbp = waktu.bangunPagi || '05:00';
+            let bpt = 0;
+            laporanData.forEach(l => { if (l.bangunPagi && l.bangunPagi <= bbp) bpt++; });
+            renderChart('guruBangunChart', 'pie', ['Tepat Waktu', 'Terlambat'], [bpt, laporanData.length - bpt], ['#2ECC71', '#E74C3C']);
+
+            // 3. Tidur Cepat (Pie)
+            const btc = waktu.tidurCepat || '21:00';
+            let tct = 0;
+            laporanData.forEach(l => { if (l.tidurCepat && l.tidurCepat <= btc) tct++; });
+            renderChart('guruTidurChart', 'pie', ['Tepat Waktu', 'Terlambat'], [tct, laporanData.length - tct], ['#3498DB', '#E74C3C']);
+
+            // 4. Olahraga (Donut)
+            let olg = 0;
+            laporanData.forEach(l => { if (l.rincianOlahraga && l.rincianOlahraga.trim()) olg++; });
+            renderChart('guruOlahragaChart', 'doughnut', ['Melakukan', 'Tidak'], [olg, laporanData.length - olg], ['#F1C40F', '#95A5A6']);
+
+            // 5. Bermasyarakat (Donut)
+            let masy = 0;
+            laporanData.forEach(l => { if (l.kegiatanMasyarakat && l.kegiatanMasyarakat.trim()) masy++; });
+            renderChart('guruMasyarakatChart', 'doughnut', ['Melakukan', 'Tidak'], [masy, laporanData.length - masy], ['#9B59B6', '#95A5A6']);
+
+            // 6. Belajar (Donut)
+            let bel = 0;
+            laporanData.forEach(l => { if ((l.tempatBelajar && l.tempatBelajar.trim()) || (l.materiBelajar && l.materiBelajar.trim())) bel++; });
+            renderChart('guruBelajarChart', 'doughnut', ['Belajar', 'Tidak'], [bel, laporanData.length - bel], ['#34495E', '#95A5A6']);
+
+            // 7. Makanan Sehat Detail (Horizontal Bar)
+            let mCounts = { Karbo: 0, Sayur: 0, Susu: 0, Lauk: 0, Air: 0 };
+            laporanData.forEach(l => {
+                if (l.makananKarbo) mCounts.Karbo++;
+                if (l.makananSayur) mCounts.Sayur++;
+                if (l.makananSusu) mCounts.Susu++;
+                if (l.makananLauk) mCounts.Lauk++;
+                if (l.makananAir) mCounts.Air++;
+            });
+
+            const ctxMakan = document.getElementById('guruMakananChart').getContext('2d');
+            if (chartInstances['guruMakananChart']) chartInstances['guruMakananChart'].destroy();
+            chartInstances['guruMakananChart'] = new Chart(ctxMakan, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(mCounts),
+                    datasets: [{
+                        label: 'Jumlah Siswa',
+                        data: Object.values(mCounts),
+                        backgroundColor: ['#e67e22', '#2ecc71', '#ecf0f1', '#e74c3c', '#3498db'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', 
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        function renderChart(id, type, labels, data, colors) {
+            const ctx = document.getElementById(id).getContext('2d');
+            if (chartInstances[id]) chartInstances[id].destroy();
+            chartInstances[id] = new Chart(ctx, {
+                type: type,
+                data: { labels: labels, datasets: [{ label: 'Jumlah', data: data, backgroundColor: colors }] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
 
         function populateLaporanTable(viewType) {
             const thead = document.querySelector("#laporanTable thead");
