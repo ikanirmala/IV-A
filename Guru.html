@@ -1532,7 +1532,6 @@
         }
 
         async function saveGaleri() {
-            // UPDATED: Now saves 10 items
             const gal = []; 
             for(let i=1; i<=10; i++) { 
                 gal.push(document.getElementById(`gal-url-${i}`).value); 
@@ -1599,7 +1598,6 @@
             form.innerHTML = pengumumanFormHtml + visualKelasHtml;
         }
 
-        // NEW: Fungsi untuk menyimpan data Pengumuman & Visual Kelas
         async function saveKelasVisual() {
             if(!globalSettings.infoSekolah) globalSettings.infoSekolah = {};
             
@@ -1638,15 +1636,46 @@
             const tbody = document.querySelector("#siswaTable tbody"); tbody.innerHTML = '';
             const { data } = await supabaseClient.from('siswa').select('*').eq('kelas', currentUser.kelas);
             (data||[]).forEach(s => {
-                // ADDED: Menampilkan jenis_kelamin di tabel
-                tbody.innerHTML += `<tr><td><img src="${s.foto||'https://placehold.co/30'}" style="width:35px;height:35px;border-radius:50%;object-fit:cover;border:1px solid #ddd"></td><td>${s.nama}</td><td>${s.nomor_induk}</td><td>${s.jenis_kelamin || '-'}</td><td>${s.agama}</td><td><button class="action-btn edit" onclick="openSiswaModal('${s.id}')"><i class="fas fa-edit"></i></button> <button class="action-btn delete" onclick="deleteSiswa('${s.id}')"><i class="fas fa-trash"></i></button></td></tr>`;
+                tbody.innerHTML += `<tr><td><img src="${s.foto||'https://lh3.googleusercontent.com/d/1ksDmPJziA5EXVCk8USZcWXdpLSg3smh_'}" style="width:35px;height:35px;border-radius:50%;object-fit:cover;border:1px solid #ddd"></td><td>${s.nama}</td><td>${s.nomor_induk}</td><td>${s.jenis_kelamin || '-'}</td><td>${s.agama}</td><td><button class="action-btn edit" onclick="openSiswaModal('${s.id}')"><i class="fas fa-edit"></i></button> <button class="action-btn delete" onclick="deleteSiswa('${s.id}')"><i class="fas fa-trash"></i></button></td></tr>`;
             });
         }
         
-        // ADDED: jenisKelamin ke format Excel
-        function downloadSiswaExcel() { 
-            const ws = XLSX.utils.json_to_sheet([{nama:"Nama Siswa", nomorInduk:"12345", jenisKelamin: "Laki-laki", agama:"Islam", foto:""}]); 
-            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Siswa"); XLSX.writeFile(wb, "Format_Siswa.xlsx"); 
+        async function downloadSiswaExcel() { 
+            const btn = document.querySelector('button[onclick="downloadSiswaExcel()"]');
+            const originalText = btn ? btn.innerHTML : '';
+            if(btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memuat...'; btn.disabled = true; }
+
+            try {
+                const { data } = await supabaseClient.from('siswa').select('*').eq('kelas', currentUser.kelas).order('nama', { ascending: true });
+                
+                let excelData = [];
+
+                if (data && data.length > 0) {
+                    excelData = data.map(s => ({
+                        nama: s.nama,
+                        nomorInduk: s.nomor_induk, 
+                        jenisKelamin: s.jenis_kelamin || '',
+                        agama: s.agama,
+                        foto: s.foto || ''
+                    }));
+                } else {
+                    excelData = [
+                        {nama: "Bangbin", nomorInduk: "6281310051985", jenisKelamin: "Laki-laki", agama: "Islam", foto: "https://lh3.googleusercontent.com/d/1ksDmPJziA5EXVCk8USZcWXdpLSg3smh_"},
+                        {nama: "Aura Kasih", nomorInduk: "67890", jenisKelamin: "Perempuan", agama: "Islam", foto: "https://akcdn.detik.net.id/customthumb/2008/11/25/229/aura-dalem.jpg?w=700&q=90"}
+                    ];
+                }
+
+                const ws = XLSX.utils.json_to_sheet(excelData); 
+                const wb = XLSX.utils.book_new(); 
+                XLSX.utils.book_append_sheet(wb, ws, "BangbinSiswa"); 
+                XLSX.writeFile(wb, `Bangbin_Siswa_${currentUser.kelas}.xlsx`); 
+
+            } catch (err) {
+                console.error(err);
+                showModal("Gagal mengunduh data.", "Error");
+            } finally {
+                if(btn) { btn.innerHTML = originalText; btn.disabled = false; }
+            }
         }
         
         async function uploadSiswaExcel() {
@@ -1654,12 +1683,11 @@
             const r = new FileReader();
             r.onload = async (e) => {
                 const wb = XLSX.read(e.target.result, {type:'binary'}); const d = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-                // ADDED: Map jenisKelamin dari Excel ke Database
                 for(const row of d) { 
                     await supabaseClient.from('siswa').insert([{
                         nama: row.nama, 
                         nomor_induk: row.nomorInduk, 
-                        jenis_kelamin: row.jenisKelamin, // Mapping
+                        jenis_kelamin: row.jenisKelamin, 
                         agama: row.agama, 
                         foto: row.foto, 
                         kelas: currentUser.kelas
@@ -1676,7 +1704,6 @@
                 if (data) { 
                     document.getElementById('siswaNama').value = data.nama; 
                     document.getElementById('siswaInduk').value = data.nomor_induk; 
-                    // ADDED: Populate jenis kelamin saat edit
                     document.getElementById('siswaGender').value = data.jenis_kelamin || '';
                     document.getElementById('siswaAgama').value = data.agama; 
                     document.getElementById('siswaFoto').value = data.foto||''; 
@@ -1690,7 +1717,6 @@
             const p = { 
                 nama: document.getElementById('siswaNama').value, 
                 nomor_induk: document.getElementById('siswaInduk').value, 
-                // ADDED: Ambil value jenis kelamin
                 jenis_kelamin: document.getElementById('siswaGender').value,
                 agama: document.getElementById('siswaAgama').value, 
                 foto: document.getElementById('siswaFoto').value, 
@@ -1756,21 +1782,18 @@
             const username = document.getElementById('profile-username').value;
             const password = document.getElementById('profile-password').value;
             const kelas = document.getElementById('profile-kelas').value;
-            const foto = document.getElementById('profile-foto-url').value; // NEW
+            const foto = document.getElementById('profile-foto-url').value; 
 
             if(!nama || !username || !password || !kelas) return showModal("Semua kolom harus diisi!");
 
             try {
-                // NEW: Added 'foto' to update query
                 const { error } = await supabaseClient.from('users').update({ nama, username, password, kelas, foto }).eq('id', currentUser.id);
                 if(error) throw error;
                 
-                // Update Local Data
                 currentUser.nama = nama; currentUser.username = username; currentUser.password = password; currentUser.kelas = kelas;
-                currentUser.foto = foto; // NEW
+                currentUser.foto = foto; 
                 sessionStorage.setItem('guruUser', JSON.stringify(currentUser));
                 
-                // Refresh UI Elements
                 document.getElementById('guru-name-display').textContent = `${currentUser.nama} (${currentUser.kelas})`;
                 document.querySelector('.sidebar-header h3').innerHTML = `<i class="fas fa-school"></i> ${currentUser.kelas}`;
                 document.getElementById('span-kelas').textContent = currentUser.kelas;
@@ -1784,17 +1807,13 @@
         // --- BACKUP & RESTORE LOGIC (UPDATED) ---
 
         async function backupSystem() {
-            // Mengambil tombol untuk indikator loading
             const btn = document.querySelector('button[onclick="backupSystem()"]');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
             btn.disabled = true;
 
             try {
-                // Ambil data Siswa (Raw Data)
                 const { data: siswaData } = await supabaseClient.from('siswa').select('*').eq('kelas', currentUser.kelas);
-                
-                // Ambil data Laporan (Raw Data, bukan fullData tabel agar bisa di-restore dengan sempurna)
                 const { data: laporanData } = await supabaseClient.from('laporan').select('*').eq('kelas', currentUser.kelas);
 
                 const backup = { 
@@ -1805,7 +1824,7 @@
                         kelas: currentUser.kelas
                     },
                     settings: globalSettings, 
-                    laporan: laporanData || [], // Simpan data mentah
+                    laporan: laporanData || [], 
                     siswa: siswaData || []
                 };
                 
@@ -1828,7 +1847,6 @@
             const file = input.files[0];
             if (!file) return;
 
-            // Reset input agar file yang sama bisa dipilih lagi jika gagal/batal
             input.value = '';
 
             showConfirmModal("Apakah Anda yakin ingin memulihkan data dari file ini? Data yang ada mungkin akan diperbarui atau ditimpa.", async () => {
