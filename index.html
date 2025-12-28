@@ -172,8 +172,17 @@
         .vision-box { 
             background: white; padding: 60px; border-radius: 30px; 
             box-shadow: var(--shadow-md); border-left: 10px solid var(--secondary); 
-            position: relative; 
+            position: relative;
+            /* UPDATE: Menambahkan cursor pointer dan transisi untuk interaktivitas */
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+        /* UPDATE: Hover effect untuk vision box */
+        .vision-box:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
         .vision-box i.bg-icon { 
             position: absolute; right: 30px; bottom: 30px; font-size: 120px; 
             color: rgba(0,0,0,0.03); transform: rotate(-15deg); 
@@ -465,7 +474,8 @@
                 </div>
                 
                 <!-- Box Visi Misi -->
-                <div class="vision-box reveal delay-200">
+                <!-- UPDATE: Menambahkan onclick event untuk membuka modal Visi Misi -->
+                <div class="vision-box reveal delay-200" onclick="openVisiMisiModal()">
                     <i class="fas fa-quote-right bg-icon"></i>
                     <h4><i class="fas fa-bullseye"></i> Visi & Misi Sekolah</h4>
                     <div id="visi-text" class="vision-text">Memuat visi...</div>
@@ -638,6 +648,10 @@
 
         document.querySelectorAll('.reveal, .reveal-scale').forEach(el => observer.observe(el));
 
+        // Variable Global untuk Visi Misi
+        let globalVisiContent = "";
+        let globalMisiContent = "";
+
         // Init Data
         window.addEventListener('load', async () => {
             await loadSchoolInfo();
@@ -665,9 +679,16 @@
                     if(info.namaSekolah) document.querySelector('title').textContent = `WEB ${info.namaSekolah}`;
                     if(info.namaSekolah) document.getElementById('hero-title').innerHTML = `WEB ${info.namaSekolah}<br>KELAS IV-A`;
                     
-                    // Visi Misi Short
+                    // Visi Misi - STORE & DISPLAY
+                    globalVisiContent = vm.visi || "Visi belum diatur.";
+                    globalMisiContent = vm.misi || "Misi belum diatur.";
+                    
                     document.getElementById('visi-text').textContent = vm.visi ? `"${vm.visi}"` : "Visi belum diatur.";
-                    document.getElementById('misi-text').textContent = vm.misi ? vm.misi.substring(0, 100) + '...' : "Misi belum diatur.";
+                    // Potong misi untuk preview di card
+                    let misiPreview = vm.misi || "Misi belum diatur.";
+                    if(misiPreview.length > 100) misiPreview = misiPreview.substring(0, 100) + '... (Klik untuk selengkapnya)';
+                    document.getElementById('misi-text').textContent = misiPreview;
+
                     if(info.sambutanKepsek) document.getElementById('sambutan-text').textContent = `"${info.sambutanKepsek}"`;
 
                     // Info Visual (Images 3 Kotak)
@@ -929,6 +950,30 @@
             modalImg.style.display = imgSrc ? 'block' : 'none';
             modalHtml.innerHTML = `<p>${desc}</p>`;
             modalAction.innerHTML = '';
+            modal.style.display = 'block';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+
+        // Fungsi Khusus untuk Membuka Modal Visi Misi
+        function openVisiMisiModal() {
+            modalTitle.textContent = "Visi & Misi Sekolah";
+            modalImg.style.display = 'none'; // Tidak perlu gambar header
+            
+            // Format Konten Visi & Misi di dalam Modal
+            const contentHtml = `
+                <div style="text-align: left;">
+                    <h4 style="color: var(--primary); margin-bottom: 10px; font-weight: 700; font-size: 1.2rem;">Visi</h4>
+                    <p style="margin-bottom: 25px; line-height: 1.8; font-style: italic; color: #333;">"${globalVisiContent}"</p>
+                    
+                    <div style="width: 100%; height: 1px; background: #eee; margin-bottom: 25px;"></div>
+                    
+                    <h4 style="color: var(--primary); margin-bottom: 10px; font-weight: 700; font-size: 1.2rem;">Misi</h4>
+                    <p style="white-space: pre-line; line-height: 1.8; color: #555;">${globalMisiContent}</p>
+                </div>
+            `;
+            
+            modalHtml.innerHTML = contentHtml;
+            modalAction.innerHTML = ''; // Tidak ada tombol aksi khusus
             modal.style.display = 'block';
             setTimeout(() => modal.classList.add('show'), 10);
         }
