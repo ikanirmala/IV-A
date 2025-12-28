@@ -187,7 +187,7 @@
         .vision-box h4 { color: var(--primary); font-size: 1.6rem; margin-bottom: 25px; display: flex; align-items: center; gap: 15px; }
         .vision-text { color: #525f7f; line-height: 2; margin-bottom: 30px; font-size: 1.1rem; }
 
-        /* --- SECTION INFO KELAS (PARALLAX & 3 GRID) --- */
+        /* --- SECTION PARALLAX GENERAL --- */
         .parallax-section {
             background-image: url('https://placehold.co/1920x1080?text=Background');
             background-attachment: fixed;
@@ -198,7 +198,7 @@
         }
         .parallax-section .parallax-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.5); 
+            background: rgba(15, 23, 42, 0.5);
             z-index: 1;
         }
         .parallax-section .section-title { color: white; }
@@ -481,7 +481,7 @@
             <div class="info-grid">
                 <!-- KOTAK 1: JADWAL PELAJARAN -->
                 <div class="preview-card reveal delay-100" onclick="openModal('Jadwal Pelajaran', document.getElementById('img-jadwal-src').src, 'Jadwal pelajaran berlaku untuk semester ini.')">
-                    <img src="https://placehold.co/600x400?text=Jadwal+Pelajaran" id="img-jadwal-src" alt="Jadwal">
+                    <img src="https://lh3.googleusercontent.com/d/13ig-S7TCdp_AVdPnld-9IJ-mnG8loPK3" id="img-jadwal-src" alt="Jadwal">
                     <div class="preview-overlay">
                         <h3><i class="fas fa-calendar-alt"></i> Jadwal Pelajaran</h3>
                         <p>Klik untuk memperbesar</p>
@@ -542,14 +542,16 @@
         </div>
     </section>
 
-    <!-- 6. DAFTAR SISWA -->
-    <section style="background: #fff;">
+    <!-- 6. DAFTAR SISWA (PARALLAX + BACKGROUND GALERI #3) -->
+    <!-- ID: student-section untuk target JS background -->
+    <section id="student-section" class="parallax-section">
+        <div class="parallax-overlay"></div>
         <div class="container">
-            <h2 class="section-title reveal">Siswa Kelas 4A</h2>
-            <p style="text-align: center; color: #666; margin-bottom: 50px; margin-top: -50px;">Wajah-wajah ceria generasi penerus bangsa.</p>
+            <h2 class="section-title reveal" style="color: white;">Siswa Kelas 4A</h2>
+            <p style="text-align: center; color: #e2e8f0; margin-bottom: 50px; margin-top: -50px; font-weight: 300;">Wajah-wajah ceria generasi penerus bangsa.</p>
             
             <div id="student-container" class="student-grid">
-                <div style="grid-column: 1/-1; text-align: center; color: #8898aa;">
+                <div style="grid-column: 1/-1; text-align: center; color: #cbd5e1;">
                     <i class="fas fa-spinner fa-spin"></i> Memuat Data Siswa...
                 </div>
             </div>
@@ -684,13 +686,26 @@
                     // --- LOAD BACKGROUND PARALLAX ---
                     const validGallery = galeri.filter(img => img && img.trim() !== "");
                     
+                    // Background Hero (Gallery #1)
                     if(validGallery.length > 0) {
                         document.querySelector('.hero').style.backgroundImage = `url('${validGallery[0]}')`;
-                        
-                        if(validGallery.length > 1) {
-                            document.getElementById('info-kelas-section').style.backgroundImage = `url('${validGallery[1]}')`;
-                        } else {
-                            document.getElementById('info-kelas-section').style.backgroundImage = `url('${validGallery[0]}')`;
+                    }
+                    
+                    // Background Info Kelas (Gallery #2)
+                    if(validGallery.length > 1) {
+                        document.getElementById('info-kelas-section').style.backgroundImage = `url('${validGallery[1]}')`;
+                    } else if (validGallery.length > 0) {
+                        document.getElementById('info-kelas-section').style.backgroundImage = `url('${validGallery[0]}')`;
+                    }
+
+                    // Background Section Siswa (Gallery #3)
+                    const studentSection = document.getElementById('student-section');
+                    if (studentSection) {
+                        if (validGallery.length > 2) {
+                             studentSection.style.backgroundImage = `url('${validGallery[2]}')`;
+                        } else if (validGallery.length > 0) {
+                             // Fallback ke index 0 jika index 2 tidak ada
+                             studentSection.style.backgroundImage = `url('${validGallery[0]}')`;
                         }
                     }
 
@@ -838,7 +853,8 @@
                 .order('nama', { ascending: true });
 
             if (error || !students || students.length === 0) {
-                container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #8898aa; padding: 20px;">Belum ada data siswa untuk Kelas 4A.</div>`;
+                // UPDATE: Color white/light-gray karena background gelap
+                container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #cbd5e1; padding: 20px;">Belum ada data siswa untuk Kelas 4A.</div>`;
                 return;
             }
 
@@ -846,8 +862,9 @@
                 const safeName = s.nama.replace(/'/g, "\\'");
                 const safeFoto = s.foto || 'https://placehold.co/150?text=Siswa';
                 
+                // UPDATED: Mengganti NIS dengan Jenis Kelamin di Modal
                 return `
-                <div class="student-card reveal delay-${(idx % 5) * 100}" onclick="openModal('${safeName}', '${safeFoto}', 'Siswa Kelas 4A - ${s.nomor_induk ? 'NIS: ' + s.nomor_induk : ''}')">
+                <div class="student-card reveal delay-${(idx % 5) * 100}" onclick="openModal('${safeName}', '${safeFoto}', 'Siswa Kelas 4A - Jenis Kelamin: ${s.jenis_kelamin || '-'}')">
                     <div class="student-img-wrapper">
                         <img src="${safeFoto}" alt="${s.nama}" class="student-img">
                     </div>
