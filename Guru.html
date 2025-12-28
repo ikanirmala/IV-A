@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link id="favicon" rel="icon" type="image/x-icon" href="https://lh3.googleusercontent.com/d/16rll5zsRdwTbR3nF_NmPKwY51tg4tnOn">
-    <title>IKA NIRMALA</title>
+    <title>Ika Nirmala</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
@@ -37,11 +37,42 @@
         .sidebar { width: 260px; background-color: white; color: var(--dark-color); display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 100; box-shadow: 2px 0 10px rgba(0,0,0,0.05); transition: 0.3s; }
         .sidebar-header { padding: 30px 20px; text-align: center; border-bottom: 1px solid var(--background-color); }
         .sidebar-header h3 { font-weight: 700; color: var(--primary-color); letter-spacing: 1px; }
-        .sidebar-nav { flex-grow: 1; padding: 20px 0; overflow-y: auto; }
-        .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 12px 25px; color: var(--secondary-color); text-decoration: none; transition: 0.3s; font-weight: 500; font-size: 14px; border-left: 4px solid transparent; }
-        .sidebar-nav a:hover, .sidebar-nav a.active { background: #F0F7FF; color: var(--primary-color); border-left-color: var(--primary-color); }
-        .sidebar-nav a i { width: 20px; text-align: center; }
+        .sidebar-nav { flex-grow: 1; padding: 20px 0; overflow-y: auto; perspective: 1000px; }
+        
+        .sidebar-nav .nav-link { 
+            display: flex; align-items: center; gap: 12px; padding: 12px 25px; 
+            color: var(--secondary-color); text-decoration: none; 
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); 
+            font-weight: 500; font-size: 14px; border-left: 4px solid transparent; 
+            cursor: pointer; transform-origin: left center;
+        }
+        
+        .sidebar-nav .nav-link:hover, .sidebar-nav .nav-link.active { 
+            background: linear-gradient(90deg, #F0F7FF 0%, #FFFFFF 100%); 
+            color: var(--primary-color); 
+            border-left-color: var(--primary-color);
+            transform: scale(1.05) translateX(10px); 
+            box-shadow: 5px 5px 15px rgba(74, 144, 226, 0.15); 
+            z-index: 10;
+        }
 
+        .sidebar-nav .nav-link:hover i {
+            animation: wiggle 0.5s ease-in-out;
+            color: var(--primary-color);
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-15deg) scale(1.2); }
+            75% { transform: rotate(15deg) scale(1.2); }
+        }
+        
+        /* Submenu Styling */
+        .sidebar-submenu { overflow: hidden; transition: max-height 0.3s ease-out; background: #F8FAFC; margin: 0 15px; border-radius: 8px; }
+        .sidebar-submenu .nav-link { padding-left: 45px; font-size: 13px; border-left: none; }
+        .sidebar-submenu .nav-link:hover, .sidebar-submenu .nav-link.active-sub { color: var(--primary-color); background: #E0F2FE; border-radius: 8px; font-weight: 600; transform: scale(1.02) translateX(5px); }
+        .arrow-icon { transition: transform 0.3s; font-size: 10px; margin-left: auto; }
+        .arrow-icon.rotate { transform: rotate(90deg); }
         .main-content { flex-grow: 1; margin-left: 260px; padding: 30px; width: calc(100% - 260px); }
 
         /* Generic Components */
@@ -80,7 +111,7 @@
 
         /* NEW STYLES FOR SETTINGS & SCHOOL DATA */
         .settings-section-title { font-size: 14px; font-weight: 700; color: var(--secondary-color); text-transform: uppercase; letter-spacing: 1px; margin: 30px 0 15px; border-bottom: 2px solid #F1F5F9; padding-bottom: 10px; grid-column: 1 / -1; }
-        
+
         .ibadah-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; animation: fadeUp 0.5s ease; }
         .ibadah-card { background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; transition: 0.3s; position: relative; overflow: hidden; }
         .ibadah-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--primary-color); }
@@ -131,9 +162,6 @@
 
         /* Other styles */
         .controls-wrapper { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 20px; align-items: flex-start; margin-bottom: 25px; }
-        .view-switcher { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; background: #F1F5F9; padding: 5px; border-radius: 12px; }
-        .view-switcher .btn { background: transparent; color: #64748B; border: none; box-shadow: none; padding: 8px 16px; border-radius: 8px; }
-        .view-switcher .btn.active { background: white; color: var(--primary-color); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px; }
         .modal.show { display: flex; }
@@ -177,8 +205,22 @@
                 <h3><i class="fas fa-school"></i> IV-A</h3>
             </div>
             <nav class="sidebar-nav">
-                <a href="./"><i class="fas fa-home"></i> Home</a>
-                <a href="#" class="nav-link active" data-page="page-laporan"><i class="fas fa-file-invoice"></i> Laporan Siswa</a>
+                <a href="./" class="nav-link"><i class="fas fa-home"></i> Home</a>
+                
+                <!-- DROPDOWN MENU START -->
+                <div class="nav-item-dropdown">
+                    <a href="javascript:void(0)" class="nav-link" id="nav-laporan-parent" onclick="toggleSidebarDropdown(this)">
+                        <i class="fas fa-file-invoice"></i> Laporan Siswa <i class="fas fa-chevron-right arrow-icon"></i>
+                    </a>
+                    <div class="sidebar-submenu" id="submenu-laporan" style="display: none;">
+                        <a href="javascript:void(0)" class="nav-link sub-link" onclick="openLaporanSub('data', this)"><i class="fas fa-table"></i> Data</a>
+                        <a href="javascript:void(0)" class="nav-link sub-link" onclick="openLaporanSub('nilai', this)"><i class="fas fa-star-half-alt"></i> Nilai</a>
+                        <a href="javascript:void(0)" class="nav-link sub-link" onclick="openLaporanSub('rekap', this)"><i class="fas fa-chart-pie"></i> Rekap</a>
+                        <a href="javascript:void(0)" class="nav-link sub-link" onclick="openLaporanSub('predikat', this)"><i class="fas fa-award"></i> Predikat</a>
+                    </div>
+                </div>
+                <!-- DROPDOWN MENU END -->
+
                 <a href="#" class="nav-link" data-page="page-siswa"><i class="fas fa-user-graduate"></i> Data Siswa</a>
                 <a href="#" class="nav-link" data-page="page-sekolah"><i class="fas fa-school"></i> Data Sekolah</a>
                 <a href="#" class="nav-link" data-page="page-pengaturan"><i class="fas fa-cogs"></i> Pengaturan 7KAIH</a>
@@ -206,14 +248,8 @@
             <section id="page-laporan" class="page active">
                 <div class="card">
                     <div class="controls-wrapper">
-                        <div class="view-switcher">
-                            <button id="btnData" class="btn active" onclick="switchLaporanView('data', this)"><i class="fas fa-table"></i> Data</button>
-                            <button id="btnNilai" class="btn" onclick="switchLaporanView('nilai', this)"><i class="fas fa-star-half-alt"></i> Nilai</button>
-                            <button id="btnRekap" class="btn" onclick="switchLaporanView('rekap', this)"><i class="fas fa-chart-pie"></i> Rekap</button>
-                            <button id="btnPredikat" class="btn" onclick="switchLaporanView('predikat', this)"><i class="fas fa-award"></i> Predikat</button>
-                        </div>
-
-                        <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
+                        
+                        <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center; width: 100%;">
                             <div style="display: flex; align-items: center; gap: 10px; background: #F8FAFC; padding: 5px 10px; border-radius: 10px; border: 1px solid #E2E8F0;">
                                 <i class="far fa-calendar-alt" style="color: #94A3B8;"></i>
                                 <input type="date" id="rep-startDate" style="border: none; background: transparent; padding: 5px; font-size: 13px;">
@@ -221,11 +257,11 @@
                                 <input type="date" id="rep-endDate" style="border: none; background: transparent; padding: 5px; font-size: 13px;">
                                 <button class="btn btn-primary" style="padding: 5px 15px; font-size: 12px;" onclick="applyDateFilter()">Filter</button>
                             </div>
-                            <div class="search-container">
+                            <div class="search-container" style="flex-grow: 1;">
                                 <i class="fas fa-search"></i>
-                                <input type="text" id="laporanSearch" onkeyup="filterLaporanTable()" placeholder="Cari Siswa...">
+                                <input type="text" id="laporanSearch" onkeyup="filterLaporanTable()" placeholder="Cari Siswa..." style="width: 100%;">
                             </div>
-                            <button class="action-btn download" onclick="downloadRekapPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+                            <button id="btnDownloadRekap" class="action-btn download" onclick="downloadRekapPDF()" style="display: none;"><i class="fas fa-file-pdf"></i> PDF</button>
                         </div>
                     </div>
 
@@ -422,7 +458,10 @@
             document.getElementById('guru-name-display').textContent = `${currentUser.nama} (${currentUser.kelas})`;
             document.getElementById('span-kelas').textContent = currentUser.kelas;
             await loadGlobalSettings();
-            switchPage('page-laporan');
+            
+            // Default Open Laporan > Data
+            openLaporanSub('data', document.querySelector('.sub-link')); 
+            toggleSidebarDropdown(document.getElementById('nav-laporan-parent'));
         }
 
         async function loadGlobalSettings() {
@@ -433,19 +472,55 @@
             }
         }
 
-        // --- NAVIGATION ---
+        // --- NAVIGATION & DROPDOWN ---
+        
+        function toggleSidebarDropdown(element) {
+            const submenu = element.nextElementSibling;
+            const arrow = element.querySelector('.arrow-icon');
+            
+            if (submenu.style.display === 'none' || submenu.style.display === '') {
+                submenu.style.display = 'block';
+                arrow.classList.add('rotate');
+                element.classList.add('active'); 
+            } else {
+                submenu.style.display = 'none';
+                arrow.classList.remove('rotate');
+                element.classList.remove('active');
+            }
+        }
+
+        function openLaporanSub(view, element) {
+            switchPage('page-laporan');
+            
+            document.querySelectorAll('.sub-link').forEach(el => el.classList.remove('active-sub'));
+            if(element) element.classList.add('active-sub');
+            
+            switchLaporanView(view);
+        }
+
         document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', (e) => { e.preventDefault(); switchPage(link.dataset.page); });
+            link.addEventListener('click', (e) => { 
+                if(link.dataset.page) {
+                    e.preventDefault(); 
+                    switchPage(link.dataset.page); 
+                }
+            });
         });
 
         function switchPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => {
+                // Don't remove active from parent dropdown or sublinks here immediately, handled separately
+                if(l.dataset.page) l.classList.remove('active');
+            });
+            
             document.getElementById(pageId).classList.add('active');
+            
             const link = document.querySelector(`[data-page="${pageId}"]`);
             if(link) link.classList.add('active');
             
-            if (pageId === 'page-laporan') loadLaporanData();
+            // Special handling for Laporan Data Load
+            if (pageId === 'page-laporan' && fullData.length === 0) loadLaporanData();
             if (pageId === 'page-siswa') loadSiswaData();
             if (pageId === 'page-sekolah') renderSekolahForms();
             if (pageId === 'page-pengaturan') renderPengaturanForms();
@@ -626,7 +701,7 @@
             showModal("Pengaturan Sistem Berhasil Disimpan!", "Sukses");
         }
 
-        // --- OTHER FUNCTIONS REMAIN SAME BUT WITH IMPROVED VISUALS ---
+        // --- OTHER FUNCTIONS ---
         
         async function loadLaporanData() {
             const tbody = document.querySelector("#laporanTable tbody");
@@ -657,10 +732,13 @@
             populateLaporanTable(activeLaporanView);
         }
 
-        function switchLaporanView(view, btn) {
-            document.querySelectorAll('#page-laporan .view-switcher .btn').forEach(b => b.classList.remove('active'));
-            if(btn) btn.classList.add('active');
+        function switchLaporanView(view) {
             activeLaporanView = view;
+            
+            // Toggle PDF Button Logic
+            const btnPdf = document.getElementById('btnDownloadRekap'); 
+            if(btnPdf) btnPdf.style.display = (view === 'rekap' || view === 'predikat') ? 'inline-flex' : 'none';
+
             populateLaporanTable(view);
         }
 
