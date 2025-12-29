@@ -703,18 +703,17 @@
     <script>
         const SUPABASE_URL = "https://ztcdcxqbffobonlubiga.supabase.co";
         const SUPABASE_KEY = "sb_publishable_Tlt7BdyANH_U1j_wVXLcnw_ltkzm-Bb";
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwc9cOPEvpl1dVb-qIcHEaokHTUXtT10fyn1X8f8Cga-gHkQcb4DpzmQ75sVK84BtqKAQ/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0qKD2PpBC9iBIUfR3cgtswv1zrwmVQEpzdRB5U7RGE-7EP0QBLfo_Zsi3har5i_-e/exec";
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         
         let currentUser = null;
         let globalSettings = {};
         let fullData = [];
-        let rawLaporanData = []; // Store raw object data for charts
+        let rawLaporanData = []; 
         let filteredData = [];
         let activeLaporanView = 'data';
-        let chartInstances = {}; // Store chart instances
+        let chartInstances = {}; 
 
-        // Variabel untuk modal hapus baru
         let siswaIdToDelete = null;
 
         // --- AUTH ---
@@ -750,10 +749,8 @@
             
             await loadGlobalSettings();
             
-            // Populate profile form
             populateProfileForm();
             
-            // Default Open Laporan > Grafik (Updated per request to start showing data, but default sub menu logic below)
             openLaporanSub('grafik', document.querySelectorAll('.sub-link')[0]); 
             toggleSidebarDropdown(document.getElementById('nav-laporan-parent'));
         }
@@ -804,7 +801,6 @@
         function switchPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-link').forEach(l => {
-                // Don't remove active from parent dropdown or sublinks here immediately, handled separately
                 if(l.dataset.page) l.classList.remove('active');
             });
             
@@ -813,7 +809,6 @@
             const link = document.querySelector(`[data-page="${pageId}"]`);
             if(link) link.classList.add('active');
             
-            // Special handling for Laporan Data Load
             if (pageId === 'page-laporan' && fullData.length === 0) loadLaporanData();
             if (pageId === 'page-siswa') loadSiswaData();
             if (pageId === 'page-sekolah') renderSekolahForms();
@@ -831,7 +826,6 @@
                 const { data: laporanData, error } = await supabaseClient.from('laporan').select('*').eq('kelas', currentUser.kelas).order('created_at', { ascending: false });
                 if (error) throw error;
                 
-                // Map snake_case to camelCase for Charts Logic (consistency with Admin logic)
                 rawLaporanData = laporanData.map(d => ({
                     ...d,
                     namaSiswa: d.nama_siswa,
@@ -871,7 +865,6 @@
             }
             populateLaporanTable(activeLaporanView);
             
-            // Re-render charts if view is chart
             if (activeLaporanView === 'grafik') renderGuruGlobalChart();
             if (activeLaporanView === 'analisis') renderGuruAnalisis();
         }
@@ -879,11 +872,9 @@
         function switchLaporanView(view) {
             activeLaporanView = view;
             
-            // Toggle PDF Button Logic
             const btnPdf = document.getElementById('btnDownloadRekap'); 
             if(btnPdf) btnPdf.style.display = (view === 'rekap' || view === 'predikat') ? 'inline-flex' : 'none';
 
-            // VISIBILITY TOGGLE (Chart vs Table)
             const tableContainer = document.getElementById('laporan-table-container');
             const grafikContainer = document.getElementById('grafik-view');
             const analisisContainer = document.getElementById('analisis-view');
@@ -927,7 +918,7 @@
             const studentRekap = {};
             processedData.forEach(d => {
                 if (!d.namaSiswa) return;
-                const key = d.namaSiswa; // Only one class, use name as key
+                const key = d.namaSiswa; 
                 if (!studentRekap[key]) studentRekap[key] = { totalHari: 0, beribadah: 0, tidurCepat: 0, bangunPagi: 0, olahraga: 0, belajar: 0, bermasyarakat: 0, makanBergizi: 0 };
                 
                 const data = studentRekap[key]; 
@@ -945,7 +936,6 @@
                 if (d.makananKarbo && d.makananSayur && d.makananSusu && d.makananLauk && d.makananAir) data.makanBergizi++;
             });
 
-            // Aggregate Class Data (Taat, Terbiasa, Kurang)
             const rekap = {
                 beribadah: {}, tidurCepat: {}, bangunPagi: {}, olahraga: {}, belajar: {}, bermasyarakat: {}, makanBergizi: {}
             };
@@ -1111,13 +1101,12 @@
 
         function renderSekolahForms() {
             const info = globalSettings.infoSekolah || {};
-            // FIX: Cek visiMisi di dalam infoSekolah (format baru) ATAU di root globalSettings (format database sql)
             const vm = info.visiMisi || globalSettings.visiMisi || {};
-            const sosmed = info.socialMedia || {}; // Get Social Media Data
+            const sosmed = info.socialMedia || {}; 
             
             document.getElementById('sekolahForm').innerHTML = `
                 <div class="school-logo-preview-container">
-                    <img src="${info.logo || 'https://placehold.co/150?text=Logo'}" class="school-logo-preview" id="preview-logo-sekolah">
+                    <img src="${info.logo || 'https://lh3.googleusercontent.com/d/16rll5zsRdwTbR3nF_NmPKwY51tg4tnOn'}" class="school-logo-preview" id="preview-logo-sekolah">
                     <div style="font-size: 12px; color: #64748B; margin-bottom: 10px;">Logo Sekolah</div>
                     <button type="button" class="btn btn-info btn-sm" onclick="document.getElementById('f-logo').click()" style="width: 100%; justify-content: center;"><i class="fas fa-upload"></i> Upload Logo</button>
                     <input type="file" id="f-logo" style="display:none" onchange="handleFileUpload(this, 'sk-logo'); document.getElementById('preview-logo-sekolah').src = window.URL.createObjectURL(this.files[0])">
@@ -1125,7 +1114,7 @@
                 </div>
                 
                 <div class="school-form-fields">
-                    <div class="form-group full-width"><label>Nama Sekolah</label><input type="text" id="sk-nama" value="${info.namaSekolah||''}" placeholder="Contoh: SDN 1 Merdeka"></div>
+                    <div class="form-group full-width"><label>Nama Sekolah</label><input type="text" id="sk-nama" value="${info.namaSekolah||''}" placeholder="Contoh: SDN Bangbin Merdeka"></div>
                     <div class="form-group"><label>NPSN</label><input type="text" id="sk-npsn" value="${info.npsn||''}"></div>
                     <div class="form-group"><label>Alamat Lengkap</label><input type="text" id="sk-alamat" value="${info.alamat||''}"></div>
                     
@@ -1552,7 +1541,6 @@
         // --- RENDER KELAS VISUAL FORM (DENGAN FORM PENGUMUMAN) ---
         function renderKelasVisualForm() {
             const ik = globalSettings.infoSekolah?.infoKelas || {};
-            // FIX: Cek pengumuman di dalam infoSekolah (format baru) ATAU di root globalSettings (format database sql)
             const pengumumanData = globalSettings.infoSekolah?.pengumuman || globalSettings.pengumuman || {};
             const form = document.getElementById('kelasVisualForm');
             
