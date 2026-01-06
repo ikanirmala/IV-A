@@ -326,7 +326,6 @@ async function saveNilaiTpKoku(idSiswa, idTpKoku, nilai) {
 
     } catch(err) {
         console.error("Gagal save nilai koku", err);
-        // Tampilkan alert kecil agar user tahu jika gagal (karena koneksi putus misalnya)
         alert("Gagal menyimpan nilai. Periksa koneksi internet."); 
     }
 }
@@ -1188,7 +1187,6 @@ document.getElementById('btnConfirmDelete').addEventListener('click', async () =
         closeModal('deleteConfirmModal');
         showModal("Data berhasil dihapus.", "Sukses");
 
-        // --- BAGIAN INI YANG DIUPDATE ---
         if (deleteType === 'siswa') loadSiswaData();
         else if (deleteType === 'mapel') { loadMapel(); renderNilaiMenu(); }
         else if (deleteType === 'ekskul') {
@@ -1434,7 +1432,6 @@ async function loadNilaiEkstraTable() {
                 </td>`;
 
             ekskuls.forEach(e => {
-                // Filter TP khusus untuk Ekskul ini
                 const currentEkskulTps = tps.filter(t => t.id_ekskul === e.id_ekskul);                
                 const existing = nilai.find(n => n.id_siswa === s.id && n.id_ekskul === e.id_ekskul);
                 const valPredikat = existing ? existing.nilai : "";
@@ -2437,7 +2434,7 @@ function renderGuruAnalisis() {
 
 function renderChart(id, type, labels, data, colors) {
     const canvas = document.getElementById(id);
-    if (!canvas) return; // Guard
+    if (!canvas) return; 
     const ctx = canvas.getContext('2d');
     if (chartInstances[id]) chartInstances[id].destroy();
     chartInstances[id] = new Chart(ctx, { type: type, data: { labels: labels, datasets: [{ label: 'Jumlah', data: data, backgroundColor: colors }] }, options: { responsive: true, maintainAspectRatio: false } });
@@ -2567,7 +2564,7 @@ function renderKelasVisualForm() {
 
     let visualKelasHtml = `
         <div class="settings-section-title" style="margin: 30px 0 20px;"><i class="fas fa-chalkboard"></i> Info Visual Kelas</div>
-        <div class="form-group full-width"><label>Jadwal Pelajaran (URL Gambar)</label><div style="display:flex;gap:10px"><input type="text" id="iv-jadwal" value="${ik.jadwalPelajaran||''}"><button type="button" class="btn btn-info" onclick="document.getElementById('f-iv-j').click()"><i class="fas fa-folder-open"></i></button><input type="file" id="f-iv-j" style="display:none" onchange="handleFileUpload(this, 'iv-jadwal')"></div></div>
+        <div class="form-group full-width"><label>Ulang Tahun Siswa (URL Gambar)</label><div style="display:flex;gap:10px"><input type="text" id="iv-jadwal" value="${ik.jadwalPelajaran||''}"><button type="button" class="btn btn-info" onclick="document.getElementById('f-iv-j').click()"><i class="fas fa-folder-open"></i></button><input type="file" id="f-iv-j" style="display:none" onchange="handleFileUpload(this, 'iv-jadwal')"></div></div>
         <div class="form-group full-width"><label>Struktur Organisasi (URL Gambar)</label><div style="display:flex;gap:10px"><input type="text" id="iv-struktur" value="${ik.strukturOrganisasi||''}"><button type="button" class="btn btn-info" onclick="document.getElementById('f-iv-s').click()"><i class="fas fa-folder-open"></i></button><input type="file" id="f-iv-s" style="display:none" onchange="handleFileUpload(this, 'iv-struktur')"></div></div>
         <div class="form-group full-width"><label>Kesepakatan Kelas (URL Gambar)</label><div style="display:flex;gap:10px"><input type="text" id="iv-kesepakatan" value="${ik.kesepakatanKelas||''}"><button type="button" class="btn btn-info" onclick="document.getElementById('f-iv-k').click()"><i class="fas fa-folder-open"></i></button><input type="file" id="f-iv-k" style="display:none" onchange="handleFileUpload(this, 'iv-kesepakatan')"></div></div>
     `;
@@ -2647,7 +2644,6 @@ function renderSiswaTable(data) {
 function filterSiswaList() {
     const term = document.getElementById('filter-nama-siswa').value.toLowerCase();
     
-    // Filter dari cachedSiswaList
     const filtered = cachedSiswaList.filter(s => 
         s.nama.toLowerCase().includes(term) || 
         s.nomor_induk.toLowerCase().includes(term)
