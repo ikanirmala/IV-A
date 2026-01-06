@@ -120,6 +120,7 @@
         .nav-card i { font-size: 2.5rem; margin-bottom: 15px; display: block; }
         .nav-card h3 { font-size: 1.2rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
 
+        /* MODIFIKASI TOMBOL PORTAL GURU & SISWA MENJADI BULAT */
         #btn-portal-guru, #btn-portal-siswa {
             z-index: 1; 
             width: 250px; 
@@ -218,18 +219,20 @@
             margin-bottom: 0; 
         }
         
+        .card-wrapper { display: flex; flex-direction: column; gap: 15px; }
+        
         .preview-card {
-            position: relative; height: 320px; 
+            position: relative; height: 320px; width: 100%;
             border-radius: 25px; overflow: hidden; cursor: pointer;
             box-shadow: var(--shadow-lg); transition: transform 0.3s;
             background: #fff;
         }
-        .preview-card:hover { transform: translateY(-12px); z-index: 2; }
+        .preview-card:hover { transform: translateY(-5px); z-index: 2; }
         .preview-card img { 
             width: 100%; height: 100%; object-fit: cover; 
             transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
         }
-        .preview-card:hover img { transform: scale(1.15); }
+        .preview-card:hover img { transform: scale(1.1); }
         .preview-overlay {
             position: absolute; bottom: 0; left: 0; width: 100%; padding: 30px;
             background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.6), transparent); 
@@ -240,6 +243,19 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px;
         }
         .preview-overlay p { font-size: 0.9rem; opacity: 0.9; margin: 0; }
+
+        /* Action Buttons under Cards (OPSI A) */
+        .action-btn {
+            display: block; width: 100%; text-align: center;
+            padding: 12px; border-radius: 15px; 
+            background: rgba(255,255,255,0.1); 
+            color: white; font-weight: 600; text-decoration: none;
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.3s; cursor: pointer;
+            font-size: 0.95rem;
+        }
+        .action-btn:hover { background: var(--primary); border-color: var(--primary); transform: translateY(-2px); }
+        .action-btn i { margin-right: 8px; }
 
         /* --- SECTION PENGUMUMAN --- */
         .announcement-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 35px; }
@@ -270,25 +286,53 @@
         }
         .news-card:hover .read-more { gap: 12px; }
 
-        /* --- SECTION GRAFIK --- */
+        /* --- SECTION GRAFIK (UPDATED LAYOUT) --- */
         .chart-section { 
-            background: white; padding: 70px; border-radius: 40px; 
+            background: white; padding: 50px; border-radius: 40px; 
             box-shadow: var(--shadow-lg); 
-            display: grid; grid-template-columns: 1.2fr 1fr; gap: 60px; align-items: center; 
+            width: 100%;
         }
-        .chart-text h3 { font-size: 2.5rem; margin-bottom: 25px; color: var(--dark); font-weight: 800; }
-        .chart-text p { color: #666; margin-bottom: 35px; line-height: 1.8; font-size: 1.1rem; }
-        .stat-badge { 
-            display: inline-flex; align-items: center; gap: 10px;
-            padding: 15px 30px; background: #E3F2FD; color: var(--primary); 
-            border-radius: 50px; font-weight: 700; margin-top: 10px; 
-            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.2); 
+        
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Dua kolom */
+            gap: 40px;
+            align-items: start;
         }
-        .check-list { list-style: none; margin-top: 30px; }
-        .check-list li { 
-            margin-bottom: 18px; display: flex; align-items: center; gap: 15px; 
-            font-weight: 500; font-size: 1.05rem; color: var(--dark);
+
+        .chart-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid #E2E8F0;
         }
+
+        .chart-title-small {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid #F1F5F9;
+            padding-bottom: 10px;
+        }
+
+        .attendance-details {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            text-align: center;
+        }
+        .att-item {
+            background: #F8FAFC;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #E2E8F0;
+        }
+        .att-val { font-size: 1.2rem; font-weight: bold; }
+        .att-label { font-size: 0.8rem; color: #64748B; }
 
         /* --- SECTION SISWA --- */
         .student-grid { 
@@ -375,7 +419,7 @@
         .social-links a:hover { background: var(--primary); transform: translateY(-5px) scale(1.1); }
         .social-links a.wa:hover { background: #25D366; }
 
-        /* --- MODAL STYLES --- */
+        /* --- MODAL STYLES (NEW) --- */
         .modal { 
             display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; 
             background-color: rgba(0,0,0,0.85); backdrop-filter: blur(8px); 
@@ -384,7 +428,7 @@
         .modal.show { opacity: 1; }
         .modal-content { 
             background-color: #fefefe; margin: 5% auto; padding: 0; border-radius: 25px; 
-            width: 90%; max-width: 1000px; position: relative; 
+            width: 90%; max-width: 800px; position: relative; 
             transform: translateY(50px); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             overflow: hidden; box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.5); 
         }
@@ -398,20 +442,30 @@
         }
         .close-modal:hover { background: rgba(255,255,255,0.4); transform: rotate(90deg); }
         .modal-img { width: 100%; border-radius: 15px; margin-bottom: 25px; box-shadow: var(--shadow-md); }
-        .modal-btn { 
-            display: inline-flex; align-items: center; gap: 10px;
-            padding: 12px 25px; background: var(--primary); color: white; 
-            border-radius: 12px; text-decoration: none; font-weight: 600; 
-            margin-top: 20px; transition: 0.3s; 
-        }
-        .modal-btn:hover { background: var(--primary-dark); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3); }
+        
+        /* Gaya Tabel Jadwal (Baru) */
+        .schedule-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .schedule-table th { background: #E3F2FD; color: var(--primary-dark); font-weight: 700; padding: 12px; border-bottom: 2px solid var(--primary); }
+        .schedule-table td { padding: 12px; border-bottom: 1px solid #eee; }
+        .schedule-table tr:hover { background: #f9f9f9; }
+        .day-badge { display: inline-block; padding: 5px 15px; border-radius: 20px; color: white; font-size: 0.85rem; font-weight: 600; width: 80px; text-align: center; }
+        
+        /* Gaya Kartu Ekskul (Baru) */
+        .ekskul-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .ekskul-card { border: 1px solid #eee; border-radius: 15px; overflow: hidden; box-shadow: var(--shadow-sm); transition: 0.3s; }
+        .ekskul-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); }
+        .ekskul-img { width: 100%; height: 120px; object-fit: cover; background: #eee; }
+        .ekskul-body { padding: 15px; }
+        .ekskul-title { font-weight: 700; color: var(--dark); margin-bottom: 5px; font-size: 1.1rem; }
+        .ekskul-info { font-size: 0.85rem; color: #666; margin-bottom: 5px; }
 
         /* RESPONSIVE */
         @media (max-width: 992px) {
             .hero h1 { font-size: 2.8rem; }
             .profile-grid { grid-template-columns: 1fr; gap: 40px; }
             .teacher-card { order: 1; } .vision-box { order: 2; }
-            .chart-section { grid-template-columns: 1fr; padding: 40px; }
+            .chart-section { padding: 40px; }
+            .charts-container { grid-template-columns: 1fr; }
             .info-grid { grid-template-columns: repeat(2, 1fr); }
             .gallery-grid { grid-template-columns: repeat(3, 1fr); }
         }
@@ -438,6 +492,7 @@
             
             <div class="nav-cards">
                 <a href="Guru.html" class="nav-card" id="btn-portal-guru">
+
                     <h3>Portal Guru</h3>
                 </a>
                 <a href="Siswa.html" class="nav-card" id="btn-portal-siswa">
@@ -445,7 +500,6 @@
                     <h3>Portal Siswa</h3>
                 </a>
             </div>
-            
         </div>
     </header>
 
@@ -479,28 +533,49 @@
             <h2 class="section-title reveal" style="color:white">Informasi Kelas</h2>
             
             <div class="info-grid">
-                <div class="preview-card reveal delay-100" onclick="openModal('Ulang Tahun', document.getElementById('img-jadwal-src').src, 'Jadwal pelajaran berlaku untuk semester ini.')">
-                    <img src="https://placehold.co/600x400?text=Jadwal" id="img-jadwal-src" alt="Jadwal">
-                    <div class="preview-overlay">
-                        <h3><i class="fas fa-calendar-alt"></i> Ulang Tahun</h3>
-                        <p>Klik untuk memperbesar</p>
+
+                <div class="card-wrapper reveal delay-100">
+                    <div class="preview-card" onclick="openModal('Jadwal Pelajaran', document.getElementById('img-jadwal-src').src, 'Jadwal pelajaran berlaku untuk semester ini.')">
+                        <img src="https://placehold.co/600x400?text=Jadwal" id="img-jadwal-src" alt="Jadwal">
+                        <div class="preview-overlay">
+                            <h3><i class="fas fa-calendar-alt"></i> Jadwal Pelajaran</h3>
+                            <p>Klik untuk memperbesar</p>
+                        </div>
                     </div>
+                    <!-- BUTTON OPSI A: Lihat Tabel Database -->
+                    <button class="action-btn" onclick="openJadwalModal()">
+                        <i class="fas fa-table"></i> Lihat Tabel Jadwal (Database)
+                    </button>
                 </div>
 
-                <div class="preview-card reveal delay-200" onclick="openModal('Regu Piket & Struktur', document.getElementById('img-struktur-src').src, 'Daftar petugas piket kebersihan dan struktur organisasi kelas.')">
-                    <img src="https://placehold.co/600x400?text=Struktur+Kelas" id="img-struktur-src" alt="Struktur">
-                    <div class="preview-overlay">
-                        <h3><i class="fas fa-users"></i> Regu Kelas</h3>
-                        <p>Klik untuk melihat detail</p>
+                <!-- KARTU 2: REGU PIKET (Original: Structure Image) -->
+                <div class="card-wrapper reveal delay-200">
+                    <div class="preview-card" onclick="openModal('Struktur Kelas', document.getElementById('img-struktur-src').src, 'Daftar petugas piket kebersihan dan struktur organisasi kelas.')">
+                        <img src="https://placehold.co/600x400?text=Struktur+Kelas" id="img-struktur-src" alt="Struktur">
+                        <div class="preview-overlay">
+                            <h3><i class="fas fa-users"></i> Struktur Kelas</h3>
+                            <p>Klik untuk melihat detail</p>
+                        </div>
                     </div>
+                    <!-- BUTTON OPSI A: Lihat Jadwal Piket -->
+                    <button class="action-btn" onclick="openPiketModal()">
+                        <i class="fas fa-broom"></i> Lihat Jadwal Piket (Database)
+                    </button>
                 </div>
 
-                <div class="preview-card reveal delay-300" onclick="openModal('Kesepakatan Kelas', document.getElementById('img-kesepakatan-src').src, 'Kesepakatan dan Keyakinan Kelas yang telah disetujui bersama.')">
-                    <img src="https://placehold.co/600x400?text=Kesepakatan+Kelas" id="img-kesepakatan-src" alt="Kesepakatan">
-                    <div class="preview-overlay">
-                        <h3><i class="fas fa-handshake"></i> Kesepakatan Kelas</h3>
-                        <p>Tata tertib & komitmen</p>
+                <!-- KARTU 3: KESEPAKATAN KELAS (Original: Image) -->
+                <div class="card-wrapper reveal delay-300">
+                    <div class="preview-card" onclick="openModal('Kesepakatan Kelas', document.getElementById('img-kesepakatan-src').src, 'Kesepakatan dan Keyakinan Kelas yang telah disetujui bersama.')">
+                        <img src="https://placehold.co/600x400?text=Kesepakatan+Kelas" id="img-kesepakatan-src" alt="Kesepakatan">
+                        <div class="preview-overlay">
+                            <h3><i class="fas fa-handshake"></i> Kesepakatan Kelas</h3>
+                            <p>Tata tertib & komitmen</p>
+                        </div>
                     </div>
+                    <!-- BUTTON OPSI A: Info Ekskul -->
+                    <button class="action-btn" onclick="openEkskulModal()">
+                        <i class="fas fa-running"></i> Info Ekstrakurikuler
+                    </button>
                 </div>
             </div>
         </div>
@@ -519,19 +594,47 @@
 
     <section style="background: linear-gradient(to right, #f8f9fa, #e9ecef);">
         <div class="container">
+            <h2 class="section-title reveal">Monitoring Kelas</h2>
             <div class="chart-section reveal-scale">
-                <div>
-                    <canvas id="kaihChart"></canvas>
-                </div>
-                <div class="chart-text">
-                    <h3>Grafik 7 KAIH</h3>
-                    <p>Pemantauan perkembangan karakter siswa melalui 7 Kebiasaan Anak Indonesia Hebat (7KAIH). Data ini diambil secara <strong>real-time</strong> dari laporan harian siswa.</p>
-                    <div class="stat-badge"><i class="fas fa-chart-pie"></i> Analisis Jurnal</div>
-                    <ul class="check-list">
-                        <li><i class="fas fa-check-circle" style="color: var(--secondary); font-size: 1.2rem;"></i> Ketaatan Beribadah</li>
-                        <li><i class="fas fa-check-circle" style="color: var(--secondary); font-size: 1.2rem;"></i> Disiplin Waktu</li>
-                        <li><i class="fas fa-check-circle" style="color: var(--secondary); font-size: 1.2rem;"></i> Gaya Hidup Sehat</li>
-                    </ul>
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <div class="chart-title-small">
+                            <i class="fas fa-chart-bar" style="color: var(--primary);"></i> Pencapaian 7KAIH
+                        </div>
+                        <div style="position: relative; height: 300px;">
+                            <canvas id="kaihBarChart"></canvas>
+                        </div>
+                        <div style="text-align: center; margin-top: 15px; font-size: 0.9rem; color: #64748B;">
+                            Grafik pencapaian karakter siswa berdasarkan 7 Kebiasaan Anak Indonesia Hebat.
+                        </div>
+                    </div>
+
+                    <!-- CHART 2: KEHADIRAN DONUT -->
+                    <div class="chart-card">
+                        <div class="chart-title-small">
+                            <i class="fas fa-user-clock" style="color: var(--accent);"></i> Kehadiran Hari Ini
+                            <br><span id="attendance-date" style="font-size: 0.9rem; font-weight: normal; color: #666;"></span>
+                        </div>
+                        <div style="position: relative; height: 250px;">
+                            <canvas id="attendanceChart"></canvas>
+                        </div>
+                        
+                        <div id="attendance-detail-container" class="attendance-details">
+                            <div class="att-item" style="border-left: 4px solid #F59E0B;">
+                                <div class="att-val" style="color:#F59E0B" id="val-sakit">0</div>
+                                <div class="att-label">Sakit</div>
+                            </div>
+                            <div class="att-item" style="border-left: 4px solid #3B82F6;">
+                                <div class="att-val" style="color:#3B82F6" id="val-izin">0</div>
+                                <div class="att-label">Izin</div>
+                            </div>
+                            <div class="att-item" style="border-left: 4px solid #EF4444;">
+                                <div class="att-val" style="color:#EF4444" id="val-alpha">0</div>
+                                <div class="att-label">Alpha</div>
+                            </div>
+                        </div>
+                        <div id="absence-names" style="margin-top: 15px; font-size: 0.85rem; color: #64748B; text-align: center; font-style: italic;"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -580,7 +683,7 @@
 
     <footer>
         <div class="container">
-            <p>© 2024 SDN Setu 02 - Kelas 4 A. Dibuat dengan semangat belajar.</p>
+            <p>© 2026 SDN Setu 02 - Kelas 4 A. Dibuat dengan semangat belajar.</p>
             <div class="social-links">
                 <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
                 <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
@@ -631,6 +734,7 @@
 
         let globalVisiContent = "";
         let globalMisiContent = "";
+        let savedGlobalSettings = {}; 
 
         // Init Data
         window.addEventListener('load', async () => {
@@ -651,6 +755,7 @@
                 const res = await fetch(`${API_URL}/pengaturan`);
                 const json = await res.json();
                 const data = json.data || {};
+                savedGlobalSettings = data; 
                 
                 const info = data.infoSekolah || {};
                 const visual = info.infoKelas || {};
@@ -788,7 +893,6 @@
         // --- LOAD INFO GURU (UPDATE NIP) ---
         async function loadTeacherInfo() {
             try {
-                // Endpoint ini sudah kita update di server.js untuk return nip
                 const res = await fetch(`${API_URL}/guru-info?kelas=4A`);
                 if(!res.ok) return; 
 
@@ -796,7 +900,6 @@
                 if (data) {
                     document.getElementById('profile-nama').textContent = data.nama;
                     
-                    // --- UPDATE: Tampilkan NIP dibawah tulisan Wali Kelas ---
                     const nipText = data.nip ? `<br><span style="font-size: 0.85em; opacity: 0.9; font-weight: 400;">NIP. ${data.nip}</span>` : '';
                     document.getElementById('teacher-nip').innerHTML = `Wali Kelas ${data.kelas || '4 A'} ${nipText}`;
 
@@ -810,7 +913,6 @@
                         }
                     }
                     
-                    // Footer Quote
                     document.getElementById('sambutan-author').textContent = `- ${data.nama} (Guru Kelas 4A)`;
                 }
             } catch(e) { console.log("Guru Info load skipped (API not ready)"); }
@@ -852,61 +954,156 @@
             }
         }
 
-        // 4. LOAD & RENDER CHART 7 KAIH
+        // --- 4. LOAD & RENDER CHARTS (GRAFIK 7KAIH & ABSENSI) ---
         async function loadChartData() {
             try {
-                const res = await fetch(`${API_URL}/laporan?kelas=4A`);
-                const laporan = await res.json();
+                // 1. DATA 7KAIH (Fetch Laporan)
+                const resLaporan = await fetch(`${API_URL}/laporan?kelas=4A`);
+                const laporan = await resLaporan.json();
                 
-                if(!laporan || laporan.length === 0) return;
+                // 2. DATA ABSENSI (Fetch Siswa Total & Absensi Hari Ini)
+                const today = new Date();
+                const dateString = today.toISOString().split('T')[0];
+                document.getElementById('attendance-date').textContent = today.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
-                let stats = { ibadah: 0, bangun: 0, tidur: 0, olahraga: 0, belajar: 0, sosial: 0, makan: 0 };
-                const total = laporan.length;
+                const resSiswa = await fetch(`${API_URL}/siswa`);
+                const allSiswa = await resSiswa.json();
+                const totalSiswa = allSiswa.filter(s => s.kelas === '4A').length;
 
-                laporan.forEach(lap => {
-                    let ibCount = 0;
-                    for(let i=1; i<=7; i++) if(lap[`ibadah${i}`]) ibCount++;
-                    if(ibCount >= 4) stats.ibadah++; 
+                const resAbsen = await fetch(`${API_URL}/absensi?tanggal=${dateString}&kelas=4A`);
+                const dataAbsen = await resAbsen.json();
 
-                    if(lap.bangun_pagi && lap.bangun_pagi <= "05:00") stats.bangun++;
-                    if(lap.tidur_cepat && lap.tidur_cepat <= "21:00") stats.tidur++;
+                // --- PROSES CHART 7KAIH (STACKED BAR) ---
+                if(laporan && laporan.length > 0) {
+                    const { ibadahSettings = [], waktu = {}, predikat = {} } = savedGlobalSettings;
+                    const ibadahThreshold = ibadahSettings.filter(s => s).length || 1;
+                    const bbp = waktu.bangunPagi || '05:00'; 
+                    const btc = waktu.tidurCepat || '21:00';
 
-                    if(lap.rincian_olahraga && lap.rincian_olahraga.length > 2) stats.olahraga++;
-                    if(lap.materi_belajar && lap.materi_belajar.length > 2) stats.belajar++;
-                    if(lap.kegiatan_masyarakat && lap.kegiatan_masyarakat.length > 2) stats.sosial++;
+                    // Hitung akumulasi per anak
+                    const studentRekap = {};
+                    laporan.forEach(d => {
+                        if (!d.nama_siswa) return;
+                        const key = d.nama_siswa; 
+                        if (!studentRekap[key]) studentRekap[key] = { totalHari: 0, beribadah: 0, tidurCepat: 0, bangunPagi: 0, olahraga: 0, belajar: 0, bermasyarakat: 0, makanBergizi: 0 };
+                        const data = studentRekap[key]; 
+                        data.totalHari++; 
+                        
+                        let ibadahPoint = 0;
+                        for(let j=1; j<=7; j++) { if(ibadahSettings[j-1] && String(d[`ibadah${j}`]||'').trim()) ibadahPoint++; }
+                        if(ibadahPoint >= ibadahThreshold) data.beribadah++;
+                        
+                        if (d.bangun_pagi && d.bangun_pagi <= bbp) data.bangunPagi++; 
+                        if (d.tidur_cepat && d.tidur_cepat <= btc) data.tidurCepat++;
+                        if (String(d.rincian_olahraga || '').trim()) data.olahraga++; 
+                        if ((String(d.tempat_belajar || '').trim()) || (String(d.materi_belajar || '').trim())) data.belajar++;
+                        if (String(d.kegiatan_masyarakat || '').trim()) data.bermasyarakat++; 
+                        
+                        let foodScore = (d.makanan_karbo?1:0) + (d.makanan_sayur?1:0) + (d.makanan_susu?1:0) + (d.makanan_lauk?1:0) + (d.makanan_air?1:0);
+                        if(foodScore >= 3) data.makanBergizi++; // Toleransi makan
+                    });
 
-                    let foodScore = (lap.makanan_karbo?1:0) + (lap.makanan_sayur?1:0) + (lap.makanan_susu?1:0) + (lap.makanan_lauk?1:0) + (lap.makanan_air?1:0);
-                    if(foodScore >= 3) stats.makan++;
+                    // Hitung Kategori (Taat/Terbiasa/Kurang) untuk Chart
+                    const rekapChart = { beribadah: {}, tidurCepat: {}, bangunPagi: {}, olahraga: {}, belajar: {}, bermasyarakat: {}, makanBergizi: {} };
+                    const keys = ["beribadah", "tidurCepat", "bangunPagi", "olahraga", "belajar", "bermasyarakat", "makanBergizi"];
+                    const labelTaat = predikat.taatText || 'Anak Hebat';
+                    const labelBiasa = predikat.terbiasaText || 'Terbiasa';
+                    const labelKurang = predikat.kurangText || 'Perlu Peningkatan';
+
+                    Object.values(studentRekap).forEach(data => {
+                        keys.forEach(catKey => {
+                            let p_text = labelKurang;
+                            if (data.totalHari > 0) { 
+                                const prob = (data[catKey] / data.totalHari) * 100;
+                                if (prob >= (predikat.taatValue || 85)) { p_text = labelTaat; }
+                                else if (prob >= (predikat.terbiasaValue || 70)) { p_text = labelBiasa; }
+                            }
+                            rekapChart[catKey][p_text] = (rekapChart[catKey][p_text] || 0) + 1;
+                        });
+                    });
+
+                    // Render Stacked Bar Chart
+                    const chartLabels = ["Beribadah", "Tidur Cepat", "Bangun Pagi", "Olahraga", "Belajar", "Bermasyarakat", "Makan Sehat"];
+                    const tData = [], bData = [], kData = [];
+                    
+                    keys.forEach(key => { 
+                        tData.push(rekapChart[key][labelTaat] || 0); 
+                        bData.push(rekapChart[key][labelBiasa] || 0); 
+                        kData.push(rekapChart[key][labelKurang] || 0); 
+                    });
+
+                    const ctxBar = document.getElementById('kaihBarChart').getContext('2d');
+                    new Chart(ctxBar, { 
+                        type: 'bar', 
+                        data: { 
+                            labels: chartLabels, 
+                            datasets: [
+                                { label: labelTaat, data: tData, backgroundColor: 'rgba(22, 163, 74, 0.8)' }, 
+                                { label: labelBiasa, data: bData, backgroundColor: 'rgba(245, 158, 11, 0.8)' }, 
+                                { label: labelKurang, data: kData, backgroundColor: 'rgba(239, 68, 68, 0.8)' }
+                            ] 
+                        }, 
+                        options: { 
+                            responsive: true, 
+                            maintainAspectRatio: false, 
+                            scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
+                            plugins: { legend: { position: 'bottom' } }
+                        } 
+                    });
+                } else {
+                    document.getElementById('kaihBarChart').parentNode.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; height:100%; color:#aaa;">Belum ada data laporan.</div>';
+                }
+
+                // --- PROSES CHART KEHADIRAN (DONUT) ---
+                let sakit = 0, izin = 0, alpha = 0;
+                let absentNames = [];
+
+                dataAbsen.forEach(a => {
+                    if (a.keterangan === 'Sakit') sakit++;
+                    else if (a.keterangan === 'Izin') izin++;
+                    else if (a.keterangan === 'Alpha') alpha++;
+                    
+                    if (a.keterangan !== 'Hadir') absentNames.push(`${a.nama} (${a.keterangan})`);
                 });
 
-                const dataSet = [
-                    (stats.ibadah/total)*100, (stats.bangun/total)*100, (stats.tidur/total)*100,
-                    (stats.olahraga/total)*100, (stats.belajar/total)*100, (stats.sosial/total)*100, (stats.makan/total)*100
-                ];
+                const tidakHadirTotal = sakit + izin + alpha;
+                const hadir = totalSiswa - tidakHadirTotal;
 
-                const ctx = document.getElementById('kaihChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'radar',
+                // Update Angka di HTML
+                document.getElementById('val-sakit').textContent = sakit;
+                document.getElementById('val-izin').textContent = izin;
+                document.getElementById('val-alpha').textContent = alpha;
+                
+                if(absentNames.length > 0) {
+                    document.getElementById('absence-names').textContent = "Tidak Hadir: " + absentNames.join(', ');
+                } else {
+                    document.getElementById('absence-names').textContent = "Semua siswa Hadir!";
+                }
+
+                const ctxDonut = document.getElementById('attendanceChart').getContext('2d');
+                new Chart(ctxDonut, {
+                    type: 'doughnut',
                     data: {
-                        labels: ['Beribadah', 'Bangun Pagi', 'Tidur Cepat', 'Olahraga', 'Belajar', 'Bermasyarakat', 'Makan Sehat'],
+                        labels: ['Hadir', 'Sakit', 'Izin', 'Alpha'],
                         datasets: [{
-                            label: 'Persentase Kepatuhan Kelas (%)',
-                            data: dataSet,
-                            backgroundColor: 'rgba(74, 144, 226, 0.2)',
-                            borderColor: '#4A90E2',
-                            pointBackgroundColor: '#FF6B6B',
-                            borderWidth: 2
+                            data: [hadir, sakit, izin, alpha],
+                            backgroundColor: ['#10B981', '#F59E0B', '#3B82F6', '#EF4444'],
+                            borderWidth: 0
                         }]
                     },
                     options: {
-                        scales: { r: { suggestedMin: 0, suggestedMax: 100 } },
-                        plugins: { legend: { position: 'bottom' } }
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
                     }
                 });
+
             } catch(e) { console.error("Chart load error", e); }
         }
 
-        // --- MODAL FUNCTIONS ---
+        // --- MODAL FUNCTIONS (UPDATED) ---
         const modal = document.getElementById('genericModal');
         const modalTitle = document.getElementById('modalTitle');
         const modalImg = document.getElementById('modalImg');
@@ -921,6 +1118,151 @@
             modalAction.innerHTML = '';
             modal.style.display = 'block';
             setTimeout(() => modal.classList.add('show'), 10);
+        }
+
+        // 1. MODAL JADWAL PELAJARAN (DATABASE)
+        async function openJadwalModal() {
+            modalTitle.textContent = "Jadwal Pelajaran Kelas 4A (Database)";
+            modalImg.style.display = 'none';
+            modalHtml.innerHTML = '<div style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat Jadwal...</div>';
+            modalAction.innerHTML = '';
+            modal.style.display = 'block';
+            setTimeout(() => modal.classList.add('show'), 10);
+
+            try {
+                const res = await fetch(`${API_URL}/jadwal-pelajaran?kelas=4A`);
+                const data = await res.json();
+
+                if(!data || data.length === 0) {
+                    modalHtml.innerHTML = '<p class="text-center">Belum ada data jadwal pelajaran di database.</p>';
+                    return;
+                }
+
+                const days = { 1: 'Senin', 2: 'Selasa', 3: 'Rabu', 4: 'Kamis', 5: 'Jumat', 6: 'Sabtu' };
+                const colors = { 1: '#EF5350', 2: '#AB47BC', 3: '#42A5F5', 4: '#66BB6A', 5: '#FFA726', 6: '#8D6E63' };
+                
+                // Group by Day
+                const grouped = {};
+                data.forEach(item => {
+                    const h = item.hari;
+                    if(!grouped[h]) grouped[h] = [];
+                    grouped[h].push(item);
+                });
+
+                let html = '';
+                for(let h=1; h<=6; h++) {
+                    const dayName = days[h]; 
+                    if(grouped[dayName]) {
+                         html += `<div style="margin-bottom: 20px;">
+                            <span class="day-badge" style="background:${colors[h] || '#333'};">${dayName}</span>
+                            <table class="schedule-table">
+                                <tr>
+                                    <th width="30%">Kegiatan / Mapel</th>
+                                    <th>Keterangan</th>
+                                </tr>`;
+                        grouped[dayName].forEach(row => {
+                            html += `<tr>
+                                <td style="font-weight:bold; color:#555;">${row.nama_kegiatan}</td>
+                                <td style="font-size:0.9em; color:#666;">${row.tipe || '-'}</td>
+                            </tr>`;
+                        });
+                        html += `</table></div>`;
+                    }
+                }
+                modalHtml.innerHTML = html;
+            } catch(e) {
+                modalHtml.innerHTML = `<p class="text-center text-danger">Gagal memuat jadwal: ${e.message}</p>`;
+            }
+        }
+
+        // 2. MODAL JADWAL PIKET (DATABASE - UPDATED)
+        async function openPiketModal() {
+            modalTitle.textContent = "Jadwal Piket Kelas 4A";
+            modalImg.style.display = 'none';
+            modalHtml.innerHTML = '<div style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat Jadwal Piket...</div>';
+            modalAction.innerHTML = '';
+            modal.style.display = 'block';
+            setTimeout(() => modal.classList.add('show'), 10);
+
+            try {
+                const res = await fetch(`${API_URL}/jadwal-piket?kelas=4A`);
+                const data = await res.json();
+
+                if(!data || data.length === 0) {
+                    modalHtml.innerHTML = '<p class="text-center">Belum ada jadwal piket yang diatur di database.</p>';
+                    return;
+                }
+
+                const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+                const colors = { 'Senin': '#EF5350', 'Selasa': '#AB47BC', 'Rabu': '#42A5F5', 'Kamis': '#66BB6A', 'Jumat': '#FFA726' };
+                
+                // Group by Day
+                const grouped = {};
+                data.forEach(item => {
+                    const h = item.hari;
+                    if(!grouped[h]) grouped[h] = [];
+                    grouped[h].push(item.nama); 
+                });
+
+                let html = '<div class="ekskul-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">';
+                
+                days.forEach(day => {
+                    const students = grouped[day] || [];
+                    html += `
+                    <div style="border: 1px solid #eee; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                        <div style="background: ${colors[day]}; color: white; padding: 10px; text-align: center; font-weight: bold;">${day}</div>
+                        <div style="padding: 15px; background: #fff;">
+                            ${students.length > 0 ? 
+                                `<ul style="padding-left: 20px; margin: 0; font-size: 0.9rem; color: #555;">${students.map(s => `<li>${s}</li>`).join('')}</ul>` 
+                                : '<div style="text-align:center; color:#ccc; font-style:italic;">Libur / Kosong</div>'
+                            }
+                        </div>
+                    </div>`;
+                });
+                
+                html += '</div>';
+                modalHtml.innerHTML = html;
+
+            } catch (e) {
+                modalHtml.innerHTML = `<p class="text-center text-danger">Gagal memuat jadwal piket: ${e.message}</p>`;
+            }
+        }
+
+        // 3. MODAL EKSTRAKURIKULER (DATABASE)
+        async function openEkskulModal() {
+            modalTitle.textContent = "Informasi Ekstrakurikuler";
+            modalImg.style.display = 'none';
+            modalHtml.innerHTML = '<div style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat Data Ekskul...</div>';
+            modalAction.innerHTML = '';
+            modal.style.display = 'block';
+            setTimeout(() => modal.classList.add('show'), 10);
+
+            try {
+                const res = await fetch(`${API_URL}/ekstrakurikuler`);
+                const data = await res.json();
+
+                if(!data || data.length === 0) {
+                    modalHtml.innerHTML = '<p class="text-center">Belum ada data ekstrakurikuler.</p>';
+                    return;
+                }
+
+                let html = '<div class="ekskul-grid">';
+                data.forEach(ekskul => {
+                    const foto = 'https://placehold.co/300x200?text=' + ekskul.nama_ekskul.replace(/ /g, '+');
+                    html += `
+                    <div class="ekskul-card">
+                        <img src="${foto}" class="ekskul-img" alt="${ekskul.nama_ekskul}">
+                        <div class="ekskul-body">
+                            <div class="ekskul-title">${ekskul.nama_ekskul}</div>
+                            <div class="ekskul-info"><i class="far fa-clock" style="width:20px; color:var(--primary);"></i> Jadwal Menyusul</div>
+                        </div>
+                    </div>`;
+                });
+                html += '</div>';
+                modalHtml.innerHTML = html;
+            } catch(e) {
+                modalHtml.innerHTML = `<p class="text-center text-danger">Gagal memuat ekskul: ${e.message}</p>`;
+            }
         }
 
         function openVisiMisiModal() {
