@@ -1,0 +1,22 @@
+version: '3'
+services:
+  api:
+    build: .
+    container_name: 7kaih-api
+    restart: always
+    
+    ports:
+      - "3000:3000"
+
+    # 2. Aktifkan Mode Host (Menempel langsung ke server)
+    network_mode: "host"
+    
+    volumes:
+      - ./uploads:/app/uploads
+    environment:
+
+      - DB_HOST=127.0.0.1
+      - DB_PORT=5432
+      - DB_NAME=ikadb
+      - DB_USER=Bangbin
+      - DB_PASSWORD=Bangbin0103
