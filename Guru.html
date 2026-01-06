@@ -3,1198 +3,1342 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link id="favicon" rel="icon" type="image/x-icon" href="">
-    <title>IKA NIRMALA</title>
+    <title>IV-A - Setu 02</title>
     
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
-    <script src="https://unpkg.com/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link id="favicon" rel="icon" type="image/x-icon" href="">
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
+        /* --- ROOT VARIABLES & RESET --- */
         :root {
-            --primary-color: #4A90E2; --primary-dark: #357ABD; --secondary-color: #7F8C8D; 
-            --success-color: #2ECC71; --danger-color: #E74C3C; --warning-color: #F1C40F; 
-            --info-color: #3498DB; --light-color: #FDFEFE; --dark-color: #2C3E50; 
-            --background-color: #F0F2F5; --text-color: #2C3E50; --card-bg-color: #FFFFFF; 
-            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-            --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
-            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
-            --border-radius: 16px; --border-color: #E2E8F0;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
-        body { font-family: 'Poppins', sans-serif; background-color: var(--background-color); color: var(--text-color); line-height: 1.6; font-size: 14px; }
-        
-        #login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #4A90E2, #8E44AD); }
-        .login-card { background: white; padding: 40px; border-radius: 20px; width: 100%; max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); text-align: center; transform: scale(0.95); opacity: 0; animation: fadeUp 0.5s forwards; }
-
-        #dashboard-container { display: flex; min-height: 100vh; }
-        .sidebar { width: 260px; background-color: white; color: var(--dark-color); display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 100; box-shadow: 2px 0 10px rgba(0,0,0,0.05); transition: 0.3s; }
-        .sidebar-header { padding: 30px 20px; text-align: center; border-bottom: 1px solid var(--background-color); }
-        .sidebar-header h3 { font-weight: 700; color: var(--primary-color); letter-spacing: 1px; }
-        .sidebar-nav { flex-grow: 1; padding: 20px 0; overflow-y: auto; perspective: 1000px; }
-        
-        .sidebar-nav .nav-link { 
-            display: flex; align-items: center; gap: 12px; padding: 12px 25px; 
-            color: var(--secondary-color); text-decoration: none; 
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); 
-            font-weight: 500; font-size: 14px; border-left: 4px solid transparent; 
-            cursor: pointer; transform-origin: left center;
-        }
-        
-        .sidebar-nav .nav-link:hover, .sidebar-nav .nav-link.active { 
-            background: linear-gradient(90deg, #F0F7FF 0%, #FFFFFF 100%); 
-            color: var(--primary-color); 
-            border-left-color: var(--primary-color);
-            transform: scale(1.05) translateX(10px); 
-            box-shadow: 5px 5px 15px rgba(74, 144, 226, 0.15); 
-            z-index: 10;
+            --primary: #4A90E2;
+            --primary-dark: #357ABD;
+            --secondary: #50E3C2;
+            --accent: #FF6B6B;
+            --dark: #2C3E50;
+            --light: #F9FAFB;
+            --gray: #64748B;
+            --gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --shadow-sm: 0 4px 6px rgba(0,0,0,0.05);
+            --shadow-md: 0 10px 15px rgba(0,0,0,0.1);
+            --shadow-lg: 0 20px 25px rgba(0,0,0,0.15);
+            --border-radius: 20px;
         }
 
-        .sidebar-nav .nav-link:hover i { animation: wiggle 0.5s ease-in-out; color: var(--primary-color); }
-        @keyframes wiggle { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-15deg) scale(1.2); } 75% { transform: rotate(15deg) scale(1.2); } }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        .sidebar-submenu { overflow: hidden; transition: max-height 0.3s ease-out; background: #F8FAFC; margin: 0 15px; border-radius: 8px; }
-        .sidebar-submenu .nav-link { padding-left: 45px; font-size: 13px; border-left: none; }
-        .sidebar-submenu .nav-link:hover, .sidebar-submenu .nav-link.active-sub { color: var(--primary-color); background: #E0F2FE; border-radius: 8px; font-weight: 600; transform: scale(1.02) translateX(5px); }
-        .arrow-icon { transition: transform 0.3s; font-size: 10px; margin-left: auto; }
-        .arrow-icon.rotate { transform: rotate(90deg); }
-        .main-content { flex-grow: 1; margin-left: 260px; padding: 30px; width: calc(100% - 260px); }
-
-        .card { background: white; padding: 30px; border-radius: var(--border-radius); box-shadow: var(--shadow-sm); margin-bottom: 25px; border: 1px solid white; transition: 0.3s ease; }
-        .card:hover { box-shadow: var(--shadow-md); }
-        .card h3 { font-size: 18px; font-weight: 600; color: var(--dark-color); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-        .card h3 i { color: var(--primary-color); }
-
-        .btn, .action-btn { padding: 10px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s; font-family: inherit; font-size: 13px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
-        .btn-primary { background: linear-gradient(135deg, #4A90E2, #357ABD); color: white; }
-        .btn-success { background: linear-gradient(135deg, #2ECC71, #27AE60); color: white; }
-        .btn-danger { background: linear-gradient(135deg, #E74C3C, #C0392B); color: white; }
-        .btn-info { background: linear-gradient(135deg, #3498DB, #2980B9); color: white; }
-        .btn-warning { background: linear-gradient(135deg, #F1C40F, #F39C12); color: white; }
-        .action-btn.edit { background-color: #EBF5FB; color: var(--info-color); box-shadow: none; }
-        .action-btn.edit:hover { background-color: var(--info-color); color: white; }
-        .action-btn.delete { background-color: #FDEDEC; color: var(--danger-color); box-shadow: none; }
-        .action-btn.delete:hover { background-color: var(--danger-color); color: white; }
-        .action-btn.download { background-color: #EAFAF1; color: var(--success-color); box-shadow: none; }
-
-        .table-wrapper { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border-color); margin-top: 20px; max-height: 65vh; background: white; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 16px 20px; text-align: left; border-bottom: 1px solid var(--border-color); white-space: nowrap; font-size: 13px; }
-        th { background: #F8FAFC; font-weight: 600; color: #64748B; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 2; border-bottom: 2px solid var(--border-color); }
-        tbody tr:hover { background-color: #F8FAFC; }
-        
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
-        .form-group { margin-bottom: 20px; position: relative; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 13px; color: #64748B; transition: 0.3s; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid #CBD5E1; font-family: inherit; font-size: 14px; background: #F8FAFC; transition: 0.3s; }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { background: white; border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1); }
-        .full-width { grid-column: 1 / -1; }
-
-        .settings-section-title { font-size: 14px; font-weight: 700; color: var(--secondary-color); text-transform: uppercase; letter-spacing: 1px; margin: 30px 0 15px; border-bottom: 2px solid #F1F5F9; padding-bottom: 10px; grid-column: 1 / -1; }
-        .ibadah-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; animation: fadeUp 0.5s ease; }
-        .ibadah-card { background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; transition: 0.3s; position: relative; overflow: hidden; }
-        .ibadah-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--primary-color); }
-        .ibadah-card.active { background: #F0F7FF; border-color: var(--primary-color); }
-        .ibadah-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .ibadah-title { font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 8px; }
-        .ibadah-icon { width: 32px; height: 32px; background: #E0F2FE; color: var(--primary-color); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
-        
-        .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
-        .toggle-switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #CBD5E1; transition: .4s; border-radius: 24px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        input:checked + .slider { background-color: var(--success-color); }
-        input:checked + .slider:before { transform: translateX(20px); }
-
-        .predikat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-top: 25px; }
-        .predikat-card { padding: 25px; border-radius: 20px; text-align: center; color: white; position: relative; overflow: hidden; transition: all 0.4s; }
-        .predikat-card:hover { transform: translateY(-5px); }
-        .predikat-card::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%); transform: rotate(45deg); pointer-events: none; opacity: 0; transition: opacity 0.5s ease; }
-        .predikat-card:hover::before { opacity: 1; }
-        .predikat-card.taat { background: linear-gradient(135deg, #059669, #34D399); box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4); }
-        .predikat-card.terbiasa { background: linear-gradient(135deg, #D97706, #FBBF24); box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4); }
-        .predikat-card.kurang { background: linear-gradient(135deg, #DC2626, #F87171); box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4); }
-        .predikat-icon { font-size: 32px; margin-bottom: 20px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); transition: transform 0.4s ease; }
-        .predikat-card:hover .predikat-icon { transform: scale(1.1) rotate(10deg); }
-        .predikat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; opacity: 0.9; font-weight: 600; display: block; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .predikat-input { width: 100%; background: rgba(255, 255, 255, 0.2) !important; border: 2px solid rgba(255, 255, 255, 0.3) !important; border-radius: 12px; padding: 12px; color: white !important; text-align: center; font-weight: 700; font-size: 16px; backdrop-filter: blur(4px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .predikat-input:focus { background: rgba(255, 255, 255, 0.35) !important; border-color: white !important; transform: scale(1.05); box-shadow: 0 8px 20px rgba(0,0,0,0.15); outline: none; }
-        .predikat-input::placeholder { color: rgba(255,255,255,0.6); font-weight: 400; }
-        .input-group-animate { margin-bottom: 15px; position: relative; }
-
-        .school-info-grid { display: grid; grid-template-columns: 200px 1fr; gap: 30px; align-items: start; }
-        .school-logo-preview-container { text-align: center; padding: 20px; background: #F8FAFC; border-radius: 16px; border: 2px dashed #CBD5E1; }
-        .school-logo-preview { width: 120px; height: 120px; object-fit: contain; margin-bottom: 15px; border-radius: 50%; box-shadow: var(--shadow-md); background: white; padding: 10px; }
-        .school-form-fields { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-up { animation: fadeUp 0.5s ease forwards; }
-        .page { display: none; }
-        .page.active { display: block; animation: fadeUp 0.4s ease; }
-
-        .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-top: 20px; }
-        .chart-wrapper { position: relative; height: 350px; background: white; padding: 20px; border-radius: 12px; border: 1px solid #E2E8F0; box-shadow: var(--shadow-sm); }
-        .chart-title { font-size: 16px; font-weight: 600; color: var(--dark-color); margin-bottom: 15px; border-bottom: 1px solid #F1F5F9; padding-bottom: 10px; }
-
-        @media (max-width: 768px) {
-            .sidebar { width: 0; overflow: hidden; }
-            .main-content { margin-left: 0; width: 100%; padding: 20px; }
-            .school-info-grid { grid-template-columns: 1fr; }
-            .predikat-grid { grid-template-columns: 1fr; }
-            .school-form-fields { grid-template-columns: 1fr; }
-            .chart-grid { grid-template-columns: 1fr; }
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background-color: var(--light); 
+            color: var(--dark); 
+            overflow-x: hidden; 
+            line-height: 1.6;
         }
 
-        .controls-wrapper { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 20px; align-items: flex-start; margin-bottom: 25px; }
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px; }
-        .modal.show { display: flex; }
-        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 100%; max-width: 800px; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: fadeUp 0.3s ease; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #F1F5F9; }
-        .modal-header h3 { font-size: 20px; color: var(--dark-color); }
+        /* --- PRELOADER --- */
+        #preloader { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: white; z-index: 9999; 
+            display: flex; justify-content: center; align-items: center; 
+            transition: opacity 0.5s ease-out; 
+        }
+        .loader { 
+            width: 50px; height: 50px; 
+            border: 5px solid #f3f3f3; 
+            border-top: 5px solid var(--primary); 
+            border-radius: 50%; 
+            animation: spin 1s linear infinite; 
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- ANIMATIONS --- */
+        .reveal { opacity: 0; transform: translateY(50px); transition: all 0.8s cubic-bezier(0.5, 0, 0, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
         
-        #edit-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; padding: 10px 0; }
-        .checklist-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .checklist-option { display: flex; align-items: center; gap: 10px; background-color: #F8FAFC; padding: 12px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; transition: 0.2s; }
-        .checklist-option:hover { border-color: var(--primary-color); background: white; }
-        .checklist-option input { width: 1.2em; height: 1.2em; accent-color: var(--primary-color); }
-        .lainnya-text-input { display: none; width: 100%; margin-top: 10px; }
+        .reveal-scale { opacity: 0; transform: scale(0.8); transition: all 0.8s cubic-bezier(0.5, 0, 0, 1); }
+        .reveal-scale.active { opacity: 1; transform: scale(1); }
+        
+        .delay-100 { transition-delay: 0.1s; }
+        .delay-200 { transition-delay: 0.2s; }
+        .delay-300 { transition-delay: 0.3s; }
+        
+        @keyframes fadeDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
 
-        .gallery-preview { width: 100%; height: 160px; object-fit: cover; border-radius: 12px; border: 1px solid #E2E8F0; margin-bottom: 10px; transition: 0.3s; }
-        .gallery-preview:hover { transform: scale(1.02); }
-        .search-container { position: relative; margin-bottom: 0; }
-        .search-container i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94A3B8; }
-        .search-container input { padding-left: 45px !important; width: 250px; background: white; border-color: #E2E8F0; }
+        /* --- HERO SECTION --- */
+        .hero {
+            position: relative; height: 100vh; 
+            display: flex; align-items: center; justify-content: center; 
+            text-align: center; color: white;
+            background-color: #333; /* Fallback */
+            background-attachment: fixed; 
+            background-position: center; 
+            background-repeat: no-repeat; 
+            background-size: cover; 
+            overflow: hidden;
+            transition: background-image 0.8s ease-in-out;
+        }
+        .hero-overlay { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(30, 41, 59, 0.5); 
+            z-index: 1; 
+        }
+        .hero-content { 
+            position: relative; z-index: 2; 
+            max-width: 900px; padding: 30px; 
+            animation: fadeDown 1.2s ease-out; 
+        }
+        .hero h1 { 
+            font-size: 3.5rem; font-weight: 800; margin-bottom: 15px; 
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.5); letter-spacing: -1px; 
+        }
+        .hero p { 
+            font-size: 1.2rem; margin-bottom: 40px; 
+            font-weight: 300; letter-spacing: 1px; opacity: 0.95; 
+        }
 
-        .modal-modern-content { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); padding: 40px 30px; border-radius: 24px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.5); animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; overflow: visible; }
-        .modal-icon-wrapper { width: 80px; height: 80px; background: #FEE2E2; color: #EF4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: -60px auto 20px; border: 4px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .modal-modern-title { font-size: 20px; font-weight: 700; color: #1E293B; margin-bottom: 10px; }
-        .modal-modern-text { font-size: 14px; color: #64748B; line-height: 1.6; margin-bottom: 30px; }
-        .modal-btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .btn-modern-cancel { background: #F1F5F9; color: #64748B; border: none; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.3s; }
-        .btn-modern-cancel:hover { background: #E2E8F0; color: #334155; }
-        .btn-modern-delete { background: linear-gradient(135deg, #EF4444, #DC2626); color: white; border: none; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); transition: 0.3s; }
-        .btn-modern-delete:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(239, 68, 68, 0.4); }
-        @keyframes popIn { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
+        /* --- NAV CARDS (PORTAL BUTTONS) --- */
+        .nav-cards { display: flex; gap: 25px; justify-content: center; flex-wrap: wrap; margin-top: 30px; }
+        .nav-card {
+            background: rgba(255, 255, 255, 0.1); 
+            backdrop-filter: blur(10px); 
+            padding: 30px 50px; 
+            border-radius: var(--border-radius); 
+            border: 1px solid rgba(255,255,255,0.2);
+            cursor: pointer; transition: all 0.4s ease; 
+            text-decoration: none; color: white; 
+            min-width: 220px; position: relative; overflow: hidden;
+        }
+        .nav-card:hover { 
+            transform: translateY(-8px); 
+            background: rgba(255, 255, 255, 0.25); 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4); 
+            border-color: rgba(255,255,255,0.4);
+        }
+        .nav-card i { font-size: 2.5rem; margin-bottom: 15px; display: block; }
+        .nav-card h3 { font-size: 1.2rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* --- TAMBAHAN CSS UNTUK SIDEBAR TOGGLE --- */
-        .sidebar { 
-            transition: transform 0.3s ease, width 0.3s ease; 
+        /* MODIFIKASI TOMBOL PORTAL GURU & SISWA MENJADI BULAT */
+        #btn-portal-guru, #btn-portal-siswa {
+            z-index: 1; 
+            width: 250px; 
+            height: 250px; 
+            border-radius: 50%;
+            padding: 0;            
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        #btn-portal-guru.has-bg { background: rgba(0, 0, 0, 0.4) !important; border-color: rgba(255, 255, 255, 0.6); }
+        #btn-portal-guru::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: var(--teacher-bg); background-size: cover; background-position: center top;
+            opacity: 0.4; filter: grayscale(80%) blur(1px); 
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); z-index: -1; 
+        }
+        #btn-portal-guru:hover::before { opacity: 1; filter: grayscale(0%) blur(0px); transform: scale(1.1); }
+        #btn-portal-guru i, #btn-portal-guru h3 { position: relative; z-index: 2; text-shadow: 0 4px 8px rgba(0,0,0,0.8); }
+
+        /* --- SECTIONS GENERAL --- */
+        section { padding: 100px 20px; position: relative; overflow: hidden; }
+        .container { max-width: 1200px; margin: 0 auto; position: relative; z-index: 2; }
+        .section-title { 
+            text-align: center; margin-bottom: 70px; font-size: 2.5rem; font-weight: 800; 
+            color: var(--dark); position: relative; display: inline-block; left: 50%; transform: translateX(-50%); 
+        }
+        .section-title::before { 
+            content: ''; position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); 
+            width: 80px; height: 6px; background: var(--primary); border-radius: 3px; 
+        }
+
+        /* --- SECTION PROFIL KELAS --- */
+        .profile-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 60px; align-items: center; }
+        .teacher-card { 
+            background: white; border-radius: 30px; padding: 50px 30px; text-align: center; 
+            box-shadow: var(--shadow-lg); position: relative; overflow: hidden; 
+            border: 1px solid rgba(0,0,0,0.05); transition: transform 0.3s;
+        }
+        .teacher-card:hover { transform: translateY(-5px); }
+        .teacher-bg { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 140px; 
+            background: var(--gradient-bg); z-index: 0; 
+        }
+        .teacher-img { 
+            width: 160px; height: 160px; border-radius: 50%; object-fit: cover; 
+            border: 6px solid white; position: relative; z-index: 1; 
+            margin-bottom: 25px; background: #eee; box-shadow: var(--shadow-md); 
+        }
+        .teacher-info { position: relative; z-index: 1; }
+        .teacher-info h3 { font-size: 2rem; color: var(--dark); margin-bottom: 5px; font-weight: 700; }
+        .teacher-info p { color: var(--gray); font-size: 1.1rem; margin-bottom: 25px; font-weight: 500; }
+        
+        .vision-box { 
+            background: white; padding: 60px; border-radius: 30px; 
+            box-shadow: var(--shadow-md); border-left: 10px solid var(--secondary); 
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .vision-box:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .vision-box i.bg-icon { 
+            position: absolute; right: 30px; bottom: 30px; font-size: 120px; 
+            color: rgba(0,0,0,0.03); transform: rotate(-15deg); 
+        }
+        .vision-box h4 { color: var(--primary); font-size: 1.6rem; margin-bottom: 25px; display: flex; align-items: center; gap: 15px; }
+        .vision-text { color: #525f7f; line-height: 2; margin-bottom: 30px; font-size: 1.1rem; }
+
+        /* --- SECTION PARALLAX GENERAL --- */
+        .parallax-section {
+            background-color: #1e293b;
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            position: relative;
+        }
+        .parallax-section .parallax-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.7);
+            z-index: 1;
+        }
+        .parallax-section .section-title { color: white; }
+        
+        .info-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 30px; 
+            margin-bottom: 0; 
         }
         
-        .main-content { 
-            transition: margin-left 0.3s ease, width 0.3s ease; 
+        .card-wrapper { display: flex; flex-direction: column; gap: 15px; }
+        
+        .preview-card {
+            position: relative; height: 320px; width: 100%;
+            border-radius: 25px; overflow: hidden; cursor: pointer;
+            box-shadow: var(--shadow-lg); transition: transform 0.3s;
+            background: #fff;
         }
-
-        body.sidebar-collapsed .sidebar {
-            transform: translateX(-100%);
-            width: 0;
+        .preview-card:hover { transform: translateY(-5px); z-index: 2; }
+        .preview-card img { 
+            width: 100%; height: 100%; object-fit: cover; 
+            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
         }
+        .preview-card:hover img { transform: scale(1.1); }
+        .preview-overlay {
+            position: absolute; bottom: 0; left: 0; width: 100%; padding: 30px;
+            background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.6), transparent); 
+            color: white; transform: translateY(0);
+        }
+        .preview-overlay h3 { 
+            font-size: 1.3rem; margin-bottom: 8px; font-weight: 700; 
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px;
+        }
+        .preview-overlay p { font-size: 0.9rem; opacity: 0.9; margin: 0; }
 
-        body.sidebar-collapsed .main-content {
-            margin-left: 0;
+        /* Action Buttons under Cards (OPSI A) */
+        .action-btn {
+            display: block; width: 100%; text-align: center;
+            padding: 12px; border-radius: 15px; 
+            background: rgba(255,255,255,0.1); 
+            color: white; font-weight: 600; text-decoration: none;
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.3s; cursor: pointer;
+            font-size: 0.95rem;
+        }
+        .action-btn:hover { background: var(--primary); border-color: var(--primary); transform: translateY(-2px); }
+        .action-btn i { margin-right: 8px; }
+
+        /* --- SECTION PENGUMUMAN --- */
+        .announcement-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 35px; }
+        .news-card {
+            background: white; border-radius: 24px; overflow: hidden; box-shadow: var(--shadow-sm);
+            transition: all 0.4s ease; border-bottom: 6px solid transparent; cursor: pointer;
+            position: relative; display: flex; flex-direction: column;
+        }
+        .news-card:hover { 
+            transform: translateY(-10px); 
+            box-shadow: var(--shadow-lg); 
+            border-bottom-color: var(--primary); 
+        }
+        .news-header { 
+            height: 180px; position: relative; overflow: hidden; background: #F0F4F8; 
+            display: flex; align-items: center; justify-content: center; 
+        }
+        .news-header img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+        .news-card:hover .news-header img { transform: scale(1.1); }
+        .news-icon-placeholder { font-size: 3.5rem; color: var(--primary); opacity: 0.5; }
+        .news-content { padding: 35px; flex-grow: 1; display: flex; flex-direction: column; }
+        .news-content h3 { margin-bottom: 15px; font-size: 1.4rem; color: var(--dark); font-weight: 700; line-height: 1.4; }
+        .news-content p { color: var(--gray); font-size: 1rem; line-height: 1.7; margin-bottom: 25px; flex-grow: 1; }
+        .read-more { 
+            font-weight: 600; color: var(--primary); font-size: 0.95rem; 
+            display: inline-flex; align-items: center; gap: 8px; 
+            transition: gap 0.3s;
+        }
+        .news-card:hover .read-more { gap: 12px; }
+
+        /* --- SECTION GRAFIK (UPDATED LAYOUT) --- */
+        .chart-section { 
+            background: white; padding: 50px; border-radius: 40px; 
+            box-shadow: var(--shadow-lg); 
             width: 100%;
         }
+        
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Dua kolom */
+            gap: 40px;
+            align-items: start;
+        }
 
-        /* Tombol Toggle */
-        .btn-toggle-sidebar {
+        .chart-card {
             background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: var(--shadow-md);
             border: 1px solid #E2E8F0;
-            color: var(--secondary-color);
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-right: 15px;
-            transition: 0.3s;
-        }
-        .btn-toggle-sidebar:hover {
-            background: #F1F5F9;
-            color: var(--primary-color);
         }
 
+        .chart-title-small {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid #F1F5F9;
+            padding-bottom: 10px;
+        }
+
+        .attendance-details {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            text-align: center;
+        }
+        .att-item {
+            background: #F8FAFC;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #E2E8F0;
+        }
+        .att-val { font-size: 1.2rem; font-weight: bold; }
+        .att-label { font-size: 0.8rem; color: #64748B; }
+
+        /* --- SECTION SISWA --- */
+        .student-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); 
+            gap: 20px; justify-items: center; padding: 20px 0; width: 100%; 
+        }
+        .student-card { 
+            text-align: center; cursor: pointer; transition: all 0.3s ease; 
+            width: 100%; position: relative; 
+            background: transparent; box-shadow: none; border: none;
+        }
+        .student-card:hover { transform: translateY(-10px); }
+        
+        .student-img-wrapper { 
+            width: 110px; height: 110px; border-radius: 50%; overflow: hidden; 
+            margin: 0 auto; border: 4px solid white; 
+            box-shadow: var(--shadow-md); position: relative; background: #eee; 
+            transition: all 0.3s ease; 
+        }
+        /* Efek hover pada foto */
+        .student-card:hover .student-img-wrapper { 
+            box-shadow: 0 15px 30px rgba(74, 144, 226, 0.6); 
+            border-color: var(--primary); 
+            transform: scale(1.1);
+        }
+        .student-img { width: 100%; height: 100%; object-fit: cover; }        
+        .student-name, .student-id { display: none; }
+
+
+        /* --- SECTION GALERI & VIDEO (UPDATE: 5 GRID) --- */
+        .gallery-grid { 
+            display: grid; 
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 15px; margin-bottom: 60px; 
+        }
+        
+        .gallery-item { 
+            border-radius: 15px; overflow: hidden; height: 200px; 
+            cursor: pointer; position: relative; box-shadow: var(--shadow-md); background: #eee; 
+            transition: transform 0.3s;
+        }
+        .gallery-item:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+        .gallery-item:hover img { transform: scale(1.1); }
+        
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; }
+        .video-container { 
+            position: relative; padding-bottom: 56.25%; height: 0; 
+            overflow: hidden; border-radius: 20px; box-shadow: var(--shadow-md); background: #000; 
+            transition: transform 0.3s;
+        }
+        .video-container:hover { transform: scale(1.02); }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+
+        /* --- SECTION SAMBUTAN GURU --- */
+        .sambutan-section { 
+            background: var(--dark); color: white; border-radius: 40px; 
+            margin: 80px 0 50px; padding: 100px 50px; 
+            position: relative; overflow: hidden; text-align: center; 
+            box-shadow: var(--shadow-lg);
+        }
+        .sambutan-bg-icon { 
+            position: absolute; font-size: 400px; color: rgba(255,255,255,0.03); 
+            top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; 
+        }
+        .sambutan-content { position: relative; z-index: 2; max-width: 1000px; margin: 0 auto; }
+        .quote-icon { font-size: 2rem; color: var(--secondary); margin-bottom: 40px; display: inline-block; }
+        .quote-text { font-size: 1rem; font-style: italic; line-height: 1.8; margin-bottom: 50px; font-weight: 300; }
+        .quote-author { font-weight: 800; font-size: 1.3rem; letter-spacing: 2px; color: var(--secondary); text-transform: uppercase; }
+
+        /* --- FOOTER --- */
+        footer { 
+            background: #1e293b; color: #ecf0f1; padding: 60px 0; 
+            text-align: center; font-size: 1rem; position: relative; 
+        }
+        .social-links { margin-top: 30px; display: flex; justify-content: center; gap: 20px; }
+        .social-links a { 
+            color: white; font-size: 1.5rem; width: 55px; height: 55px; 
+            border-radius: 50%; background: rgba(255,255,255,0.1); 
+            display: flex; align-items: center; justify-content: center; 
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+        .social-links a:hover { background: var(--primary); transform: translateY(-5px) scale(1.1); }
+        .social-links a.wa:hover { background: #25D366; }
+
+        /* --- MODAL STYLES (NEW) --- */
+        .modal { 
+            display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; 
+            background-color: rgba(0,0,0,0.85); backdrop-filter: blur(8px); 
+            opacity: 0; transition: opacity 0.3s ease; 
+        }
+        .modal.show { opacity: 1; }
+        .modal-content { 
+            background-color: #fefefe; margin: 5% auto; padding: 0; border-radius: 25px; 
+            width: 90%; max-width: 1200px; position: relative; 
+            transform: translateY(50px); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            overflow: hidden; box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.5); 
+        }
+        .modal.show .modal-content { transform: translateY(0); }
+        .modal-header { background: var(--primary); color: white; padding: 25px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { padding: 40px; max-height: 75vh; overflow-y: auto; text-align: left; }
+        .close-modal { 
+            color: white; font-size: 28px; font-weight: bold; cursor: pointer; transition: 0.3s; 
+            width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; 
+            border-radius: 50%; background: rgba(255,255,255,0.2); 
+        }
+        .close-modal:hover { background: rgba(255,255,255,0.4); transform: rotate(90deg); }
+        .modal-img { width: 100%; border-radius: 15px; margin-bottom: 25px; box-shadow: var(--shadow-md); }
+        
+        /* Gaya Tabel Jadwal (Baru) */
+        .jadwal-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        .jadwal-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .jadwal-header {
+            padding: 10px;
+            color: white;
+            font-weight: 700;
+            text-align: center;
+        }
+        .jadwal-body {
+            padding: 0;
+        }
+        .jadwal-mini-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .jadwal-mini-table td, .jadwal-mini-table th {
+            padding: 8px 10px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .jadwal-mini-table th {
+            background-color: #f8fafc;
+            color: #64748b;
+            font-weight: 600;
+            text-align: left;
+        }
+        .jadwal-mini-table tr:last-child td {
+            border-bottom: none;
+        }
+        @media (max-width: 768px) {
+            .jadwal-grid { grid-template-columns: 1fr; }
+        }
+        
+        /* Gaya Kartu Ekskul (Baru) */
+        .ekskul-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .ekskul-card { border: 1px solid #eee; border-radius: 15px; overflow: hidden; box-shadow: var(--shadow-sm); transition: 0.3s; }
+        .ekskul-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); }
+        .ekskul-img { width: 100%; height: 120px; object-fit: cover; background: #eee; }
+        .ekskul-body { padding: 15px; }
+        .ekskul-title { font-weight: 700; color: var(--dark); margin-bottom: 5px; font-size: 1.1rem; }
+        .ekskul-info { font-size: 0.85rem; color: #666; margin-bottom: 5px; }
+
+        /* RESPONSIVE */
+        @media (max-width: 992px) {
+            .hero h1 { font-size: 2.8rem; }
+            .profile-grid { grid-template-columns: 1fr; gap: 40px; }
+            .teacher-card { order: 1; } .vision-box { order: 2; }
+            .chart-section { padding: 40px; }
+            .charts-container { grid-template-columns: 1fr; }
+            .info-grid { grid-template-columns: repeat(2, 1fr); }
+            .gallery-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.2rem; }
+            section { padding: 60px 20px; }
+            .info-grid { grid-template-columns: 1fr; } 
+            .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+            .student-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+            .nav-card { padding: 20px; width: 100%; }
+        }
     </style>
 </head>
 <body>
 
-    <div id="login-container">
-        <div class="login-card">
-            <div style="font-size: 40px; color: var(--primary-color); margin-bottom: 10px;"><i class="fas fa-graduation-cap"></i></div>
-            <h2 style="color: var(--dark-color); margin-bottom: 5px;">Login Guru</h2>
-            <p style="margin: 0 0 30px; color: #94A3B8; font-size: 13px;">Panel Manajemen Kelas & Laporan 7KAIH</p>
-            <form id="loginForm">
-                <div class="form-group"><input type="text" id="username" placeholder="Username" required></div>
-                <div class="form-group"><input type="password" id="password" placeholder="Password" required></div>
-                <button type="submit" id="loginButton" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 15px; font-size: 15px; margin-top: 10px;">Masuk</button>
-                <a href="./" class="btn btn-danger" style="width: 50%; justify-content: center; padding: 15px; font-size: 15px; margin-top: 10px;"><i class="fas fa-home"></i></a>
-            </form>
-        </div>
-    </div>
+    <div id="preloader"><div class="loader"></div></div>
 
-    <div id="dashboard-container" style="display: none;">
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h3><i class="fas fa-school"></i> IV-A</h3>
-            </div>
-            <nav class="sidebar-nav">
-                <a href="./" class="nav-link"><i class="fas fa-home"></i> Home</a>
-                
-                <div class="nav-item-dropdown">
-                    <a href="javascript:void(0)" class="nav-link" id="nav-laporan-parent" onclick="toggleSidebarDropdown(this)">
-                        <i class="fas fa-file-invoice"></i> 7KAIH <i class="fas fa-chevron-right arrow-icon"></i>
-                    </a>
-                    <div class="sidebar-submenu" id="submenu-laporan" style="display: none;">
-                        <a href="javascript:void(0)" class="nav-link sub-link" onclick="openLaporanSub('grafik', this)"><i class="fas fa-chart-bar"></i> Grafik</a>
-                        <a href="javascript:void(0)" class="nav-link sub-link" onclick="openLaporanSub('data', this)"><i class="fas fa-table"></i> Data</a>
-                        <a href="javascript:void(0)" class="nav-link sub-link" onclick="openLaporanSub('nilai', this)"><i class="fas fa-star-half-alt"></i> Nilai 7K</a>
-                        <a href="javascript:void(0)" class="nav-link sub-link" onclick="openLaporanSub('rekap', this)"><i class="fas fa-chart-pie"></i> Rekap</a>
-                        <a href="javascript:void(0)" class="nav-link sub-link" onclick="openLaporanSub('predikat', this)"><i class="fas fa-award"></i> Predikat</a>
-                        <a href="javascript:void(0)" class="nav-link sub-link" onclick="openLaporanSub('analisis', this)"><i class="fas fa-search-plus"></i> Analisis Rinci</a>
-                        <a href="#" class="nav-link sub-link" data-page="page-pengaturan"><i class="fas fa-cogs"></i> Pengaturan 7KAIH</a>
-
-                    </div>
-                </div>
-
-                <div class="nav-item-dropdown">
-                    <a href="javascript:void(0)" class="nav-link" onclick="toggleSidebarDropdown(this)">
-                        <i class="fas fa-chalkboard-teacher"></i> Sekolah <i class="fas fa-chevron-right arrow-icon"></i>
-                    </a>
-                    <div class="sidebar-submenu" style="display: none;">
-                        <a href="#" class="nav-link sub-link" data-page="page-sekolah"><i class="fas fa-school"></i> Data Sekolah</a>
-                        <a href="#" class="nav-link" data-page="page-siswa"><i class="fas fa-user-graduate"></i> Data Siswa</a>                        
-                        <a href="#" class="nav-link sub-link" data-page="page-galeri"><i class="fas fa-images"></i> Galeri & YouTube</a>
-                        <a href="#" class="nav-link sub-link" data-page="page-kelas"><i class="fas fa-info-circle"></i> Info Visual Kelas</a>
-                    </div>
-                </div>                
-
-                <div class="nav-item-dropdown">
-                    <a href="javascript:void(0)" class="nav-link" onclick="toggleSidebarDropdown(this)">
-                        <i class="fas fa-chalkboard-teacher"></i> Kelas <i class="fas fa-chevron-right arrow-icon"></i>
-                    </a>
-                    <div class="sidebar-submenu" style="display: none;">                                     
-                        
-                        <a href="#" class="nav-link sub-link" data-page="page-pelajaran"><i class="fas fa-book"></i> Pelajaran</a>
-                        <a href="#" class="nav-link sub-link" data-page="page-tp-list"><i class="fas fa-list"></i> Daftar TP</a>
-                        <a href="#" class="nav-link sub-link" data-page="page-absensi"><i class="fas fa-calendar-check"></i> Absensi</a>
-                        <a href="#" class="nav-link sub-link" data-page="page-jadpel"><i class="fas fa-calendar"></i> Jadwal Pelajaran</a>
-                        <a href="#" class="nav-link sub-link" data-page="page-piket"><i class="fas fa-calendar"></i> Jadwal Piket</a>
-                    </div>
-                </div>
-
-                <div class="nav-item-dropdown">
-                    <a href="javascript:void(0)" class="nav-link" onclick="toggleSidebarDropdown(this)">
-                        <i class="fas fa-star"></i> Nilai Mapel <i class="fas fa-chevron-right arrow-icon"></i>
-                    </a>
-                    <div class="sidebar-submenu" id="submenu-nilai" style="display: none;">
-                        <div style="padding:10px; font-size:12px; color:#aaa;">Memuat Mapel...</div>
-                    </div>
-                </div> 
-
-                <div class="nav-item-dropdown"> <a href="javascript:void(0)" class="nav-link" onclick="toggleSidebarDropdown(this)">
-                        <i class="fas fa-star"></i> Kokurikuler <i class="fas fa-chevron-right arrow-icon"></i>
-                    </a>
-                    <div class="sidebar-submenu" style="display: none;">  
-                        <a href="#" class="nav-link sub-link" data-page="page-tp-koku"><i class="fas fa-project-diagram"></i> TP Koku</a>                        
-                        <a href="#" class="nav-link sub-link" data-page="page-nilai-koku"><i class="fas fa-project-diagram"></i> Nilai Koku</a>                        
-                    </div> 
-                </div>
-
-                <div class="nav-item-dropdown"> <a href="javascript:void(0)" class="nav-link" onclick="toggleSidebarDropdown(this)">
-                        <i class="fas fa-star"></i> Ekstrakurikuler <i class="fas fa-chevron-right arrow-icon"></i>
-                    </a>
-                    <div class="sidebar-submenu" style="display: none;">  
-                        <a href="#" class="nav-link sub-link" data-page="page-tp-ekstra"><i class="fas fa-project-diagram"></i> TP Ekstrakurikuler</a>                        
-                        <a href="#" class="nav-link sub-link" data-page="page-nilai-ekstra"><i class="fas fa-project-diagram"></i> Nilai Ekstra</a>                        
-                    </div> 
-                </div>
-
-                <a href="#" class="nav-link" data-page="page-aplikasi"><i class="fas fa-database"></i> Data Aplikasi</a>
-            </nav>
-            <div style="padding: 20px;">
-                <button id="logoutButtonSide" class="btn btn-danger" style="width: 100%; justify-content: center;"><i class="fas fa-sign-out-alt"></i> Logout</button>
-            </div>
-        </aside>
-
-        <main class="main-content">
-            <div class="header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                <div style="display: flex; align-items: center;">
-                    <button class="btn-toggle-sidebar" onclick="toggleSidebar()" title="Geser Menu"><i class="fas fa-bars"></i></button>
-                    <div>
-                        <h2 id="page-title" style="font-size: 24px; font-weight: 700; color: var(--dark-color);">Managemen Kelas</h2>
-                        <p style="font-size: 13px; color: #94A3B8;">Selamat datang kembali di panel manajemen.</p>
-                    </div>
-                </div>
-                <div id="guru-badge" style="background: white; padding: 8px 20px; border-radius: 50px; box-shadow: var(--shadow-sm); font-size: 13px; font-weight: 600; color: var(--primary-color); display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-user-circle" style="font-size: 20px;"></i> <span id="guru-name-display">Guru</span>
-                </div>
-            </div>
-
-            <section id="page-laporan" class="page active">
-                <div id="grafik-view" style="display:none; margin-bottom: 25px;">
-                    <div class="card">
-                        <div class="chart-title"><i class="fas fa-chart-bar"></i> Grafik 7 Kebiasaan Anak Indonesia Hebat (Kelas Ini)</div>
-                        <div style="position: relative; height: 400px; width: 100%;">
-                            <canvas id="guruGlobalChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="analisis-view" style="display:none; margin-bottom: 25px;">
-                    <div class="settings-section-title">Analisis Ibadah</div>
-                    <div id="analisis-ibadah-rinci-container" class="chart-grid"></div>
-
-                    <div class="settings-section-title" style="margin-top: 30px;">Analisis Waktu</div>
-                    <div class="chart-grid">
-                        <div class="chart-wrapper"><div class="chart-title">Bangun Pagi</div><canvas id="guruBangunChart"></canvas></div>
-                        <div class="chart-wrapper"><div class="chart-title">Tidur Cepat</div><canvas id="guruTidurChart"></canvas></div>
-                    </div>
-
-                    <div class="settings-section-title" style="margin-top: 30px;">Analisis Kegiatan</div>
-                    <div class="chart-grid">
-                        <div class="chart-wrapper"><div class="chart-title">Olahraga</div><canvas id="guruOlahragaChart"></canvas></div>
-                        <div class="chart-wrapper"><div class="chart-title">Bermasyarakat</div><canvas id="guruMasyarakatChart"></canvas></div>
-                        <div class="chart-wrapper"><div class="chart-title">Belajar</div><canvas id="guruBelajarChart"></canvas></div>
-                    </div>
-
-                    <div class="settings-section-title" style="margin-top: 30px;">Analisis Makanan Sehat</div>
-                    <div class="card">
-                        <div class="chart-title">Detail Konsumsi Makanan Sehat</div>
-                        <div style="position: relative; height: 350px; width: 100%;"><canvas id="guruMakananChart"></canvas></div>
-                    </div>
-                </div>
-
-                <div id="laporan-table-container" class="card">
-                    <div class="controls-wrapper">
-                        <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center; width: 100%;">
-                            <div style="display: flex; align-items: center; gap: 10px; background: #F8FAFC; padding: 5px 10px; border-radius: 10px; border: 1px solid #E2E8F0;">
-                                <i class="far fa-calendar-alt" style="color: #94A3B8;"></i>
-                                <input type="date" id="rep-startDate" style="border: none; background: transparent; padding: 5px; font-size: 13px;">
-                                <span style="color: #94A3B8;">-</span>
-                                <input type="date" id="rep-endDate" style="border: none; background: transparent; padding: 5px; font-size: 13px;">
-                                <button class="btn btn-primary" style="padding: 5px 15px; font-size: 12px;" onclick="applyDateFilter()">Filter</button>
-                            </div>
-                            <div class="search-container" style="flex-grow: 1;">
-                                <i class="fas fa-search"></i>
-                                <input type="text" id="laporanSearch" onkeyup="filterLaporanTable()" placeholder="Cari Siswa..." style="width: 100%;">
-                            </div>
-                            <button id="btnDownloadRekap" class="action-btn download" onclick="downloadRekapPDF()" style="display: none;"><i class="fas fa-file-pdf"></i> PDF</button>
-                        </div>
-                    </div>
-
-                    <div class="table-wrapper"><table id="laporanTable"><thead></thead><tbody></tbody><tfoot></tfoot></table></div>
-                </div>
-            </section>
-
-
-            <section id="page-jadpel" class="page">
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                        <h3><i class="fas fa-calendar-alt"></i> Jadwal Pelajaran Kelas</h3>
-                        <button class="btn btn-info" onclick="loadJadwal()"><i class="fas fa-sync"></i> Refresh</button>
-                    </div>
-
-                    <div class="jadwal-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-                        </div>
-                </div>
-            </section>
-
-            <!-- SECTION ABSENSI UPDATE -->
-            <section id="page-absensi" class="page">
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                        <h3><i class="fas fa-calendar-times"></i> Jurnal Ketidakhadiran</h3>
-                        <div style="display: flex; gap: 10px;">
-                            <button class="btn btn-info" onclick="openRekapAbsensiModal()"><i class="fas fa-chart-pie"></i> Rekap Absensi</button>
-                            <button class="btn btn-danger" onclick="openAbsensiModal()"><i class="fas fa-plus-circle"></i> Catat Siswa Tidak Hadir</button>
-                        </div>
-                    </div>
-                    
-                    <div style="background: #F8FAFC; padding: 15px; border-radius: 12px; border: 1px solid #E2E8F0; display: flex; flex-wrap: wrap; align-items: center; gap: 15px; margin-bottom: 20px;">
-                        <i class="fas fa-filter" style="color: var(--secondary-color);"></i>
-                        <span style="font-size: 13px; font-weight: 500;">Periode:</span>
-                        
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <input type="date" id="filter-abs-start" class="form-control" style="border: 1px solid #CBD5E1; padding: 8px 12px; border-radius: 8px;">
-                            <span style="font-size: 12px; color: #64748B;">s/d</span>
-                            <input type="date" id="filter-abs-end" class="form-control" style="border: 1px solid #CBD5E1; padding: 8px 12px; border-radius: 8px;">
-                        </div>
-
-                        <button class="btn btn-primary btn-sm" onclick="loadAbsensiTable()"><i class="fas fa-search"></i> Tampilkan</button>
-                    </div>
-
-                    <p style="font-size:13px; color:#64748B; margin-bottom:15px;">Menampilkan data siswa yang <b>Sakit</b>, <b>Izin</b>, atau <b>Alpha</b> dalam periode di atas.</p>
-                    
-                    <div class="table-wrapper">
-                        <table id="table-absensi">
-                            <thead>
-                                <tr>
-                                    <th style="width: 50px;">No</th>
-                                    <th style="width: 120px;">Tanggal</th> <th>Nama Siswa</th>
-                                    <th>Keterangan</th>
-                                    <th>Catatan</th>
-                                    <th style="width: 100px;">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <section id="page-pelajaran" class="page">
-                <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-                    <!-- SECTION MAPEL -->
-                    <div class="card">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                            <h3><i class="fas fa-book"></i> Mata Pelajaran</h3>
-                            <button class="btn btn-primary btn-sm" onclick="openPekModal('mapel')"><i class="fas fa-plus"></i> Tambah</button>
-                        </div>
-                        <p style="font-size:12px; color:#64748B; margin-bottom:15px;">Kelola nama pelajaran induk. TP dikelola di menu "Daftar TP".</p>
-                        <div class="table-wrapper" style="max-height: 300px;">
-                            <table id="table-mapel">
-                                <thead><tr><th>Nama</th><th>Singkatan</th><th>Aksi</th></tr></thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-
-                    <!-- SECTION EKSKUL -->
-            <section id="page-tp-ekstra" class="page">
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                        <h3><i class="fas fa-futbol"></i> Manajemen TP Ekstrakurikuler</h3>
-                    </div>
-                    
-                    <div class="form-group" style="background: #F8FAFC; padding: 15px; border-radius: 12px; border: 1px solid #E2E8F0;">
-                        <label style="font-weight: 600; color: var(--primary-color);">Pilih Ekstrakurikuler</label>
-                        <div style="display: flex; gap: 10px;">
-                            <select id="filter-ekskul-tp" onchange="loadTpEkstraTable()" style="font-size: 14px; padding: 10px; flex-grow: 1;">
-                                <option value="">- Pilih Ekskul -</option>
-                            </select>
-                            <button class="btn btn-info" onclick="openPekModal('ekskul')" title="Tambah Nama Ekskul Baru"><i class="fas fa-plus"></i> Ekskul Baru</button>
-                        </div>
-                    </div>
-
-                    <div id="ekstra-content-area" style="display: none;">
-                        <hr style="border: 0; border-top: 1px solid #E2E8F0; margin: 20px 0;">
-                        
-                        <div id="ekskul-header-info" style="display:flex; background: #FFFBEB; border: 1px solid #FCD34D; padding: 15px; border-radius: 12px; margin-bottom: 20px; align-items: center; justify-content: space-between;">
-                            <div style="display: flex; align-items: center; gap: 15px;">
-                                <div style="width: 40px; height: 40px; background: #FEF3C7; color: #D97706; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px;">
-                                    <i class="fas fa-trophy"></i>
-                                </div>
-                                <div>
-                                    <h4 style="margin:0; color:#B45309; font-size:16px;" id="ekskul-title-display">Nama Ekskul</h4>
-                                    <div style="font-size:12px; color:#D97706;">Kelola Nama Ekskul & Tujuan Pembelajaran</div>
-                                </div>
-                            </div>
-                            <div style="display:flex; gap:10px;">
-                                <button class="btn btn-info btn-sm" id="btn-edit-ekskul-header" title="Edit Nama Ekskul"><i class="fas fa-edit"></i> Edit</button>
-                                <button class="btn btn-danger btn-sm" id="btn-delete-ekskul-header" title="Hapus Ekskul"><i class="fas fa-trash"></i> Hapus</button>
-                            </div>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                            <h4 style="margin: 0;">Daftar Tujuan Pembelajaran (TP)</h4>
-                            <button class="btn btn-primary" onclick="openTpEkstraModal()"><i class="fas fa-plus"></i> Tambah TP</button>
-                        </div>
-
-                        <div class="table-wrapper">
-                            <table id="table-tp-ekstra">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 50px;">No</th>
-                                        <th>Deskripsi Tujuan Pembelajaran</th>
-                                        <th style="width: 100px;">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="page-nilai-ekstra" class="page">
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3><i class="fas fa-medal"></i> Input Nilai Ekstrakurikuler</h3>
-                        <button class="btn btn-info" onclick="loadNilaiEkstraTable()"><i class="fas fa-sync"></i> Refresh Data</button>
-                    </div>
-
-                    <div style="background: #E0F2FE; border-left: 4px solid #0284C7; padding: 15px; margin-bottom: 20px; font-size: 13px; color: #075985;">
-                        <i class="fas fa-info-circle"></i> <b>Petunjuk:</b> 
-                        Pilih <b>Predikat Nilai</b> dan <b>Capaian TP</b> untuk setiap siswa pada kolom Ekskul yang diikuti. <br>
-                        Biarkan kosong (<b>-</b>) jika siswa tidak mengikuti ekskul tersebut.
-                    </div>
-                    
-                    <div class="table-wrapper" style="max-height: 70vh; overflow-x: auto;">
-                        <table id="table-nilai-ekstra" style="font-size: 12px; min-width: 100%;">
-                            <thead>
-                                </thead>
-                            <tbody>
-                                </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SECTION BARU: PIKET -->
-            <section id="page-piket" class="page">
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                        <h3><i class="fas fa-broom"></i> Jadwal Piket Kebersihan</h3>
-                        <button class="btn btn-info" onclick="loadPiket()"><i class="fas fa-sync"></i> Refresh</button>
-                    </div>
-
-                    <div class="piket-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-                        </div>
-                </div>
-            </section>            
-
-            <!-- SECTION BARU: MANAJEMEN TP -->
-            <section id="page-tp-list" class="page">
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                        <h3><i class="fas fa-list"></i> Manajemen Tujuan Pembelajaran (TP)</h3>
-                        <button class="btn btn-primary" onclick="openTpModal()"><i class="fas fa-plus"></i> Tambah TP</button>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Pilih Mata Pelajaran</label>
-                        <select id="filter-mapel-tp" onchange="loadTpByMapel()">
-                            <option value="">- Pilih Mapel -</option>
-                        </select>
-                    </div>
-
-                    <div class="table-wrapper">
-                        <table id="table-tp">
-                            <thead>
-                                <tr>
-                                    <th style="width: 100px;">Kode TP</th>
-                                    <th>Deskripsi Tujuan Pembelajaran</th>
-                                    <th style="width: 120px;">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr><td colspan="3" style="text-align: center; color: #94A3B8;">Silakan pilih mata pelajaran terlebih dahulu.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <section id="page-tp-koku" class="page">
-                <div class="card" style="margin-bottom: 25px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                        <h3><i class="fas fa-layer-group"></i> Daftar Tema Projek</h3>
-                        <button class="btn btn-primary btn-sm" onclick="openPekModal('koku')"><i class="fas fa-plus"></i> Tambah Tema Baru</button>
-                    </div>
-                    <p style="font-size:12px; color:#64748B; margin-bottom:15px;">Buat tema projek di sini terlebih dahulu sebelum mengisi detail kegiatan dan TP di bawah.</p>
-                    <div class="table-wrapper" style="max-height: 250px;">
-                        <table id="table-koku">
-                            <thead><tr><th>Nama Projek</th><th>Aksi</th></tr></thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                        <h3><i class="fas fa-project-diagram"></i> Manajemen Kokurikuler</h3>
-                    </div>
-                    
-                    <div class="form-group" style="background: #F8FAFC; padding: 15px; border-radius: 12px; border: 1px solid #E2E8F0;">
-                        <label style="font-weight: 600; color: var(--primary-color);">Tema</label>
-                        <select id="filter-koku-projek" onchange="loadKokuDetails()" style="font-size: 14px; padding: 10px;">
-                            <option value="">- Tema -</option>
-                            </select>
-                        <textarea id="koku-kegiatan" rows="3" placeholder="Contoh: Siswa menanam pohon di lingkungan sekolah..." style="width: 100%;"></textarea>
-                            <button class="btn btn-success btn-sm" onclick="saveKokuKegiatan()" style="margin-top: 10px;"><i class="fas fa-save"></i> Simpan Kegiatan</button>
-
-                    </div>
-
-                    <div id="koku-content-area" style="display: none;">
-                        <hr style="border: 0; border-top: 1px solid #E2E8F0; margin: 20px 0;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                            <h4 style="margin: 0;">Daftar Tujuan Pembelajaran (TP)</h4>
-                            <button class="btn btn-primary" onclick="openTpKokuModal()"><i class="fas fa-plus"></i> Tambah TP Koku</button>
-                        </div>
-
-                        <div class="table-wrapper">
-                            <table id="table-tp-koku">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 200px;">Dimensi</th>
-                                        <th>Tujuan Pembelajaran</th>
-                                        <th style="width: 100px;">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-
-            <section id="page-nilai-koku" class="page">
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3><i class="fas fa-project-diagram"></i> Input Nilai Kokurikuler</h3>
-                        <button class="btn btn-info" onclick="loadNilaiKokuTable()"><i class="fas fa-sync"></i> Refresh Data</button>
-                    </div>
-
-                    <div style="background: #FFFBEB; border-left: 4px solid #F59E0B; padding: 15px; margin-bottom: 20px; font-size: 13px; color: #B45309;">
-                        <i class="fas fa-info-circle"></i> <b>Petunjuk:</b> Pilih Predikat (SB, BSH, MB, BB). Sistem otomatis membuat Deskripsi narasi berdasarkan TP Tertinggi dan Terendah per Kegiatan.
-                    </div>
-                    
-                    <div class="table-wrapper" style="max-height: 70vh;">
-                        <table id="table-nilai-koku" style="font-size: 12px;">
-                            <thead>
-                                </thead>
-                            <tbody>
-                                </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>            
-
-            <section id="page-nilai-dynamic" class="page">
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3 id="nilai-page-title"><i class="fas fa-star"></i> Input Nilai</h3>
-                        <div style="display: flex; gap: 10px;">
-                            <button class="btn btn-warning" onclick="openPredikatNilaiModal()"><i class="fas fa-sliders-h"></i> Predikat</button>
-                            <button class="btn btn-info" onclick="refreshNilaiTable()"><i class="fas fa-sync"></i> Refresh Data</button>
-                        </div>
-                    </div>
-                    
-                    <div style="background: #F8FAFC; padding: 12px; border-radius: 10px; border: 1px solid #E2E8F0; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
-                        <i class="fas fa-search" style="color: #94A3B8;"></i>
-                        <input type="text" id="filter-nama-nilai" placeholder="Cari siswa untuk input nilai..." 
-                               style="border: none; background: transparent; width: 100%; outline: none; font-size: 13px;" 
-                               onkeyup="filterNilaiList()">
-                    </div>
-
-                    <p style="font-size:13px; color:#64748B; margin-bottom:20px;">Masukkan nilai (0-100) untuk setiap Tujuan Pembelajaran (TP).</p>
-                    
-                    <div class="table-wrapper">
-                        <table id="nilaiTable">
-                            <thead>
-                                </thead>
-                            <tbody>
-                                </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <section id="page-siswa" class="page">
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                        <h3><i class="fas fa-users"></i> Data Siswa Kelas <span id="span-kelas"></span></h3>
-                        <div style="display: flex; gap: 10px;">
-                            <button class="btn btn-success" onclick="openModal('siswaExcelModal')"><i class="fas fa-file-excel"></i> Import Excel</button>
-                            <button class="btn btn-primary" onclick="openSiswaModal()"><i class="fas fa-plus"></i> Tambah Manual</button>
-                        </div>
-                    </div>
-
-                    <div style="background: #F8FAFC; padding: 15px; border-radius: 12px; border: 1px solid #E2E8F0; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-                        <i class="fas fa-search" style="color: #94A3B8;"></i>
-                        <input type="text" id="filter-nama-siswa" placeholder="Ketik nama siswa untuk mencari..." 
-                               style="border: none; background: transparent; width: 100%; outline: none;" 
-                               onkeyup="filterSiswaList()">
-                    </div>
-
-                    <div class="table-wrapper">
-                        <table id="siswaTable">
-                            <thead>
-                                <tr>
-                                    <th>Foto</th>
-                                    <th>Nama Lengkap</th>
-                                    <th>No. Induk</th>
-                                    <th>L/P</th>
-                                    <th>Agama</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <section id="page-sekolah" class="page">
-                <div class="card animate-up">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3><i class="fas fa-university"></i> Identitas Sekolah</h3>
-                        <button class="btn btn-success" onclick="saveSekolahData()"><i class="fas fa-save"></i> Simpan Perubahan</button>
-                    </div>
-                    <form id="sekolahForm" class="school-info-grid"></form>
-                </div>
-                
-                <div class="card animate-up" style="animation-delay: 0.1s;">
-                    <h3><i class="fas fa-bullhorn"></i> Visi, Misi & Sambutan Guru</h3>
-                    <form id="infoForm" class="form-grid"></form>
-                </div>
-            </section>
-
-            <section id="page-pengaturan" class="page">
-                <div class="card animate-up">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                        <h3><i class="fas fa-sliders-h"></i> Pengaturan Sistem 7KAIH</h3>
-                        <button class="btn btn-success" onclick="saveGlobalSettings()"><i class="fas fa-save"></i> Simpan Pengaturan</button>
-                    </div>
-                    <div id="pengaturan-container"></div>
-                </div>
-            </section>
-
-            <section id="page-galeri" class="page">
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                        <h3><i class="fas fa-images"></i> Galeri Kegiatan (Maks. 10)</h3>
-                        <button class="btn btn-success" onclick="saveGaleri()"><i class="fas fa-save"></i> Simpan Galeri</button>
-                    </div>
-                    <div id="galeri-list" class="form-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));"></div>
-                    <div class="settings-section-title" style="margin-top: 40px;"><i class="fab fa-youtube"></i> Video YouTube Highlight</div>
-                    <div id="youtube-list" class="form-grid"></div>
-                </div>
-            </section>
-
-            <section id="page-kelas" class="page">
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                        <h3><i class="fas fa-chalkboard"></i> Visualisasi Informasi Kelas</h3>
-                        <button class="btn btn-success" onclick="saveKelasVisual()"><i class="fas fa-save"></i> Simpan Info</button>
-                    </div>
-                    <form id="kelasVisualForm" class="form-grid"></form>
-                </div>
-            </section>
-
-            <section id="page-aplikasi" class="page">
-                <div class="card">
-                    <h3><i class="fas fa-user-edit"></i> Edit Profil & Akun</h3>
-                    <div style="text-align: center; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #F1F5F9;">
-                        <img src="" id="preview-profile-foto" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid #E2E8F0; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                        <div style="font-size: 13px; color: #64748B; margin-bottom: 10px; font-weight: 500;">Foto Profil Guru (Tampil di Homepage)</div>
-                        <div style="display: flex; justify-content: center; gap: 10px; max-width: 400px; margin: 0 auto; align-items: center;">
-                             <input type="text" id="profile-foto-url" placeholder="URL Foto" style="display: none;">
-                             <input type="file" id="f-profile-foto" style="display:none" onchange="handleFileUpload(this, 'profile-foto-url');">
-                             <button type="button" class="btn btn-info btn-sm" onclick="document.getElementById('f-profile-foto').click()"><i class="fas fa-camera"></i> Ganti Foto</button>
-                        </div>
-                    </div>
-                    <div class="form-grid">
-                        <div class="form-group"><label>Nama Guru</label><input type="text" id="profile-nama"></div>
-                        <div class="form-group"><label>NIP</label><input type="text" id="profile-nip" placeholder="Nomor Induk Pegawai"></div>
-                        <div class="form-group"><label>Username</label><input type="text" id="profile-username"></div>
-                        <div class="form-group"><label>Password</label><input type="text" id="profile-password"></div>
-                        <div class="form-group"><label>Kelas</label><input type="text" placeholder="Pastikan Nama Kelas Sama dengan Kelas Yang ada di Data Siswa" id="profile-kelas"></div>
-                    </div>
-                    <button class="btn btn-success" onclick="updateGuruProfile()" style="margin-top: 20px;"><i class="fas fa-save"></i> Perbarui Profil</button>
-                </div>
-
-                <div class="form-grid">
-                    <div class="card">
-                        <h3><i class="fas fa-sync-alt"></i> Backup & Restore Data</h3>
-                        <p style="font-size: 13px; color: #64748B; margin: 10px 0 20px;">Unduh data (Siswa, Laporan, Pengaturan) ke file JSON.</p>
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                            <button class="btn btn-primary" onclick="backupSystem()"><i class="fas fa-download"></i> Unduh Backup</button>
-                            <button class="btn btn-warning" onclick="document.getElementById('restoreInput').click()" style="background-color: #F59E0B; color: white; border: none;"><i class="fas fa-upload"></i> Restore Data</button>
-                            <input type="file" id="restoreInput" accept=".json" style="display: none;" onchange="handleRestoreFile(this)">
-                        </div>
-                    </div>
-                    <div class="card" style="border-color: #FECACA;">
-                        <h3 style="color: var(--danger-color);"><i class="fas fa-exclamation-triangle"></i> Reset Laporan</h3>
-                        <p style="font-size: 13px; color: #64748B; margin: 10px 0 20px;">Menghapus semua data laporan siswa di kelas ini.</p>
-                        <button class="btn btn-danger" onclick="resetLaporan()"><i class="fas fa-trash"></i> Reset Data Laporan</button>
-                    </div>
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <!-- MODAL-MODAL -->
-    <div id="msgModal" class="modal"><div class="modal-content" style="max-width: 400px; text-align: center;"><div style="margin-bottom: 15px; font-size: 50px; color: var(--info-color);"><i class="fas fa-info-circle"></i></div><h3 id="msgTitle" style="margin-bottom: 10px;">Pemberitahuan</h3><p id="msgText" style="color: #64748B; margin-bottom: 25px;"></p><div id="msgModalButtons" style="display: flex; justify-content: center; gap: 10px;"><button class="btn btn-primary" onclick="closeModal('msgModal')">Mengerti</button></div></div></div>
-
-    <div id="editModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header"><h3><i class="fas fa-edit"></i> Edit Laporan Siswa</h3><span style="cursor:pointer; font-size: 24px; color: #94A3B8;" onclick="closeModal('editModal')">×</span></div>
-            <form id="editForm">
-                <input type="hidden" id="editDocId">
-                <div id="edit-form-grid"></div>
-                <div style="text-align: right; margin-top: 25px; border-top: 1px solid #F1F5F9; padding-top: 20px;">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('editModal')" style="margin-right: 10px;">Batal</button>
-                    <button type="button" class="btn btn-success" onclick="saveChanges()"><i class="fas fa-save"></i> Simpan Perubahan</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL JADWAL -->
-    <div id="jadwalModal" class="modal">
-        <div class="modal-content" style="max-width: 450px;">
-            <div class="modal-header">
-                <h3>Tambah Jadwal: <span id="jadwalHariTitle"></span></h3>
-                <span style="cursor:pointer; font-size: 24px;" onclick="closeModal('jadwalModal')">×</span>
-            </div>
-            <form id="jadwalForm">
-                <input type="hidden" id="jadwalHariInput">
-                
-                <div class="form-group">
-                    <label>Jenis Kegiatan</label>
-                    <select id="jadwalTipe" onchange="toggleJadwalInput()" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;">
-                        <option value="Mapel">Mata Pelajaran</option>
-                        <option value="Lainnya">Kegiatan Khusus</option>
-                    </select>
-                </div>
-
-                <div class="form-group" id="group-mapel">
-                    <label>Pilih Mata Pelajaran</label>
-                    <select id="jadwalMapelSelect" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;">
-                        <option value="">- Memuat Mapel... -</option>
-                    </select>
-                </div>
-
-                <div class="form-group" id="group-lainnya" style="display:none;">
-                    <label>Pilih Kegiatan</label>
-                    <select id="jadwalLainnyaSelect" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;">
-                        <option value="Upacara">Upacara</option>
-                        <option value="Senam">Senam</option>
-                        <option value="Rohani">Rohani</option>
-                        <option value="Pembiasaan">Pembiasaan</option>
-                        <option value="Ekstrakurikuler">Ekstrakurikuler</option>
-                        <option value="Kokurikuler">Kokurikuler</option>
-                        <option value="Istirahat">Istirahat</option>
-                    </select>
-                </div>
-
-                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Simpan Jadwal</button>
-            </form>
-        </div>
-    </div>
-
-
-    <!-- MODAL ABSENSI -->
-    <div id="absensiModal" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header">
-                <h3><i class="fas fa-user-minus"></i> Catat Ketidakhadiran</h3>
-                <span style="cursor:pointer; font-size: 24px;" onclick="closeModal('absensiModal')">×</span>
-            </div>
-            <form id="absensiForm">
-                <div class="form-grid" style="grid-template-columns: 1fr;">
-                    <div class="form-group">
-                        <label>Tanggal</label>
-                        <input type="date" id="abs-input-date" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Nama Siswa</label>
-                        <select id="abs-input-siswa" required>
-                            <option value="">- Pilih Siswa -</option>
-                            </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Keterangan</label>
-                        <select id="abs-input-ket" required>
-                            <option value="">- Pilih Alasan -</option>
-                            <option value="Sakit">Sakit</option>
-                            <option value="Izin">Izin</option>
-                            <option value="Alpha">Alpha</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Catatan (Opsional)</label>
-                        <textarea id="abs-input-note" rows="2" placeholder="Contoh: Demam tinggi / Acara Keluarga"></textarea>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-danger" style="margin-top: 20px; width: 100%;">Simpan Data</button>
-            </form>
-        </div>
-    </div>
-
-<div id="rekapAbsensiModal" class="modal">
-        <div class="modal-content" style="max-width: 900px;">
-            <div class="modal-header">
-                <h3><i class="fas fa-clipboard-list"></i> Rekapitulasi Absensi Kelas</h3>
-                <span style="cursor:pointer; font-size: 24px;" onclick="closeModal('rekapAbsensiModal')">×</span>
-            </div>
+    <header class="hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 id="hero-title">WEB Kelas 4 A</h1>
+            <p>Berakhlak Mulia, Cerdas, dan Berkarakter</p>
             
-            <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); background: #F8FAFC; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
-                <div class="form-group">
-                    <label>Tanggal Mulai</label>
-                    <input type="date" id="rekap-start-date">
+            <div class="nav-cards">
+                <a href="Guru.html" class="nav-card" id="btn-portal-guru">
+
+                    <h3>Portal Guru</h3>
+                </a>
+                <a href="Siswa.html" class="nav-card" id="btn-portal-siswa">
+                    <i class="fas fa-user-graduate"></i>
+                    <h3>Portal Siswa</h3>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <section>
+        <div class="container">
+            <h2 class="section-title reveal">Profil Kelas</h2>
+            <div class="profile-grid">
+                <div class="teacher-card reveal-scale delay-100">
+                    <div class="teacher-bg"></div>
+                    <img src="https://placehold.co/150?text=Foto" id="profile-foto-url" alt="Guru Kelas" class="teacher-img">
+                    <div class="teacher-info">
+                        <h3 id="profile-nama">Memuat Nama...</h3>
+                        <p id="teacher-nip">Wali Kelas 4 A</p>
+                        <div class="stat-badge"><i class="fas fa-star"></i> Guru Terbaik</div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Tanggal Akhir</label>
-                    <input type="date" id="rekap-end-date">
+                
+                <div class="vision-box reveal delay-200" onclick="openVisiMisiModal()">
+                    <i class="fas fa-quote-right bg-icon"></i>
+                    <h4><i class="fas fa-bullseye"></i> Visi & Misi Sekolah</h4>
+                    <div id="visi-text" class="vision-text">Memuat visi...</div>
+                    <div id="misi-text" class="vision-text" style="font-size: 0.95rem; color: #777;">Memuat misi...</div>
                 </div>
-                <div class="form-group">
-                    <label>Jumlah Hari Efektif</label>
-                    <input type="number" id="rekap-effective-days" placeholder="Contoh: 20" min="1">
+            </div>
+        </div>
+    </section>
+
+    <section id="info-kelas-section" class="parallax-section">
+        <div class="parallax-overlay"></div>
+        <div class="container">
+            <h2 class="section-title reveal" style="color:white">Informasi Kelas</h2>
+            
+            <div class="info-grid">
+
+                <div class="card-wrapper reveal delay-100">
+                    <div class="preview-card" onclick="openModal('Ulang Tahun', document.getElementById('img-jadwal-src').src, 'Jadwal pelajaran berlaku untuk semester ini.')">
+                        <img src="https://placehold.co/600x400?text=Jadwal" id="img-jadwal-src" alt="Jadwal">
+                        <div class="preview-overlay">
+                            <h3><i class="fas fa-calendar-alt"></i> Ulang Tahun</h3>
+                            <p>Klik untuk memperbesar</p>
+                        </div>
+                    </div>
+                    <!-- BUTTON OPSI A: Lihat Tabel Database -->
+                    <button class="action-btn" onclick="openJadwalModal()">
+                        <i class="fas fa-table"></i> Lihat Tabel Jadwal
+                    </button>
                 </div>
-                <div class="form-group" style="display: flex; align-items: flex-end;">
-                    <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="generateRekapAbsensi()">
-                        <i class="fas fa-calculator"></i> Proses Rekap
+
+                <!-- KARTU 2: REGU PIKET (Original: Structure Image) -->
+                <div class="card-wrapper reveal delay-200">
+                    <div class="preview-card" onclick="openModal('Struktur Kelas', document.getElementById('img-struktur-src').src, 'Daftar petugas piket kebersihan dan struktur organisasi kelas.')">
+                        <img src="https://placehold.co/600x400?text=Struktur+Kelas" id="img-struktur-src" alt="Struktur">
+                        <div class="preview-overlay">
+                            <h3><i class="fas fa-users"></i> Struktur Kelas</h3>
+                            <p>Klik untuk melihat detail</p>
+                        </div>
+                    </div>
+                    <!-- BUTTON OPSI A: Lihat Jadwal Piket -->
+                    <button class="action-btn" onclick="openPiketModal()">
+                        <i class="fas fa-broom"></i> Lihat Jadwal Piket
+                    </button>
+                </div>
+
+                <!-- KARTU 3: KESEPAKATAN KELAS (Original: Image) -->
+                <div class="card-wrapper reveal delay-300">
+                    <div class="preview-card" onclick="openModal('Kesepakatan Kelas', document.getElementById('img-kesepakatan-src').src, 'Kesepakatan dan Keyakinan Kelas yang telah disetujui bersama.')">
+                        <img src="https://placehold.co/600x400?text=Kesepakatan+Kelas" id="img-kesepakatan-src" alt="Kesepakatan">
+                        <div class="preview-overlay">
+                            <h3><i class="fas fa-handshake"></i> Kesepakatan Kelas</h3>
+                            <p>Tata tertib & komitmen</p>
+                        </div>
+                    </div>
+                    <!-- BUTTON OPSI A: Info Ekskul -->
+                    <button class="action-btn" onclick="openEkskulModal()">
+                        <i class="fas fa-running"></i> Info Ekstrakurikuler
                     </button>
                 </div>
             </div>
+        </div>
+    </section>
 
-            <div class="table-wrapper">
-                <table id="table-rekap-absensi">
-                    <thead>
-                        <tr>
-                            <th style="width: 40px;">No</th>
-                            <th>Nama Siswa</th>
-                            <th style="text-align: center; color: #F59E0B;">Sakit (S)</th>
-                            <th style="text-align: center; color: #3B82F6;">Izin (I)</th>
-                            <th style="text-align: center; color: #EF4444;">Alpha (A)</th>
-                            <th style="text-align: center; font-weight: bold;">Total Ketidakhadiran</th>
-                            <th style="text-align: center; background: #E0F2FE;">% Kehadiran</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td colspan="7" style="text-align:center; padding: 20px; color:#aaa;">Masukkan Tanggal & Hari Efektif, lalu klik Proses.</td></tr>
-                    </tbody>
-                </table>
+    <section>
+        <div class="container">
+            <h2 class="section-title reveal">Papan Pengumuman</h2>
+            <div id="announcement-container" class="announcement-grid">
+                <div style="grid-column: 1/-1; text-align: center; color: #8898aa;">
+                    <i class="fas fa-spinner fa-spin"></i> Memuat Pengumuman...
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section style="background: linear-gradient(to right, #f8f9fa, #e9ecef);">
+        <div class="container">
+            <h2 class="section-title reveal">Monitoring Kelas</h2>
+            <div class="chart-section reveal-scale">
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <div class="chart-title-small">
+                            <i class="fas fa-chart-bar" style="color: var(--primary);"></i> Pencapaian 7KAIH
+                        </div>
+                        <div style="position: relative; height: 300px;">
+                            <canvas id="kaihBarChart"></canvas>
+                        </div>
+                        <div style="text-align: center; margin-top: 15px; font-size: 0.9rem; color: #64748B;">
+                            Grafik pencapaian karakter siswa berdasarkan 7 Kebiasaan Anak Indonesia Hebat.
+                        </div>
+                    </div>
+
+                    <!-- CHART 2: KEHADIRAN DONUT -->
+                    <div class="chart-card">
+                        <div class="chart-title-small">
+                            <i class="fas fa-user-clock" style="color: var(--accent);"></i> Kehadiran Hari Ini
+                            <br><span id="attendance-date" style="font-size: 0.9rem; font-weight: normal; color: #666;"></span>
+                        </div>
+                        <div style="position: relative; height: 250px;">
+                            <canvas id="attendanceChart"></canvas>
+                        </div>
+                        
+                        <div id="attendance-detail-container" class="attendance-details">
+                            <div class="att-item" style="border-left: 4px solid #F59E0B;">
+                                <div class="att-val" style="color:#F59E0B" id="val-sakit">0</div>
+                                <div class="att-label">Sakit</div>
+                            </div>
+                            <div class="att-item" style="border-left: 4px solid #3B82F6;">
+                                <div class="att-val" style="color:#3B82F6" id="val-izin">0</div>
+                                <div class="att-label">Izin</div>
+                            </div>
+                            <div class="att-item" style="border-left: 4px solid #EF4444;">
+                                <div class="att-val" style="color:#EF4444" id="val-alpha">0</div>
+                                <div class="att-label">Alpha</div>
+                            </div>
+                        </div>
+                        <div id="absence-names" style="margin-top: 15px; font-size: 0.85rem; color: #64748B; text-align: center; font-style: italic;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="student-section" class="parallax-section">
+        <div class="parallax-overlay"></div>
+        <div class="container">
+            <h2 class="section-title reveal" style="color: white;">Siswa Kelas 4A</h2>
+            <p style="text-align: center; color: #e2e8f0; margin-bottom: 50px; margin-top: -50px; font-weight: 300;">Wajah-wajah ceria generasi penerus bangsa.</p>
+            
+            <div id="student-container" class="student-grid">
+                <div style="grid-column: 1/-1; text-align: center; color: #cbd5e1;">
+                    <i class="fas fa-spinner fa-spin"></i> Memuat Data Siswa...
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section style="background: #F9FAFB;">
+        <div class="container">
+            <h2 class="section-title reveal">Galeri & Kegiatan</h2>
+            
+            <h3 style="margin-bottom: 30px; color: var(--dark); border-left: 5px solid var(--primary); padding-left: 20px;">Dokumentasi Foto</h3>
+            <div id="gallery-container" class="gallery-grid reveal">
+                <p class="text-center w-full" style="grid-column: 1/-1; text-align: center; color: #8898aa;">Memuat galeri...</p>
             </div>
 
-            <div style="margin-top: 20px; text-align: right;">
-                <button class="btn btn-success" onclick="printRekapAbsensi()"><i class="fas fa-print"></i> Cetak / Download PDF</button>
+            <h3 style="margin-bottom: 30px; color: var(--dark); border-left: 5px solid var(--accent); padding-left: 20px; margin-top: 80px;">Video Highlight</h3>
+            <div id="video-container-wrapper" class="video-grid reveal delay-100">
+                <p class="text-center w-full" style="grid-column: 1/-1; text-align: center; color: #8898aa;">Memuat video...</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="sambutan-section reveal">
+            <i class="fas fa-quote-right sambutan-bg-icon"></i>
+            <div class="sambutan-content">
+                <i class="fas fa-comment-dots quote-icon"></i>
+                <p class="quote-text" id="sambutan-text">"Pendidikan adalah senjata paling mematikan di dunia, karena dengan pendidikan, Anda dapat mengubah dunia."</p>
+                <p class="quote-author" id="sambutan-author">- Guru Kelas 4 A</p>
             </div>
         </div>
     </div>
 
-    <!-- MODAL P+E+K -->
-    <div id="pekModal" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header">
-                <h3 id="pekModalTitle">Input Data</h3>
-                <span style="cursor:pointer; font-size: 24px;" onclick="closeModal('pekModal')">×</span>
+    <footer>
+        <div class="container">
+            <p>© 2026 SDN Setu 02 - Kelas 4 A. Dibuat dengan semangat belajar.</p>
+            <div class="social-links">
+                <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
+                <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+                <a href="https://wa.me/6281310051985" target="_blank" class="wa"><i class="fab fa-whatsapp"></i></a>
+                <a href="#" target="_blank"><i class="fab fa-youtube"></i></a>
             </div>
-            <form id="pekForm">
-                <input type="hidden" id="pekId">
-                <input type="hidden" id="pekType">
-                <div id="pekFormFields" class="form-grid" style="grid-template-columns: 1fr;"></div>
-                <button type="submit" class="btn btn-primary" style="margin-top: 20px; width: 100%;">Simpan Data</button>
-            </form>
         </div>
-    </div>
+    </footer>
 
-    <!--- Modal Predikat -->>
-<div id="predikatNilaiModal" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header">
-                <h3><i class="fas fa-sliders-h"></i> Konfigurasi Predikat & KKM</h3>
-                <span style="cursor:pointer; font-size: 24px;" onclick="closeModal('predikatNilaiModal')">×</span>
-            </div>
-            <div style="background: #F0F9FF; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 12px; color: #0369A1;">
-                <i class="fas fa-info-circle"></i> Pengaturan ini berlaku untuk <b>semua mata pelajaran</b>.
-            </div>
-            <form id="predikatNilaiForm">
-                <div style="margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-                    <label style="font-weight: bold; color: var(--success-color);">Predikat A (Sangat Baik)</label>
-                    <div style="display: flex; gap: 10px; margin-top: 5px;">
-                        <input type="number" id="pred-a-min" placeholder="Min (90)" style="width: 80px;" required>
-                        <input type="text" id="pred-a-label" placeholder="Label (Sangat Baik)" style="flex: 1;" required>
-                    </div>
-                    <small style="color: #aaa;">Nilai >= Angka Minimal</small>
-                </div>
-
-                <div style="margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-                    <label style="font-weight: bold; color: var(--info-color);">Predikat B (Baik)</label>
-                    <div style="display: flex; gap: 10px; margin-top: 5px;">
-                        <input type="number" id="pred-b-min" placeholder="Min (70)" style="width: 80px;" required>
-                        <input type="text" id="pred-b-label" placeholder="Label (Baik)" style="flex: 1;" required>
-                    </div>
-                    <small style="color: #aaa;">Nilai >= Angka Minimal</small>
-                </div>
-
-                <div style="margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-                    <label style="font-weight: bold; color: var(--warning-color);">Predikat C (Cukup)</label>
-                    <div style="display: flex; gap: 10px; margin-top: 5px;">
-                        <input type="number" id="pred-c-min" placeholder="Min (60)" style="width: 80px;" required>
-                        <input type="text" id="pred-c-label" placeholder="Label (Cukup)" style="flex: 1;" required>
-                    </div>
-                    <small style="color: #aaa;">Nilai >= Angka Minimal</small>
-                </div>
-
-                <div style="margin-bottom: 15px;">
-                    <label style="font-weight: bold; color: var(--danger-color);">Predikat D (Perlu Peningkatan)</label>
-                    <div style="display: flex; gap: 10px; margin-top: 5px;">
-                        <input type="number" value="0" disabled style="width: 80px; background: #eee;">
-                        <input type="text" id="pred-d-label" placeholder="Label (Perlu Peningkatan)" style="flex: 1;" required>
-                    </div>
-                    <small style="color: #aaa;">Nilai di bawah batas Cukup</small>
-                </div>
-
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Simpan Konfigurasi</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL TP BARU -->
-    <div id="tpModal" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header">
-                <h3>Kelola Tujuan Pembelajaran</h3>
-                <span style="cursor:pointer; font-size: 24px;" onclick="closeModal('tpModal')">×</span>
-            </div>
-            <form id="tpForm">
-                <input type="hidden" id="tpId">
-                <input type="hidden" id="tpMapelId">
-                <div class="form-grid" style="grid-template-columns: 1fr;">
-                    <div class="form-group">
-                        <label>Kode TP</label>
-                        <input type="text" id="tpKode" placeholder="Contoh: TP.1.1" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Deskripsi Tujuan Pembelajaran</label>
-                        <textarea id="tpDeskripsi" rows="3" placeholder="Contoh: Peserta didik mampu..." required></textarea>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary" style="margin-top: 20px; width: 100%;">Simpan TP</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL TP ESKUL -->
-    <div id="tpEkstraModal" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header">
-                <h3>Kelola TP Ekstrakurikuler</h3>
-                <span style="cursor:pointer; font-size: 24px;" onclick="closeModal('tpEkstraModal')">×</span>
-            </div>
-            <form id="tpEkstraForm">
-                <input type="hidden" id="tpEkstraId">
-                <input type="hidden" id="tpEkstraRefId"> <div class="form-grid" style="grid-template-columns: 1fr;">
-                    <div class="form-group">
-                        <label>Deskripsi Tujuan Pembelajaran</label>
-                        <textarea id="tpEkstraDeskripsi" rows="3" placeholder="Contoh: Siswa mampu melakukan teknik dasar passing..." required></textarea>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary" style="margin-top: 20px; width: 100%;">Simpan TP</button>
-            </form>
-        </div>
-    </div>
-
-
-    <!-- MODAL TP KOKU -->
-    <div id="tpKokuModal" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header">
-                <h3>Kelola TP Kokurikuler</h3>
-                <span style="cursor:pointer; font-size: 24px;" onclick="closeModal('tpKokuModal')">×</span>
-            </div>
-            <form id="tpKokuForm">
-                <input type="hidden" id="tpKokuId">
-                <input type="hidden" id="tpKokuProjekId">
-                
-                <div class="form-grid" style="grid-template-columns: 1fr;">
-                    <div class="form-group">
-                        <label>Dimensi</label>
-                        <select id="tpKokuDimensi" required>
-                            <option value="">- Pilih Dimensi -</option>
-                            <option value="Keimanan dan Ketaqwaan">Keimanan dan Ketaqwaan</option>
-                            <option value="Kewargaan">Kewargaan</option>
-                            <option value="Penalaran Kritis">Penalaran Kritis</option>
-                            <option value="Kreativitas">Kreativitas</option>
-                            <option value="Kolaborasi">Kolaborasi</option>
-                            <option value="Kemandirian">Kemandirian</option>
-                            <option value="Kesehatan">Kesehatan</option>
-                            <option value="Komunikasi">Komunikasi</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Tujuan Pembelajaran</label>
-                        <textarea id="tpKokuDeskripsi" rows="3" placeholder="Deskripsi capaian..." required></textarea>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary" style="margin-top: 20px; width: 100%;">Simpan TP</button>
-            </form>
-        </div>
-    </div>
-
-        <!-- MODAL PIKET -->
-    <div id="piketModal" class="modal">
-        <div class="modal-content" style="max-width: 400px;">
-            <div class="modal-header">
-                <h3>Piket Hari: <span id="piketHariTitle"></span></h3>
-                <span style="cursor:pointer; font-size: 24px;" onclick="closeModal('piketModal')">×</span>
-            </div>
-            <form id="piketForm">
-                <input type="hidden" id="piketHariInput">
-                
-                <div class="form-group">
-                    <label>Pilih Siswa</label>
-                    <select id="piketSiswaSelect" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;" required>
-                        <option value="">- Memuat Data... -</option>
-                    </select>
-                    <small style="color: #64748B; display:block; margin-top:5px;">
-                        *Hanya menampilkan siswa yang <b>belum</b> mendapatkan jadwal piket.
-                    </small>
-                </div>
-
-                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Simpan</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL SISWA -->
-    <div id="siswaModal" class="modal">
+    <div id="genericModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header"><h3 id="siswaModalTitle">Data Siswa</h3><span style="cursor:pointer; font-size: 24px; color: #94A3B8;" onclick="closeModal('siswaModal')">×</span></div>
-            <form id="siswaForm">
-                <input type="hidden" id="siswaId">
-                <div class="form-grid">
-                    <div class="form-group"><label>Nama Lengkap</label><input type="text" id="siswaNama" required placeholder="Contoh: Budi Santoso"></div>
-                    <div class="form-group"><label>No. Induk</label><input type="text" id="siswaInduk" required placeholder="NIS/NISN"></div>
-                    <div class="form-group"><label>Jenis Kelamin</label><select id="siswaGender"><option value="">- Pilih -</option><option value="Laki-laki">Laki-laki</option><option value="Perempuan">Perempuan</option></select></div>
-                    <div class="form-group"><label>Agama</label><select id="siswaAgama"><option>Islam</option><option>Kristen</option><option>Katolik</option><option>Hindu</option><option>Buddha</option><option>Konghucu</option></select></div>
-                    <div class="form-group"><label>Foto Siswa</label><div style="display:flex;gap:10px"><input type="text" id="siswaFoto" placeholder="URL Foto"><button type="button" class="btn btn-info" onclick="document.getElementById('f-siswa').click()"><i class="fas fa-folder-open"></i></button><input type="file" id="f-siswa" style="display:none" onchange="handleFileUpload(this, 'siswaFoto')"></div></div>
-                </div>
-                <button type="submit" class="btn btn-primary" style="margin-top: 25px; width: 100%; justify-content: center;">Simpan Data Siswa</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL IMPORT EXCEL -->
-    <div id="siswaExcelModal" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header"><h3>Import Data via Excel</h3><span style="cursor:pointer; font-size: 24px;" onclick="closeModal('siswaExcelModal')">×</span></div>
-            <div style="padding: 10px 0;">
-                <p style="font-size: 13px; color: #64748B; margin-bottom: 20px;">Unduh format, isi data siswa (termasuk jenis kelamin), lalu upload kembali.</p>
-                <button class="btn btn-success" onclick="downloadSiswaExcel()" style="width: 100%; margin-bottom: 20px;"><i class="fas fa-download"></i> Download Format Excel</button>
-                <div style="border: 2px dashed #CBD5E1; padding: 30px; text-align: center; border-radius: 12px; background: #F8FAFC;">
-                    <i class="fas fa-cloud-upload-alt" style="font-size: 40px; color: var(--primary-color); margin-bottom: 15px;"></i>
-                    <input type="file" id="excelInput" accept=".xlsx, .xls" style="display: block; width: 100%; margin-top: 10px;">
-                </div>
-                <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="uploadSiswaExcel()">Upload & Proses Data</button>
+            <div class="modal-header">
+                <h3 id="modalTitle">Judul</h3>
+                <span class="close-modal" onclick="closeGenericModal()">×</span>
+            </div>
+            <div class="modal-body">
+                <img id="modalImg" src="" style="display:none;" class="modal-img">
+                <div id="modalHtmlContent"></div>
+                <div id="modalActionArea"></div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL KONFIRMASI DELETE -->
-    <div id="deleteConfirmModal" class="modal">
-        <div class="modal-modern-content">
-            <div class="modal-icon-wrapper"><i class="fas fa-trash-alt animate-pulse"></i></div>
-            <h3 class="modal-modern-title">Konfirmasi Penghapusan</h3>
-            <p class="modal-modern-text">Apakah Anda yakin ingin menghapus data ini? <br>Tindakan ini bersifat <strong>permanen</strong>.</p>
-            <div class="modal-btn-group">
-                <button class="btn-modern-cancel" onclick="closeModal('deleteConfirmModal')">Batal</button>
-                <button class="btn-modern-delete" id="btnConfirmDelete">Ya, Hapus</button>
-            </div>
-        </div>
-    </div>
+    <script>
+        // --- KONFIGURASI API ---
+        const IS_LOCALHOST = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const API_URL = IS_LOCALHOST ? "http://localhost:3000" : "https://api.bangbin.my.id";
 
+        // Helper Resolve Image
+        function resolveImg(path) {
+            if (!path) return 'https://placehold.co/150?text=No+Img';
+            if (path.startsWith('http')) return path;
+            return `${API_URL}${path}`;
+        }
 
-<script src="Bangbin7KAIH.js"></script>
-<script></script>
+        // --- SCROLL ANIMATION OBSERVER ---
+        const observerOptions = { threshold: 0.1 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal, .reveal-scale').forEach(el => observer.observe(el));
+
+        let globalVisiContent = "";
+        let globalMisiContent = "";
+        let savedGlobalSettings = {}; 
+
+        // Init Data
+        window.addEventListener('load', async () => {
+            try {
+                await loadSchoolInfo();
+                await loadTeacherInfo();
+                await loadStudentData(); 
+                await loadChartData();
+            } catch(e) { console.error("Init Error:", e); }
+            
+            document.getElementById('preloader').style.opacity = '0';
+            setTimeout(() => { document.getElementById('preloader').style.display = 'none'; }, 500);
+        });
+
+        // 1. LOAD INFO SEKOLAH
+        async function loadSchoolInfo() {
+            try {
+                const res = await fetch(`${API_URL}/pengaturan`);
+                const json = await res.json();
+                const data = json.data || {};
+                savedGlobalSettings = data; 
+                
+                const info = data.infoSekolah || {};
+                const visual = info.infoKelas || {};
+                const vm = info.visiMisi || {};
+                const pengumumanData = info.pengumuman || {};
+                const galeri = info.galeri || [];
+                const youtube = info.youtubeLinks || [];
+                const sosmed = info.socialMedia || {}; 
+
+                // Header
+                if(info.namaSekolah) document.querySelector('title').textContent = `WEB ${info.namaSekolah}`;
+                if(info.logo) document.getElementById('favicon').href = resolveImg(info.logo);
+                if(info.namaSekolah) document.getElementById('hero-title').innerHTML = `WEB ${info.namaSekolah}<br>KELAS IV-A`;
+                
+                // Visi Misi
+                globalVisiContent = vm.visi || "Visi belum diatur.";
+                globalMisiContent = vm.misi || "Misi belum diatur.";
+                
+                document.getElementById('visi-text').textContent = vm.visi ? `"${vm.visi}"` : "Visi belum diatur.";
+                let misiPreview = vm.misi || "Misi belum diatur.";
+                if(misiPreview.length > 100) misiPreview = misiPreview.substring(0, 100) + '... (Klik untuk selengkapnya)';
+                document.getElementById('misi-text').textContent = misiPreview;
+
+                if(info.sambutanKepsek) document.getElementById('sambutan-text').textContent = `"${info.sambutanKepsek}"`;
+
+                // Info Visual
+                if(visual.jadwalPelajaran) document.getElementById('img-jadwal-src').src = resolveImg(visual.jadwalPelajaran);
+                if(visual.strukturOrganisasi) document.getElementById('img-struktur-src').src = resolveImg(visual.strukturOrganisasi);
+                if(visual.kesepakatanKelas) document.getElementById('img-kesepakatan-src').src = resolveImg(visual.kesepakatanKelas);
+
+                // --- Background Parallax ---
+                const validGallery = galeri.filter(img => img && img.trim() !== "");
+                if(validGallery.length > 0) document.querySelector('.hero').style.backgroundImage = `url('${resolveImg(validGallery[0])}')`;
+                if(validGallery.length > 1) document.getElementById('info-kelas-section').style.backgroundImage = `url('${resolveImg(validGallery[1])}')`;
+                else if(validGallery.length > 0) document.getElementById('info-kelas-section').style.backgroundImage = `url('${resolveImg(validGallery[0])}')`;
+
+                const studentSection = document.getElementById('student-section');
+                if (studentSection) {
+                    if (validGallery.length > 2) studentSection.style.backgroundImage = `url('${resolveImg(validGallery[2])}')`;
+                    else if (validGallery.length > 0) studentSection.style.backgroundImage = `url('${resolveImg(validGallery[0])}')`;
+                }
+
+                // --- Footer Social Media ---
+                const footerLinks = document.querySelectorAll('.social-links a');
+                if(footerLinks[0]) { footerLinks[0].href = sosmed.facebook || '#'; footerLinks[0].style.display = sosmed.facebook ? 'flex' : 'none'; }
+                if(footerLinks[1]) { footerLinks[1].href = sosmed.instagram || '#'; footerLinks[1].style.display = sosmed.instagram ? 'flex' : 'none'; }
+                if(footerLinks[2]) {
+                    let waNum = sosmed.whatsapp || '6281310051985'; 
+                    waNum = waNum.replace(/\D/g,''); if(waNum.startsWith('0')) waNum = '62' + waNum.substring(1);
+                    footerLinks[2].href = `https://wa.me/${waNum}`;
+                }
+                if(footerLinks[3]) { footerLinks[3].href = sosmed.youtube || '#'; footerLinks[3].style.display = sosmed.youtube ? 'flex' : 'none'; }
+
+                // --- Pengumuman ---
+                const announcementContainer = document.getElementById('announcement-container');
+                let announcementHtml = '';
+                let count = 0;
+
+                for (let i = 1; i <= 3; i++) {
+                    const p = pengumumanData[`pengumuman${i}`];
+                    if (p && p[`pengumuman${i}Judul`]) {
+                        count++;
+                        const judul = p[`pengumuman${i}Judul`];
+                        const text = p[`pengumuman${i}Text`] || 'Tidak ada konten teks.';
+                        const gambar = p[`pengumuman${i}Gambar`];
+                        const dokumen = p[`pengumuman${i}Dokumen`];
+                        
+                        const safeJudul = judul.replace(/'/g, "\\'");
+                        const safeText = text.replace(/'/g, "\\'").replace(/\n/g, "<br>");
+                        const safeGambar = gambar ? resolveImg(gambar).replace(/'/g, "\\'") : '';
+                        const safeDokumen = dokumen ? dokumen.replace(/'/g, "\\'") : '';
+
+                        let headerHtml = `<div class="news-header"><i class="fas fa-bullhorn news-icon-placeholder"></i></div>`;
+                        if (gambar) headerHtml = `<div class="news-header"><img src="${resolveImg(gambar)}" alt="Gambar Pengumuman"></div>`;
+
+                        announcementHtml += `
+                        <div class="news-card reveal delay-${i*100}" onclick="openAnnouncementModal('${safeJudul}', '${safeGambar}', '${safeText}', '${safeDokumen}')">
+                            ${headerHtml}
+                            <div class="news-content">
+                                <h3>${judul}</h3>
+                                <p>${text.substring(0, 100)}${text.length > 100 ? '...' : ''}</p>
+                                <span class="read-more">Baca Selengkapnya <i class="fas fa-arrow-right"></i></span>
+                            </div>
+                        </div>`;
+                    }
+                }
+                if (count === 0) announcementContainer.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #8898aa; padding: 40px;">Belum ada pengumuman yang dipublikasikan.</div>`;
+                else {
+                    announcementContainer.innerHTML = announcementHtml;
+                    setTimeout(() => { document.querySelectorAll('.news-card.reveal').forEach(el => { observer.observe(el); el.classList.add('active'); }); }, 100);
+                }
+
+                // --- Galeri ---
+                const galContainer = document.getElementById('gallery-container');
+                if(validGallery.length > 0) {
+                    galContainer.innerHTML = validGallery.map((img, idx) => `
+                        <div class="gallery-item reveal delay-${(idx % 3) * 100}" onclick="openModal('Galeri Kegiatan', '${resolveImg(img)}', '')">
+                            <img src="${resolveImg(img)}" alt="Kegiatan ${idx+1}">
+                        </div>
+                    `).join('');
+                    setTimeout(() => { document.querySelectorAll('.gallery-item.reveal').forEach(el => { observer.observe(el); el.classList.add('active'); }); }, 100);
+                } else {
+                    galContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #8898aa; padding: 20px;">Belum ada foto kegiatan.</div>';
+                }
+
+                // --- YouTube ---
+                const ytContainer = document.getElementById('video-container-wrapper');
+                const validYoutube = youtube.filter(url => url && url.trim() !== "");
+                if(validYoutube.length > 0) {
+                    ytContainer.innerHTML = validYoutube.map((url, idx) => {
+                        const embedUrl = getYoutubeEmbedUrl(url);
+                        if(!embedUrl) return '';
+                        return `
+                            <div class="video-container reveal delay-${(idx % 3) * 100}">
+                                <iframe src="${embedUrl}" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                            </div>`;
+                    }).join('');
+                    setTimeout(() => { document.querySelectorAll('.video-container.reveal').forEach(el => { observer.observe(el); el.classList.add('active'); }); }, 100);
+                } else {
+                    ytContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #8898aa; padding: 20px;">Belum ada video highlight.</div>';
+                }
+
+            } catch (e) { console.error("Err Info:", e); }
+        }
+
+        function getYoutubeEmbedUrl(url) {
+            if(!url) return null;
+            let videoId = "";
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            if (match && match[2].length === 11) videoId = match[2];
+            return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+        }
+
+        // --- LOAD INFO GURU (UPDATE NIP) ---
+        async function loadTeacherInfo() {
+            try {
+                const res = await fetch(`${API_URL}/guru-info?kelas=4A`);
+                if(!res.ok) return; 
+
+                const data = await res.json();
+                if (data) {
+                    document.getElementById('profile-nama').textContent = data.nama;
+                    
+                    const nipText = data.nip ? `<br><span style="font-size: 0.85em; opacity: 0.9; font-weight: 400;">NIP. ${data.nip}</span>` : '';
+                    document.getElementById('teacher-nip').innerHTML = `Wali Kelas ${data.kelas || '4 A'} ${nipText}`;
+
+                    if(data.foto) {
+                        const imgUrl = resolveImg(data.foto);
+                        document.getElementById('profile-foto-url').src = imgUrl;
+                        const btnGuru = document.getElementById('btn-portal-guru');
+                        if(btnGuru) {
+                            btnGuru.style.setProperty('--teacher-bg', `url('${imgUrl}')`);
+                            btnGuru.classList.add('has-bg');
+                        }
+                    }
+                    
+                    document.getElementById('sambutan-author').textContent = `- ${data.nama} (Guru Kelas 4A)`;
+                }
+            } catch(e) { console.log("Guru Info load skipped (API not ready)"); }
+        }
+
+        async function loadStudentData() {
+            const container = document.getElementById('student-container');
+            try {
+                const res = await fetch(`${API_URL}/siswa`);
+                const allStudents = await res.json();
+                
+                const students = allStudents.filter(s => s.kelas === '4A').sort((a,b) => a.nama.localeCompare(b.nama));
+
+                if (!students || students.length === 0) {
+                    container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #cbd5e1; padding: 20px;">Belum ada data siswa untuk Kelas 4A.</div>`;
+                    return;
+                }
+
+                container.innerHTML = students.map((s, idx) => {
+                    const safeName = s.nama.replace(/'/g, "\\'");
+                    const safeFoto = s.foto ? resolveImg(s.foto) : 'https://placehold.co/150?text=Siswa';
+                    
+                    return `
+                    <div class="student-card reveal delay-${(idx % 5) * 100}" onclick="openModal('${safeName}', '${safeFoto}', 'Siswa Kelas 4A - Jenis Kelamin: ${s.jenis_kelamin || '-'}')">
+                        <div class="student-img-wrapper">
+                            <img src="${safeFoto}" alt="${s.nama}" class="student-img">
+                        </div>
+                    </div>`;
+                }).join('');
+
+                setTimeout(() => { 
+                    document.querySelectorAll('.student-card.reveal').forEach(el => { 
+                        observer.observe(el); 
+                        el.classList.add('active'); 
+                    }); 
+                }, 100);
+            } catch(e) {
+                container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #cbd5e1;">Gagal memuat data siswa.</div>`;
+            }
+        }
+
+        // --- 4. LOAD & RENDER CHARTS (GRAFIK 7KAIH & ABSENSI) ---
+        async function loadChartData() {
+            try {
+                // 1. DATA 7KAIH (Fetch Laporan)
+                const resLaporan = await fetch(`${API_URL}/laporan?kelas=4A`);
+                const laporan = await resLaporan.json();
+                
+                // 2. DATA ABSENSI (Fetch Siswa Total & Absensi Hari Ini)
+                const today = new Date();
+                const dateString = today.toISOString().split('T')[0];
+                document.getElementById('attendance-date').textContent = today.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+                const resSiswa = await fetch(`${API_URL}/siswa`);
+                const allSiswa = await resSiswa.json();
+                const totalSiswa = allSiswa.filter(s => s.kelas === '4A').length;
+
+                const resAbsen = await fetch(`${API_URL}/absensi?tanggal=${dateString}&kelas=4A`);
+                const dataAbsen = await resAbsen.json();
+
+                // --- PROSES CHART 7KAIH (STACKED BAR) ---
+                if(laporan && laporan.length > 0) {
+                    const { ibadahSettings = [], waktu = {}, predikat = {} } = savedGlobalSettings;
+                    const ibadahThreshold = ibadahSettings.filter(s => s).length || 1;
+                    const bbp = waktu.bangunPagi || '05:00'; 
+                    const btc = waktu.tidurCepat || '21:00';
+
+                    // Hitung akumulasi per anak
+                    const studentRekap = {};
+                    laporan.forEach(d => {
+                        if (!d.nama_siswa) return;
+                        const key = d.nama_siswa; 
+                        if (!studentRekap[key]) studentRekap[key] = { totalHari: 0, beribadah: 0, tidurCepat: 0, bangunPagi: 0, olahraga: 0, belajar: 0, bermasyarakat: 0, makanBergizi: 0 };
+                        const data = studentRekap[key]; 
+                        data.totalHari++; 
+                        
+                        let ibadahPoint = 0;
+                        for(let j=1; j<=7; j++) { if(ibadahSettings[j-1] && String(d[`ibadah${j}`]||'').trim()) ibadahPoint++; }
+                        if(ibadahPoint >= ibadahThreshold) data.beribadah++;
+                        
+                        if (d.bangun_pagi && d.bangun_pagi <= bbp) data.bangunPagi++; 
+                        if (d.tidur_cepat && d.tidur_cepat <= btc) data.tidurCepat++;
+                        if (String(d.rincian_olahraga || '').trim()) data.olahraga++; 
+                        if ((String(d.tempat_belajar || '').trim()) || (String(d.materi_belajar || '').trim())) data.belajar++;
+                        if (String(d.kegiatan_masyarakat || '').trim()) data.bermasyarakat++; 
+                        
+                        let foodScore = (d.makanan_karbo?1:0) + (d.makanan_sayur?1:0) + (d.makanan_susu?1:0) + (d.makanan_lauk?1:0) + (d.makanan_air?1:0);
+                        if(foodScore >= 3) data.makanBergizi++; // Toleransi makan
+                    });
+
+                    // Hitung Kategori (Taat/Terbiasa/Kurang) untuk Chart
+                    const rekapChart = { beribadah: {}, tidurCepat: {}, bangunPagi: {}, olahraga: {}, belajar: {}, bermasyarakat: {}, makanBergizi: {} };
+                    const keys = ["beribadah", "tidurCepat", "bangunPagi", "olahraga", "belajar", "bermasyarakat", "makanBergizi"];
+                    const labelTaat = predikat.taatText || 'Anak Hebat';
+                    const labelBiasa = predikat.terbiasaText || 'Terbiasa';
+                    const labelKurang = predikat.kurangText || 'Perlu Peningkatan';
+
+                    Object.values(studentRekap).forEach(data => {
+                        keys.forEach(catKey => {
+                            let p_text = labelKurang;
+                            if (data.totalHari > 0) { 
+                                const prob = (data[catKey] / data.totalHari) * 100;
+                                if (prob >= (predikat.taatValue || 85)) { p_text = labelTaat; }
+                                else if (prob >= (predikat.terbiasaValue || 70)) { p_text = labelBiasa; }
+                            }
+                            rekapChart[catKey][p_text] = (rekapChart[catKey][p_text] || 0) + 1;
+                        });
+                    });
+
+                    // Render Stacked Bar Chart
+                    const chartLabels = ["Beribadah", "Tidur Cepat", "Bangun Pagi", "Olahraga", "Belajar", "Bermasyarakat", "Makan Sehat"];
+                    const tData = [], bData = [], kData = [];
+                    
+                    keys.forEach(key => { 
+                        tData.push(rekapChart[key][labelTaat] || 0); 
+                        bData.push(rekapChart[key][labelBiasa] || 0); 
+                        kData.push(rekapChart[key][labelKurang] || 0); 
+                    });
+
+                    const ctxBar = document.getElementById('kaihBarChart').getContext('2d');
+                    new Chart(ctxBar, { 
+                        type: 'bar', 
+                        data: { 
+                            labels: chartLabels, 
+                            datasets: [
+                                { label: labelTaat, data: tData, backgroundColor: 'rgba(22, 163, 74, 0.8)' }, 
+                                { label: labelBiasa, data: bData, backgroundColor: 'rgba(245, 158, 11, 0.8)' }, 
+                                { label: labelKurang, data: kData, backgroundColor: 'rgba(239, 68, 68, 0.8)' }
+                            ] 
+                        }, 
+                        options: { 
+                            responsive: true, 
+                            maintainAspectRatio: false, 
+                            scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
+                            plugins: { legend: { position: 'bottom' } }
+                        } 
+                    });
+                } else {
+                    document.getElementById('kaihBarChart').parentNode.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; height:100%; color:#aaa;">Belum ada data laporan.</div>';
+                }
+
+                // --- PROSES CHART KEHADIRAN (DONUT) ---
+                let sakit = 0, izin = 0, alpha = 0;
+                let absentNames = [];
+
+                dataAbsen.forEach(a => {
+                    if (a.keterangan === 'Sakit') sakit++;
+                    else if (a.keterangan === 'Izin') izin++;
+                    else if (a.keterangan === 'Alpha') alpha++;
+                    
+                    if (a.keterangan !== 'Hadir') absentNames.push(`${a.nama} (${a.keterangan})`);
+                });
+
+                const tidakHadirTotal = sakit + izin + alpha;
+                const hadir = totalSiswa - tidakHadirTotal;
+
+                // Update Angka di HTML
+                document.getElementById('val-sakit').textContent = sakit;
+                document.getElementById('val-izin').textContent = izin;
+                document.getElementById('val-alpha').textContent = alpha;
+                
+                if(absentNames.length > 0) {
+                    document.getElementById('absence-names').textContent = "Tidak Hadir: " + absentNames.join(', ');
+                } else {
+                    document.getElementById('absence-names').textContent = "Semua siswa Hadir!";
+                }
+
+                const ctxDonut = document.getElementById('attendanceChart').getContext('2d');
+                new Chart(ctxDonut, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Hadir', 'Sakit', 'Izin', 'Alpha'],
+                        datasets: [{
+                            data: [hadir, sakit, izin, alpha],
+                            backgroundColor: ['#10B981', '#F59E0B', '#3B82F6', '#EF4444'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+
+            } catch(e) { console.error("Chart load error", e); }
+        }
+
+        // --- MODAL FUNCTIONS (UPDATED) ---
+        const modal = document.getElementById('genericModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalImg = document.getElementById('modalImg');
+        const modalHtml = document.getElementById('modalHtmlContent');
+        const modalAction = document.getElementById('modalActionArea');
+
+        function openModal(title, imgSrc, desc) {
+            modalTitle.textContent = title;
+            modalImg.src = imgSrc;
+            modalImg.style.display = imgSrc ? 'block' : 'none';
+            modalHtml.innerHTML = `<p>${desc}</p>`;
+            modalAction.innerHTML = '';
+            modal.style.display = 'block';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+
+        // 1. MODAL JADWAL PELAJARAN (DATABASE)
+        async function openJadwalModal() {
+            modalTitle.textContent = "Jadwal Pelajaran Kelas 4A";
+            modalImg.style.display = 'none';
+            modalHtml.innerHTML = '<div style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat Jadwal...</div>';
+            modalAction.innerHTML = '';
+            modal.style.display = 'block';
+            setTimeout(() => modal.classList.add('show'), 10);
+
+            try {
+                const res = await fetch(`${API_URL}/jadwal-pelajaran?kelas=4A`);
+                const data = await res.json();
+
+                if(!data || data.length === 0) {
+                    modalHtml.innerHTML = '<p class="text-center">Belum ada data jadwal pelajaran di database.</p>';
+                    return;
+                }
+
+                const days = { 1: 'Senin', 2: 'Selasa', 3: 'Rabu', 4: 'Kamis', 5: 'Jumat', 6: 'Sabtu' };
+                const colors = { 1: '#EF5350', 2: '#AB47BC', 3: '#42A5F5', 4: '#66BB6A', 5: '#FFA726', 6: '#8D6E63' };
+                
+                // Group by Day
+                const grouped = {};
+                data.forEach(item => {
+                    const h = item.hari;
+                    if(!grouped[h]) grouped[h] = [];
+                    grouped[h].push(item);
+                });
+
+                let html = '<div class="jadwal-grid">';
+                for(let h=1; h<=6; h++) {
+                    const dayName = days[h]; // Match by key logic since API returns 1-6 or string
+                    // Try to match both key and name just in case API returns string
+                    let dayData = grouped[h] || grouped[dayName];
+                    
+                    if(dayData) {
+                         html += `
+                        <div class="jadwal-card">
+                            <div class="jadwal-header" style="background:${colors[h] || '#333'};">${dayName}</div>
+                            <div class="jadwal-body">
+                                <table class="jadwal-mini-table">
+                                    ${dayData.map(row => `
+                                    <tr>
+                                        <td style="text-align:center; padding:10px;">${row.mata_pelajaran || row.nama_kegiatan}</td>
+                                    </tr>
+                                    `).join('')}
+                                </table>
+                            </div>
+                        </div>`;
+                    }
+                }
+                html += '</div>';
+                modalHtml.innerHTML = html;
+            } catch(e) {
+                modalHtml.innerHTML = `<p class="text-center text-danger">Gagal memuat jadwal: ${e.message}</p>`;
+            }
+        }
+
+        // 2. MODAL JADWAL PIKET (DATABASE - UPDATED)
+        async function openPiketModal() {
+            modalTitle.textContent = "Jadwal Piket Kelas 4A";
+            modalImg.style.display = 'none';
+            modalHtml.innerHTML = '<div style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat Jadwal Piket...</div>';
+            modalAction.innerHTML = '';
+            modal.style.display = 'block';
+            setTimeout(() => modal.classList.add('show'), 10);
+
+            try {
+                const res = await fetch(`${API_URL}/jadwal-piket?kelas=4A`);
+                const data = await res.json();
+
+                if(!data || data.length === 0) {
+                    modalHtml.innerHTML = '<p class="text-center">Belum ada jadwal piket yang diatur di database.</p>';
+                    return;
+                }
+
+                const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+                const colors = { 'Senin': '#EF5350', 'Selasa': '#AB47BC', 'Rabu': '#42A5F5', 'Kamis': '#66BB6A', 'Jumat': '#FFA726' };
+                
+                // Group by Day
+                const grouped = {};
+                data.forEach(item => {
+                    const h = item.hari;
+                    if(!grouped[h]) grouped[h] = [];
+                    grouped[h].push(item.nama); 
+                });
+
+                let html = '<div class="ekskul-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">';
+                
+                days.forEach(day => {
+                    const students = grouped[day] || [];
+                    html += `
+                    <div style="border: 1px solid #eee; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                        <div style="background: ${colors[day]}; color: white; padding: 10px; text-align: center; font-weight: bold;">${day}</div>
+                        <div style="padding: 15px; background: #fff;">
+                            ${students.length > 0 ? 
+                                `<ul style="padding-left: 20px; margin: 0; font-size: 0.9rem; color: #555;">${students.map(s => `<li>${s}</li>`).join('')}</ul>` 
+                                : '<div style="text-align:center; color:#ccc; font-style:italic;">Libur / Kosong</div>'
+                            }
+                        </div>
+                    </div>`;
+                });
+                
+                html += '</div>';
+                modalHtml.innerHTML = html;
+
+            } catch (e) {
+                modalHtml.innerHTML = `<p class="text-center text-danger">Gagal memuat jadwal piket: ${e.message}</p>`;
+            }
+        }
+
+        // 3. MODAL EKSTRAKURIKULER (DATABASE)
+        async function openEkskulModal() {
+            modalTitle.textContent = "Informasi Ekstrakurikuler";
+            modalImg.style.display = 'none';
+            modalHtml.innerHTML = '<div style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat Data Ekskul...</div>';
+            modalAction.innerHTML = '';
+            modal.style.display = 'block';
+            setTimeout(() => modal.classList.add('show'), 10);
+
+            try {
+                const res = await fetch(`${API_URL}/ekstrakurikuler`);
+                const data = await res.json();
+
+                if(!data || data.length === 0) {
+                    modalHtml.innerHTML = '<p class="text-center">Belum ada data ekstrakurikuler.</p>';
+                    return;
+                }
+
+                let html = '<div class="ekskul-grid">';
+                data.forEach(ekskul => {
+                    const foto = 'https://placehold.co/300x200?text=' + ekskul.nama_ekskul.replace(/ /g, '+');
+                    html += `
+                    <div class="ekskul-card">
+                        <img src="${foto}" class="ekskul-img" alt="${ekskul.nama_ekskul}">
+                        <div class="ekskul-body">
+                            <div class="ekskul-title">${ekskul.nama_ekskul}</div>
+                            <div class="ekskul-info"><i class="far fa-clock" style="width:20px; color:var(--primary);"></i> Jadwal Menyusul</div>
+                        </div>
+                    </div>`;
+                });
+                html += '</div>';
+                modalHtml.innerHTML = html;
+            } catch(e) {
+                modalHtml.innerHTML = `<p class="text-center text-danger">Gagal memuat ekskul: ${e.message}</p>`;
+            }
+        }
+
+        function openVisiMisiModal() {
+            modalTitle.textContent = "Visi & Misi Sekolah";
+            modalImg.style.display = 'none'; 
+            
+            const contentHtml = `
+                <div style="text-align: left;">
+                    <h4 style="color: var(--primary); margin-bottom: 10px; font-weight: 700; font-size: 1.2rem;">Visi</h4>
+                    <p style="margin-bottom: 25px; line-height: 1.8; font-style: italic; color: #333;">"${globalVisiContent}"</p>
+                    <div style="width: 100%; height: 1px; background: #eee; margin-bottom: 25px;"></div>
+                    <h4 style="color: var(--primary); margin-bottom: 10px; font-weight: 700; font-size: 1.2rem;">Misi</h4>
+                    <p style="white-space: pre-line; line-height: 1.8; color: #555;">${globalMisiContent}</p>
+                </div>`;
+            
+            modalHtml.innerHTML = contentHtml;
+            modalAction.innerHTML = ''; 
+            modal.style.display = 'block';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+
+        function openAnnouncementModal(title, imgSrc, textContent, docLink) {
+            modalTitle.textContent = title;
+            if(imgSrc) { modalImg.src = resolveImg(imgSrc); modalImg.style.display = 'block'; } else { modalImg.style.display = 'none'; }
+            modalHtml.innerHTML = `<p style="line-height:1.8; white-space: pre-line; font-size: 1rem; color: #525f7f;">${textContent}</p>`;
+            if(docLink) { modalAction.innerHTML = `<a href="${docLink}" target="_blank" class="modal-btn"><i class="fas fa-file-download"></i> Buka Dokumen / Tautan</a>`; } else { modalAction.innerHTML = ''; }
+            modal.style.display = 'block';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+
+        function closeGenericModal() {
+            modal.classList.remove('show');
+            setTimeout(() => { modal.style.display = 'none'; }, 300);
+        }
+
+        window.onclick = function(event) { if (event.target == modal) closeGenericModal(); }
+    </script>
 </body>
 </html>
