@@ -3071,6 +3071,7 @@ async function resetLaporan() {
 function populateProfileForm() {
     if(!currentUser) return;
     document.getElementById('profile-nama').value = currentUser.nama;
+    document.getElementById('profile-nip').value = currentUser.nip || '';
     document.getElementById('profile-username').value = currentUser.username;
     document.getElementById('profile-password').value = currentUser.password;
     document.getElementById('profile-kelas').value = currentUser.kelas;
@@ -3082,7 +3083,8 @@ function populateProfileForm() {
 }
 
 async function updateGuruProfile() {
-    const nama = document.getElementById('profile-nama').value;
+    const nama = document.getElementById('profile-nama').value;    
+    const nip = document.getElementById('profile-nip').value;
     const username = document.getElementById('profile-username').value;
     const password = document.getElementById('profile-password').value;
     const kelas = document.getElementById('profile-kelas').value;
@@ -3094,13 +3096,18 @@ async function updateGuruProfile() {
         const res = await fetch(`${API_URL}/users/${currentUser.id}`, {
             method: 'PUT',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ nama, username, password, kelas, foto })
+            body: JSON.stringify({ nama, username, password, kelas, foto, nip })
         });
         
         if (!res.ok) throw new Error("Gagal update profil");
         
-        currentUser.nama = nama; currentUser.username = username; currentUser.password = password; currentUser.kelas = kelas;
+        currentUser.nama = nama; 
+        currentUser.nip = nip; 
+        currentUser.username = username; 
+        currentUser.password = password; 
+        currentUser.kelas = kelas;
         currentUser.foto = foto; 
+        
         sessionStorage.setItem('guruUser', JSON.stringify(currentUser));
         
         document.getElementById('guru-name-display').textContent = `${currentUser.nama} (${currentUser.kelas})`;
