@@ -10,10 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <title>Dashboard Siswa</title>
     
-    <!-- Supabase JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
+    <style>
     /* === PALET WARNA & VARIABEL === */
     :root {
         --primary-color: #6366F1; /* Indigo 500 */
@@ -335,7 +332,6 @@
 <body>
     <div id="preloader"><div class="spinner"></div></div>
     
-    <!-- Login Container -->
     <div id="login-container">
         <div class="login-card">
             <h2>Login Siswa</h2>
@@ -350,7 +346,6 @@
         </div>
     </div>
 
-    <!-- Dashboard Container (Initially Hidden) -->
     <div id="dashboard-container" style="display: none;">
         <header class="page-header">
             <h1>Laporan Harian Siswa</h1>
@@ -465,10 +460,8 @@
     </div>
 
     <script>
-        const SUPABASE_URL = "https://ztcdcxqbffobonlubiga.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_Tlt7BdyANH_U1j_wVXLcnw_ltkzm-Bb";
-        // MENGHINDARI KONFLIK VARIABEL: Gunakan 'supabaseClient' bukan 'supabase'
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // === KONFIGURASI API BARU ANDA ===
+        const API_BASE_URL = "https://api.bangbin.my.id";
 
         // Variabel Global
         let currentStudentData = {};
@@ -507,17 +500,16 @@
             });
         });
 
-        // Mengambil Opsi Ibadah dari Supabase
+        // Mengambil Opsi Ibadah dari API Server
         async function loadIbadahDropdownOptions() {
             try {
-                const { data, error } = await supabaseClient
-                    .from('pengaturan')
-                    .select('data')
-                    .eq('key', 'global')
-                    .single();
+                const response = await fetch(`${API_BASE_URL}/pengaturan`);
+                const json = await response.json();
+                
+                // Server mengembalikan { data: { ... } } atau langsung objek data
+                const settingsData = json.data || json;
 
-                if (data && data.data) {
-                    const settingsData = data.data;
+                if (settingsData) {
                     const ibadahSettings = settingsData.ibadahSettings || [];
                     const ibadahOptions = settingsData.ibadahOptions || {};
                     
@@ -536,8 +528,6 @@
                             });
                         } 
                     }
-                } else {
-                    console.error('Gagal memuat pengaturan.');
                 }
             } catch(error) {
                 console.error('Error saat memuat dropdown ibadah:', error);
@@ -566,35 +556,38 @@
             }, 100);
         }
 
-        // Login menggunakan Supabase
+        // Login menggunakan API Node.js
         async function handleLogin(nomorInduk) {
             loginButton.disabled = true;
             loginButton.textContent = 'Memverifikasi...';
             if(preloader.classList.contains('hidden')) preloader.classList.remove('hidden');
 
             try {
-                const { data: studentData, error } = await supabaseClient
-                    .from('siswa')
-                    .select('*')
-                    .eq('nomor_induk', nomorInduk)
-                    .single();
+                const response = await fetch(`${API_BASE_URL}/login-siswa`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nomor_induk: nomorInduk })
+                });
 
-                if (error || !studentData) {
-                    showMessage('Login Gagal: Nomor Induk tidak ditemukan.', 'Error');
-                    preloader.classList.add('hidden');
-                } else {
-                    const dataForDashboard = {
-                        nama: studentData.nama,
-                        induk: studentData.nomor_induk,
-                        kelas: studentData.kelas,
-                        agama: studentData.agama
-                    };
-                    sessionStorage.setItem('nomorIndukSiswa', nomorInduk);
-                    showDashboard(dataForDashboard);
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.error || 'Login gagal');
                 }
+
+                const studentData = await response.json();
+
+                const dataForDashboard = {
+                    nama: studentData.nama,
+                    induk: studentData.nomor_induk,
+                    kelas: studentData.kelas,
+                    agama: studentData.agama
+                };
+                sessionStorage.setItem('nomorIndukSiswa', nomorInduk);
+                showDashboard(dataForDashboard);
+
             } catch (error) {
                 console.error('Login error:', error);
-                showMessage('Terjadi kesalahan saat mencoba login.', 'Error');
+                showMessage('Login Gagal: Nomor Induk tidak ditemukan atau salah.', 'Error');
                 preloader.classList.add('hidden');
             } finally {
                 loginButton.disabled = false;
@@ -642,7 +635,7 @@
             if (!this.checked) textInput.value = '';
         });
 
-        // Mengirim laporan ke Supabase
+        // Mengirim laporan ke API Server
         document.getElementById('activityForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const submitButton = document.getElementById('submitActivity');
@@ -696,11 +689,14 @@
             };
 
             try {
-                const { error } = await supabaseClient
-                    .from('laporan')
-                    .insert([payload]);
+                // KIRIM DATA KE API
+                const response = await fetch(`${API_BASE_URL}/laporan`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
 
-                if (error) throw error;
+                if (!response.ok) throw new Error("Gagal menyimpan data");
 
                 const buttonContainer = document.getElementById('messageModalButtons');
                 
