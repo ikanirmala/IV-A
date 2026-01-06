@@ -5,11 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IV-A - Setu 02</title>
     
-    <!-- Favicon dari Logo Sekolah -->
-	<link id="favicon" rel="icon" type="image/x-icon" href="https://lh3.googleusercontent.com/d/16rll5zsRdwTbR3nF_NmPKwY51tg4tnOn">
+    <link id="favicon" rel="icon" type="image/x-icon" href="">
     
-    <!-- Library Eksternal -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -75,7 +72,7 @@
             position: relative; height: 100vh; 
             display: flex; align-items: center; justify-content: center; 
             text-align: center; color: white;
-            background-image: url('https://images.unsplash.com/photo-1509062522246-3755977927d7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+            background-color: #333; /* Fallback */
             background-attachment: fixed; 
             background-position: center; 
             background-repeat: no-repeat; 
@@ -123,8 +120,19 @@
         .nav-card i { font-size: 2.5rem; margin-bottom: 15px; display: block; }
         .nav-card h3 { font-size: 1.2rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* Custom Button Guru dengan Background Foto */
-        #btn-portal-guru { z-index: 1; }
+        #btn-portal-guru, #btn-portal-siswa {
+            z-index: 1; 
+            width: 250px; 
+            height: 250px; 
+            border-radius: 50%;
+            padding: 0;            
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
         #btn-portal-guru.has-bg { background: rgba(0, 0, 0, 0.4) !important; border-color: rgba(255, 255, 255, 0.6); }
         #btn-portal-guru::before {
             content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -189,7 +197,7 @@
 
         /* --- SECTION PARALLAX GENERAL --- */
         .parallax-section {
-            background-image: url('https://placehold.co/1920x1080?text=Background');
+            background-color: #1e293b;
             background-attachment: fixed;
             background-position: center;
             background-repeat: no-repeat;
@@ -198,7 +206,7 @@
         }
         .parallax-section .parallax-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.5);
+            background: rgba(15, 23, 42, 0.7);
             z-index: 1;
         }
         .parallax-section .section-title { color: white; }
@@ -376,7 +384,7 @@
         .modal.show { opacity: 1; }
         .modal-content { 
             background-color: #fefefe; margin: 5% auto; padding: 0; border-radius: 25px; 
-            width: 90%; max-width: 800px; position: relative; 
+            width: 90%; max-width: 1000px; position: relative; 
             transform: translateY(50px); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             overflow: hidden; box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.5); 
         }
@@ -420,10 +428,8 @@
 </head>
 <body>
 
-    <!-- PRELOADER -->
     <div id="preloader"><div class="loader"></div></div>
 
-    <!-- 1. HEADER HERO (GAMBAR GALERI #1 AKAN DIMUAT DISINI) -->
     <header class="hero">
         <div class="hero-overlay"></div>
         <div class="hero-content">
@@ -432,35 +438,31 @@
             
             <div class="nav-cards">
                 <a href="Guru.html" class="nav-card" id="btn-portal-guru">
-                    <i class="fas fa-chalkboard-teacher"></i>
                     <h3>Portal Guru</h3>
                 </a>
-                <a href="Siswa.html" class="nav-card">
+                <a href="Siswa.html" class="nav-card" id="btn-portal-siswa">
                     <i class="fas fa-user-graduate"></i>
                     <h3>Portal Siswa</h3>
                 </a>
             </div>
+            
         </div>
     </header>
 
-    <!-- 2. PROFIL GURU & VISI MISI -->
     <section>
         <div class="container">
             <h2 class="section-title reveal">Profil Kelas</h2>
             <div class="profile-grid">
-                <!-- Kartu Guru -->
                 <div class="teacher-card reveal-scale delay-100">
                     <div class="teacher-bg"></div>
-                    <img src="https://placehold.co/150?text=Foto" id="teacher-photo" alt="Guru Kelas" class="teacher-img">
+                    <img src="https://placehold.co/150?text=Foto" id="profile-foto-url" alt="Guru Kelas" class="teacher-img">
                     <div class="teacher-info">
-                        <h3 id="teacher-name">Memuat Nama...</h3>
+                        <h3 id="profile-nama">Memuat Nama...</h3>
                         <p id="teacher-nip">Wali Kelas 4 A</p>
                         <div class="stat-badge"><i class="fas fa-star"></i> Guru Terbaik</div>
                     </div>
                 </div>
                 
-                <!-- Box Visi Misi -->
-                <!-- UPDATE: Menambahkan onclick event untuk membuka modal Visi Misi -->
                 <div class="vision-box reveal delay-200" onclick="openVisiMisiModal()">
                     <i class="fas fa-quote-right bg-icon"></i>
                     <h4><i class="fas fa-bullseye"></i> Visi & Misi Sekolah</h4>
@@ -471,24 +473,20 @@
         </div>
     </section>
 
-    <!-- 3. INFORMASI KELAS (PARALLAX + 3 KOTAK: JADWAL, STRUKTUR, KESEPAKATAN) -->
     <section id="info-kelas-section" class="parallax-section">
         <div class="parallax-overlay"></div>
         <div class="container">
             <h2 class="section-title reveal" style="color:white">Informasi Kelas</h2>
             
-            <!-- GRID 3 KOLOM -->
             <div class="info-grid">
-                <!-- KOTAK 1: JADWAL PELAJARAN -->
-                <div class="preview-card reveal delay-100" onclick="openModal('Jadwal Pelajaran', document.getElementById('img-jadwal-src').src, 'Jadwal pelajaran berlaku untuk semester ini.')">
-                    <img src="https://lh3.googleusercontent.com/d/13ig-S7TCdp_AVdPnld-9IJ-mnG8loPK3" id="img-jadwal-src" alt="Jadwal">
+                <div class="preview-card reveal delay-100" onclick="openModal('Ulang Tahun', document.getElementById('img-jadwal-src').src, 'Jadwal pelajaran berlaku untuk semester ini.')">
+                    <img src="https://placehold.co/600x400?text=Jadwal" id="img-jadwal-src" alt="Jadwal">
                     <div class="preview-overlay">
-                        <h3><i class="fas fa-calendar-alt"></i> Jadwal Pelajaran</h3>
+                        <h3><i class="fas fa-calendar-alt"></i> Ulang Tahun</h3>
                         <p>Klik untuk memperbesar</p>
                     </div>
                 </div>
 
-                <!-- KOTAK 2: STRUKTUR ORGANISASI -->
                 <div class="preview-card reveal delay-200" onclick="openModal('Regu Piket & Struktur', document.getElementById('img-struktur-src').src, 'Daftar petugas piket kebersihan dan struktur organisasi kelas.')">
                     <img src="https://placehold.co/600x400?text=Struktur+Kelas" id="img-struktur-src" alt="Struktur">
                     <div class="preview-overlay">
@@ -497,7 +495,6 @@
                     </div>
                 </div>
 
-                <!-- KOTAK 3: KESEPAKATAN KELAS (DITAMBAHKAN SESUAI PERMINTAAN) -->
                 <div class="preview-card reveal delay-300" onclick="openModal('Kesepakatan Kelas', document.getElementById('img-kesepakatan-src').src, 'Kesepakatan dan Keyakinan Kelas yang telah disetujui bersama.')">
                     <img src="https://placehold.co/600x400?text=Kesepakatan+Kelas" id="img-kesepakatan-src" alt="Kesepakatan">
                     <div class="preview-overlay">
@@ -509,7 +506,6 @@
         </div>
     </section>
 
-    <!-- 4. PENGUMUMAN (DYNAMIC) -->
     <section>
         <div class="container">
             <h2 class="section-title reveal">Papan Pengumuman</h2>
@@ -521,7 +517,6 @@
         </div>
     </section>
 
-    <!-- 5. GRAFIK KAIH -->
     <section style="background: linear-gradient(to right, #f8f9fa, #e9ecef);">
         <div class="container">
             <div class="chart-section reveal-scale">
@@ -542,8 +537,6 @@
         </div>
     </section>
 
-    <!-- 6. DAFTAR SISWA (PARALLAX + BACKGROUND GALERI #3) -->
-    <!-- ID: student-section untuk target JS background -->
     <section id="student-section" class="parallax-section">
         <div class="parallax-overlay"></div>
         <div class="container">
@@ -558,26 +551,22 @@
         </div>
     </section>
 
-    <!-- 7. GALERI & VIDEO -->
     <section style="background: #F9FAFB;">
         <div class="container">
             <h2 class="section-title reveal">Galeri & Kegiatan</h2>
             
             <h3 style="margin-bottom: 30px; color: var(--dark); border-left: 5px solid var(--primary); padding-left: 20px;">Dokumentasi Foto</h3>
             <div id="gallery-container" class="gallery-grid reveal">
-                <!-- Diisi oleh JS -->
                 <p class="text-center w-full" style="grid-column: 1/-1; text-align: center; color: #8898aa;">Memuat galeri...</p>
             </div>
 
             <h3 style="margin-bottom: 30px; color: var(--dark); border-left: 5px solid var(--accent); padding-left: 20px; margin-top: 80px;">Video Highlight</h3>
             <div id="video-container-wrapper" class="video-grid reveal delay-100">
-                <!-- Diisi oleh JS -->
                 <p class="text-center w-full" style="grid-column: 1/-1; text-align: center; color: #8898aa;">Memuat video...</p>
             </div>
         </div>
     </section>
 
-    <!-- 8. SAMBUTAN GURU -->
     <div class="container">
         <div class="sambutan-section reveal">
             <i class="fas fa-quote-right sambutan-bg-icon"></i>
@@ -589,10 +578,9 @@
         </div>
     </div>
 
-    <!-- FOOTER -->
     <footer>
         <div class="container">
-            <p>&copy; 2024 SDN Setu 02 - Kelas 4 A. Dibuat dengan semangat belajar.</p>
+            <p>© 2024 SDN Setu 02 - Kelas 4 A. Dibuat dengan semangat belajar.</p>
             <div class="social-links">
                 <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
                 <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
@@ -602,7 +590,6 @@
         </div>
     </footer>
 
-    <!-- MODAL -->
     <div id="genericModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -611,7 +598,6 @@
             </div>
             <div class="modal-body">
                 <img id="modalImg" src="" style="display:none;" class="modal-img">
-                <p id="modalDesc"></p>
                 <div id="modalHtmlContent"></div>
                 <div id="modalActionArea"></div>
             </div>
@@ -619,9 +605,16 @@
     </div>
 
     <script>
-        const SUPABASE_URL = "https://ztcdcxqbffobonlubiga.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_Tlt7BdyANH_U1j_wVXLcnw_ltkzm-Bb";
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // --- KONFIGURASI API ---
+        const IS_LOCALHOST = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const API_URL = IS_LOCALHOST ? "http://localhost:3000" : "https://api.bangbin.my.id";
+
+        // Helper Resolve Image
+        function resolveImg(path) {
+            if (!path) return 'https://placehold.co/150?text=No+Img';
+            if (path.startsWith('http')) return path;
+            return `${API_URL}${path}`;
+        }
 
         // --- SCROLL ANIMATION OBSERVER ---
         const observerOptions = { threshold: 0.1 };
@@ -641,176 +634,145 @@
 
         // Init Data
         window.addEventListener('load', async () => {
-            await loadSchoolInfo();
-            await loadTeacherInfo();
-            await loadStudentData(); 
-            await loadChartData();
+            try {
+                await loadSchoolInfo();
+                await loadTeacherInfo();
+                await loadStudentData(); 
+                await loadChartData();
+            } catch(e) { console.error("Init Error:", e); }
+            
             document.getElementById('preloader').style.opacity = '0';
             setTimeout(() => { document.getElementById('preloader').style.display = 'none'; }, 500);
         });
 
-        // 1. LOAD INFO SEKOLAH (Background Parallax Logic disini)
+        // 1. LOAD INFO SEKOLAH
         async function loadSchoolInfo() {
             try {
-                const { data, error } = await supabaseClient.from('pengaturan').select('data').eq('key', 'global').single();
-                if (data && data.data) {
-                    const info = data.data.infoSekolah || {};
-                    const visual = info.infoKelas || {};
-                    const vm = info.visiMisi || {};
-                    const pengumumanData = info.pengumuman || {};
-                    const galeri = info.galeri || [];
-                    const youtube = info.youtubeLinks || [];
-                    const sosmed = info.socialMedia || {}; 
+                const res = await fetch(`${API_URL}/pengaturan`);
+                const json = await res.json();
+                const data = json.data || {};
+                
+                const info = data.infoSekolah || {};
+                const visual = info.infoKelas || {};
+                const vm = info.visiMisi || {};
+                const pengumumanData = info.pengumuman || {};
+                const galeri = info.galeri || [];
+                const youtube = info.youtubeLinks || [];
+                const sosmed = info.socialMedia || {}; 
 
-                    // Header
-                    if(info.namaSekolah) document.querySelector('title').textContent = `WEB ${info.namaSekolah}`;
-                    if(info.namaSekolah) document.getElementById('hero-title').innerHTML = `WEB ${info.namaSekolah}<br>KELAS IV-A`;
-                    
-                    // Visi Misi - STORE & DISPLAY
-                    globalVisiContent = vm.visi || "Visi belum diatur.";
-                    globalMisiContent = vm.misi || "Misi belum diatur.";
-                    
-                    document.getElementById('visi-text').textContent = vm.visi ? `"${vm.visi}"` : "Visi belum diatur.";
-                    // Potong misi untuk preview di card
-                    let misiPreview = vm.misi || "Misi belum diatur.";
-                    if(misiPreview.length > 100) misiPreview = misiPreview.substring(0, 100) + '... (Klik untuk selengkapnya)';
-                    document.getElementById('misi-text').textContent = misiPreview;
+                // Header
+                if(info.namaSekolah) document.querySelector('title').textContent = `WEB ${info.namaSekolah}`;
+                if(info.logo) document.getElementById('favicon').href = resolveImg(info.logo);
+                if(info.namaSekolah) document.getElementById('hero-title').innerHTML = `WEB ${info.namaSekolah}<br>KELAS IV-A`;
+                
+                // Visi Misi
+                globalVisiContent = vm.visi || "Visi belum diatur.";
+                globalMisiContent = vm.misi || "Misi belum diatur.";
+                
+                document.getElementById('visi-text').textContent = vm.visi ? `"${vm.visi}"` : "Visi belum diatur.";
+                let misiPreview = vm.misi || "Misi belum diatur.";
+                if(misiPreview.length > 100) misiPreview = misiPreview.substring(0, 100) + '... (Klik untuk selengkapnya)';
+                document.getElementById('misi-text').textContent = misiPreview;
 
-                    if(info.sambutanKepsek) document.getElementById('sambutan-text').textContent = `"${info.sambutanKepsek}"`;
+                if(info.sambutanKepsek) document.getElementById('sambutan-text').textContent = `"${info.sambutanKepsek}"`;
 
-                    // Info Visual (Images 3 Kotak)
-                    if(visual.jadwalPelajaran) document.getElementById('img-jadwal-src').src = visual.jadwalPelajaran;
-                    if(visual.strukturOrganisasi) document.getElementById('img-struktur-src').src = visual.strukturOrganisasi;
-                    if(visual.kesepakatanKelas) document.getElementById('img-kesepakatan-src').src = visual.kesepakatanKelas;
+                // Info Visual
+                if(visual.jadwalPelajaran) document.getElementById('img-jadwal-src').src = resolveImg(visual.jadwalPelajaran);
+                if(visual.strukturOrganisasi) document.getElementById('img-struktur-src').src = resolveImg(visual.strukturOrganisasi);
+                if(visual.kesepakatanKelas) document.getElementById('img-kesepakatan-src').src = resolveImg(visual.kesepakatanKelas);
 
-                    // --- LOAD BACKGROUND PARALLAX ---
-                    const validGallery = galeri.filter(img => img && img.trim() !== "");
-                    
-                    // Background Hero (Gallery #1)
-                    if(validGallery.length > 0) {
-                        document.querySelector('.hero').style.backgroundImage = `url('${validGallery[0]}')`;
-                    }
-                    
-                    // Background Info Kelas (Gallery #2)
-                    if(validGallery.length > 1) {
-                        document.getElementById('info-kelas-section').style.backgroundImage = `url('${validGallery[1]}')`;
-                    } else if (validGallery.length > 0) {
-                        document.getElementById('info-kelas-section').style.backgroundImage = `url('${validGallery[0]}')`;
-                    }
+                // --- Background Parallax ---
+                const validGallery = galeri.filter(img => img && img.trim() !== "");
+                if(validGallery.length > 0) document.querySelector('.hero').style.backgroundImage = `url('${resolveImg(validGallery[0])}')`;
+                if(validGallery.length > 1) document.getElementById('info-kelas-section').style.backgroundImage = `url('${resolveImg(validGallery[1])}')`;
+                else if(validGallery.length > 0) document.getElementById('info-kelas-section').style.backgroundImage = `url('${resolveImg(validGallery[0])}')`;
 
-                    // Background Section Siswa (Gallery #3)
-                    const studentSection = document.getElementById('student-section');
-                    if (studentSection) {
-                        if (validGallery.length > 2) {
-                             studentSection.style.backgroundImage = `url('${validGallery[2]}')`;
-                        } else if (validGallery.length > 0) {
-                             // Fallback ke index 0 jika index 2 tidak ada
-                             studentSection.style.backgroundImage = `url('${validGallery[0]}')`;
-                        }
-                    }
-
-                    // --- UPDATE FOOTER SOCIAL MEDIA ---
-                    const footerLinks = document.querySelectorAll('.social-links a');
-                    
-                    if(footerLinks[0]) {
-                         footerLinks[0].href = sosmed.facebook || '#';
-                         if(!sosmed.facebook) footerLinks[0].style.display = 'none'; 
-                         else footerLinks[0].style.display = 'flex';
-                    }
-                    if(footerLinks[1]) {
-                        footerLinks[1].href = sosmed.instagram || '#';
-                        if(!sosmed.instagram) footerLinks[1].style.display = 'none';
-                        else footerLinks[1].style.display = 'flex';
-                    }
-                    if(footerLinks[2]) {
-                        let waNum = sosmed.whatsapp || '6281310051985'; 
-                        waNum = waNum.replace(/\D/g,''); 
-                        if(waNum.startsWith('0')) waNum = '62' + waNum.substring(1);
-                        footerLinks[2].href = `https://wa.me/${waNum}`;
-                    }
-                    if(footerLinks[3]) {
-                        footerLinks[3].href = sosmed.youtube || '#';
-                        if(!sosmed.youtube) footerLinks[3].style.display = 'none';
-                        else footerLinks[3].style.display = 'flex';
-                    }
-
-                    // --- LOAD PENGUMUMAN DINAMIS ---
-                    const announcementContainer = document.getElementById('announcement-container');
-                    let announcementHtml = '';
-                    let count = 0;
-
-                    for (let i = 1; i <= 3; i++) {
-                        const p = pengumumanData[`pengumuman${i}`];
-                        if (p && p[`pengumuman${i}Judul`]) {
-                            count++;
-                            const judul = p[`pengumuman${i}Judul`];
-                            const text = p[`pengumuman${i}Text`] || 'Tidak ada konten teks.';
-                            const gambar = p[`pengumuman${i}Gambar`];
-                            const dokumen = p[`pengumuman${i}Dokumen`];
-                            
-                            const safeJudul = judul.replace(/'/g, "\\'");
-                            const safeText = text.replace(/'/g, "\\'").replace(/\n/g, "<br>");
-                            const safeGambar = gambar ? gambar.replace(/'/g, "\\'") : '';
-                            const safeDokumen = dokumen ? dokumen.replace(/'/g, "\\'") : '';
-
-                            let headerHtml = `<div class="news-header"><i class="fas fa-bullhorn news-icon-placeholder"></i></div>`;
-                            if (gambar) {
-                                headerHtml = `<div class="news-header"><img src="${gambar}" alt="Gambar Pengumuman"></div>`;
-                            }
-
-                            announcementHtml += `
-                            <div class="news-card reveal delay-${i*100}" onclick="openAnnouncementModal('${safeJudul}', '${safeGambar}', '${safeText}', '${safeDokumen}')">
-                                ${headerHtml}
-                                <div class="news-content">
-                                    <h3>${judul}</h3>
-                                    <p>${text.substring(0, 100)}${text.length > 100 ? '...' : ''}</p>
-                                    <span class="read-more">Baca Selengkapnya <i class="fas fa-arrow-right"></i></span>
-                                </div>
-                            </div>
-                            `;
-                        }
-                    }
-
-                    if (count === 0) announcementContainer.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #8898aa; padding: 40px;">Belum ada pengumuman yang dipublikasikan.</div>`;
-                    else {
-                        announcementContainer.innerHTML = announcementHtml;
-                        setTimeout(() => { document.querySelectorAll('.news-card.reveal').forEach(el => { observer.observe(el); el.classList.add('active'); }); }, 100);
-                    }
-
-                    // --- LOAD GALERI ---
-                    const galContainer = document.getElementById('gallery-container');
-                    
-                    if(validGallery.length > 0) {
-                        galContainer.innerHTML = validGallery.map((img, idx) => `
-                            <div class="gallery-item reveal delay-${(idx % 3) * 100}" onclick="openModal('Galeri Kegiatan', '${img}', '')">
-                                <img src="${img}" alt="Kegiatan ${idx+1}">
-                            </div>
-                        `).join('');
-                        setTimeout(() => { document.querySelectorAll('.gallery-item.reveal').forEach(el => { observer.observe(el); el.classList.add('active'); }); }, 100);
-                    } else {
-                        galContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #8898aa; padding: 20px;">Belum ada foto kegiatan.</div>';
-                    }
-
-                    // --- LOAD YOUTUBE ---
-                    const ytContainer = document.getElementById('video-container-wrapper');
-                    const validYoutube = youtube.filter(url => url && url.trim() !== "");
-
-                    if(validYoutube.length > 0) {
-                        ytContainer.innerHTML = validYoutube.map((url, idx) => {
-                            const embedUrl = getYoutubeEmbedUrl(url);
-                            if(!embedUrl) return '';
-                            return `
-                                <div class="video-container reveal delay-${(idx % 3) * 100}">
-                                    <iframe src="${embedUrl}" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                                </div>
-                            `;
-                        }).join('');
-                        setTimeout(() => { document.querySelectorAll('.video-container.reveal').forEach(el => { observer.observe(el); el.classList.add('active'); }); }, 100);
-                    } else {
-                        ytContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #8898aa; padding: 20px;">Belum ada video highlight.</div>';
-                    }
-
+                const studentSection = document.getElementById('student-section');
+                if (studentSection) {
+                    if (validGallery.length > 2) studentSection.style.backgroundImage = `url('${resolveImg(validGallery[2])}')`;
+                    else if (validGallery.length > 0) studentSection.style.backgroundImage = `url('${resolveImg(validGallery[0])}')`;
                 }
+
+                // --- Footer Social Media ---
+                const footerLinks = document.querySelectorAll('.social-links a');
+                if(footerLinks[0]) { footerLinks[0].href = sosmed.facebook || '#'; footerLinks[0].style.display = sosmed.facebook ? 'flex' : 'none'; }
+                if(footerLinks[1]) { footerLinks[1].href = sosmed.instagram || '#'; footerLinks[1].style.display = sosmed.instagram ? 'flex' : 'none'; }
+                if(footerLinks[2]) {
+                    let waNum = sosmed.whatsapp || '6281310051985'; 
+                    waNum = waNum.replace(/\D/g,''); if(waNum.startsWith('0')) waNum = '62' + waNum.substring(1);
+                    footerLinks[2].href = `https://wa.me/${waNum}`;
+                }
+                if(footerLinks[3]) { footerLinks[3].href = sosmed.youtube || '#'; footerLinks[3].style.display = sosmed.youtube ? 'flex' : 'none'; }
+
+                // --- Pengumuman ---
+                const announcementContainer = document.getElementById('announcement-container');
+                let announcementHtml = '';
+                let count = 0;
+
+                for (let i = 1; i <= 3; i++) {
+                    const p = pengumumanData[`pengumuman${i}`];
+                    if (p && p[`pengumuman${i}Judul`]) {
+                        count++;
+                        const judul = p[`pengumuman${i}Judul`];
+                        const text = p[`pengumuman${i}Text`] || 'Tidak ada konten teks.';
+                        const gambar = p[`pengumuman${i}Gambar`];
+                        const dokumen = p[`pengumuman${i}Dokumen`];
+                        
+                        const safeJudul = judul.replace(/'/g, "\\'");
+                        const safeText = text.replace(/'/g, "\\'").replace(/\n/g, "<br>");
+                        const safeGambar = gambar ? resolveImg(gambar).replace(/'/g, "\\'") : '';
+                        const safeDokumen = dokumen ? dokumen.replace(/'/g, "\\'") : '';
+
+                        let headerHtml = `<div class="news-header"><i class="fas fa-bullhorn news-icon-placeholder"></i></div>`;
+                        if (gambar) headerHtml = `<div class="news-header"><img src="${resolveImg(gambar)}" alt="Gambar Pengumuman"></div>`;
+
+                        announcementHtml += `
+                        <div class="news-card reveal delay-${i*100}" onclick="openAnnouncementModal('${safeJudul}', '${safeGambar}', '${safeText}', '${safeDokumen}')">
+                            ${headerHtml}
+                            <div class="news-content">
+                                <h3>${judul}</h3>
+                                <p>${text.substring(0, 100)}${text.length > 100 ? '...' : ''}</p>
+                                <span class="read-more">Baca Selengkapnya <i class="fas fa-arrow-right"></i></span>
+                            </div>
+                        </div>`;
+                    }
+                }
+                if (count === 0) announcementContainer.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #8898aa; padding: 40px;">Belum ada pengumuman yang dipublikasikan.</div>`;
+                else {
+                    announcementContainer.innerHTML = announcementHtml;
+                    setTimeout(() => { document.querySelectorAll('.news-card.reveal').forEach(el => { observer.observe(el); el.classList.add('active'); }); }, 100);
+                }
+
+                // --- Galeri ---
+                const galContainer = document.getElementById('gallery-container');
+                if(validGallery.length > 0) {
+                    galContainer.innerHTML = validGallery.map((img, idx) => `
+                        <div class="gallery-item reveal delay-${(idx % 3) * 100}" onclick="openModal('Galeri Kegiatan', '${resolveImg(img)}', '')">
+                            <img src="${resolveImg(img)}" alt="Kegiatan ${idx+1}">
+                        </div>
+                    `).join('');
+                    setTimeout(() => { document.querySelectorAll('.gallery-item.reveal').forEach(el => { observer.observe(el); el.classList.add('active'); }); }, 100);
+                } else {
+                    galContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #8898aa; padding: 20px;">Belum ada foto kegiatan.</div>';
+                }
+
+                // --- YouTube ---
+                const ytContainer = document.getElementById('video-container-wrapper');
+                const validYoutube = youtube.filter(url => url && url.trim() !== "");
+                if(validYoutube.length > 0) {
+                    ytContainer.innerHTML = validYoutube.map((url, idx) => {
+                        const embedUrl = getYoutubeEmbedUrl(url);
+                        if(!embedUrl) return '';
+                        return `
+                            <div class="video-container reveal delay-${(idx % 3) * 100}">
+                                <iframe src="${embedUrl}" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                            </div>`;
+                    }).join('');
+                    setTimeout(() => { document.querySelectorAll('.video-container.reveal').forEach(el => { observer.observe(el); el.classList.add('active'); }); }, 100);
+                } else {
+                    ytContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #8898aa; padding: 20px;">Belum ada video highlight.</div>';
+                }
+
             } catch (e) { console.error("Err Info:", e); }
         }
 
@@ -819,116 +781,129 @@
             let videoId = "";
             const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
             const match = url.match(regExp);
-            if (match && match[2].length === 11) {
-                videoId = match[2];
-            }
+            if (match && match[2].length === 11) videoId = match[2];
             return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
         }
 
-        // 2. LOAD TEACHER INFO
+        // --- LOAD INFO GURU (UPDATE NIP) ---
         async function loadTeacherInfo() {
-            const { data } = await supabaseClient.from('users').select('*').eq('role', 'Guru').limit(1).single();
-            if (data) {
-                document.getElementById('teacher-name').textContent = data.nama;
-                document.getElementById('teacher-nip').textContent = `Wali Kelas ${data.kelas || '4 A'}`;
-                if(data.foto) {
-                    document.getElementById('teacher-photo').src = data.foto;
-                    const btnGuru = document.getElementById('btn-portal-guru');
-                    if(btnGuru) {
-                        btnGuru.style.setProperty('--teacher-bg', `url('${data.foto}')`);
-                        btnGuru.classList.add('has-bg');
+            try {
+                // Endpoint ini sudah kita update di server.js untuk return nip
+                const res = await fetch(`${API_URL}/guru-info?kelas=4A`);
+                if(!res.ok) return; 
+
+                const data = await res.json();
+                if (data) {
+                    document.getElementById('profile-nama').textContent = data.nama;
+                    
+                    // --- UPDATE: Tampilkan NIP dibawah tulisan Wali Kelas ---
+                    const nipText = data.nip ? `<br><span style="font-size: 0.85em; opacity: 0.9; font-weight: 400;">NIP. ${data.nip}</span>` : '';
+                    document.getElementById('teacher-nip').innerHTML = `Wali Kelas ${data.kelas || '4 A'} ${nipText}`;
+
+                    if(data.foto) {
+                        const imgUrl = resolveImg(data.foto);
+                        document.getElementById('profile-foto-url').src = imgUrl;
+                        const btnGuru = document.getElementById('btn-portal-guru');
+                        if(btnGuru) {
+                            btnGuru.style.setProperty('--teacher-bg', `url('${imgUrl}')`);
+                            btnGuru.classList.add('has-bg');
+                        }
                     }
+                    
+                    // Footer Quote
+                    document.getElementById('sambutan-author').textContent = `- ${data.nama} (Guru Kelas 4A)`;
                 }
-                document.getElementById('sambutan-author').textContent = `- ${data.nama} (Guru Kelas 4A)`;
-            }
+            } catch(e) { console.log("Guru Info load skipped (API not ready)"); }
         }
 
-        // 3. LOAD STUDENT DATA
         async function loadStudentData() {
             const container = document.getElementById('student-container');
-            const { data: students, error } = await supabaseClient
-                .from('siswa')
-                .select('*')
-                .eq('kelas', '4A') 
-                .order('nama', { ascending: true });
-
-            if (error || !students || students.length === 0) {
-                // UPDATE: Color white/light-gray karena background gelap
-                container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #cbd5e1; padding: 20px;">Belum ada data siswa untuk Kelas 4A.</div>`;
-                return;
-            }
-
-            container.innerHTML = students.map((s, idx) => {
-                const safeName = s.nama.replace(/'/g, "\\'");
-                const safeFoto = s.foto || 'https://placehold.co/150?text=Siswa';
+            try {
+                const res = await fetch(`${API_URL}/siswa`);
+                const allStudents = await res.json();
                 
-                // UPDATED: Mengganti NIS dengan Jenis Kelamin di Modal
-                return `
-                <div class="student-card reveal delay-${(idx % 5) * 100}" onclick="openModal('${safeName}', '${safeFoto}', 'Siswa Kelas 4A - Jenis Kelamin: ${s.jenis_kelamin || '-'}')">
-                    <div class="student-img-wrapper">
-                        <img src="${safeFoto}" alt="${s.nama}" class="student-img">
-                    </div>
-                    <!-- Nama dan info hanya muncul di modal, tidak di card -->
-                </div>
-                `;
-            }).join('');
+                const students = allStudents.filter(s => s.kelas === '4A').sort((a,b) => a.nama.localeCompare(b.nama));
 
-            setTimeout(() => { 
-                document.querySelectorAll('.student-card.reveal').forEach(el => { 
-                    observer.observe(el); 
-                    el.classList.add('active'); 
-                }); 
-            }, 100);
+                if (!students || students.length === 0) {
+                    container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #cbd5e1; padding: 20px;">Belum ada data siswa untuk Kelas 4A.</div>`;
+                    return;
+                }
+
+                container.innerHTML = students.map((s, idx) => {
+                    const safeName = s.nama.replace(/'/g, "\\'");
+                    const safeFoto = s.foto ? resolveImg(s.foto) : 'https://placehold.co/150?text=Siswa';
+                    
+                    return `
+                    <div class="student-card reveal delay-${(idx % 5) * 100}" onclick="openModal('${safeName}', '${safeFoto}', 'Siswa Kelas 4A - Jenis Kelamin: ${s.jenis_kelamin || '-'}')">
+                        <div class="student-img-wrapper">
+                            <img src="${safeFoto}" alt="${s.nama}" class="student-img">
+                        </div>
+                    </div>`;
+                }).join('');
+
+                setTimeout(() => { 
+                    document.querySelectorAll('.student-card.reveal').forEach(el => { 
+                        observer.observe(el); 
+                        el.classList.add('active'); 
+                    }); 
+                }, 100);
+            } catch(e) {
+                container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #cbd5e1;">Gagal memuat data siswa.</div>`;
+            }
         }
 
         // 4. LOAD & RENDER CHART 7 KAIH
         async function loadChartData() {
-            const { data: laporan } = await supabaseClient.from('laporan').select('*').limit(50);
-            if(!laporan || laporan.length === 0) return;
+            try {
+                const res = await fetch(`${API_URL}/laporan?kelas=4A`);
+                const laporan = await res.json();
+                
+                if(!laporan || laporan.length === 0) return;
 
-            let stats = { ibadah: 0, bangun: 0, tidur: 0, olahraga: 0, belajar: 0, sosial: 0, makan: 0 };
-            const total = laporan.length;
+                let stats = { ibadah: 0, bangun: 0, tidur: 0, olahraga: 0, belajar: 0, sosial: 0, makan: 0 };
+                const total = laporan.length;
 
-            laporan.forEach(lap => {
-                let ibCount = 0;
-                for(let i=1; i<=7; i++) if(lap[`ibadah${i}`]) ibCount++;
-                if(ibCount >= 4) stats.ibadah++; 
+                laporan.forEach(lap => {
+                    let ibCount = 0;
+                    for(let i=1; i<=7; i++) if(lap[`ibadah${i}`]) ibCount++;
+                    if(ibCount >= 4) stats.ibadah++; 
 
-                if(lap.bangun_pagi && lap.bangun_pagi <= "05:00") stats.bangun++;
-                if(lap.tidur_cepat && lap.tidur_cepat <= "21:00") stats.tidur++;
+                    if(lap.bangun_pagi && lap.bangun_pagi <= "05:00") stats.bangun++;
+                    if(lap.tidur_cepat && lap.tidur_cepat <= "21:00") stats.tidur++;
 
-                if(lap.rincian_olahraga && lap.rincian_olahraga.length > 2) stats.olahraga++;
-                if(lap.materi_belajar && lap.materi_belajar.length > 2) stats.belajar++;
-                if(lap.kegiatan_masyarakat && lap.kegiatan_masyarakat.length > 2) stats.sosial++;
+                    if(lap.rincian_olahraga && lap.rincian_olahraga.length > 2) stats.olahraga++;
+                    if(lap.materi_belajar && lap.materi_belajar.length > 2) stats.belajar++;
+                    if(lap.kegiatan_masyarakat && lap.kegiatan_masyarakat.length > 2) stats.sosial++;
 
-                let foodScore = (lap.makanan_karbo?1:0) + (lap.makanan_sayur?1:0) + (lap.makanan_susu?1:0) + (lap.makanan_lauk?1:0) + (lap.makanan_air?1:0);
-                if(foodScore >= 3) stats.makan++;
-            });
+                    let foodScore = (lap.makanan_karbo?1:0) + (lap.makanan_sayur?1:0) + (lap.makanan_susu?1:0) + (lap.makanan_lauk?1:0) + (lap.makanan_air?1:0);
+                    if(foodScore >= 3) stats.makan++;
+                });
 
-            const dataSet = [
-                (stats.ibadah/total)*100, (stats.bangun/total)*100, (stats.tidur/total)*100,
-                (stats.olahraga/total)*100, (stats.belajar/total)*100, (stats.sosial/total)*100, (stats.makan/total)*100
-            ];
+                const dataSet = [
+                    (stats.ibadah/total)*100, (stats.bangun/total)*100, (stats.tidur/total)*100,
+                    (stats.olahraga/total)*100, (stats.belajar/total)*100, (stats.sosial/total)*100, (stats.makan/total)*100
+                ];
 
-            const ctx = document.getElementById('kaihChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: ['Beribadah', 'Bangun Pagi', 'Tidur Cepat', 'Olahraga', 'Belajar', 'Bermasyarakat', 'Makan Sehat'],
-                    datasets: [{
-                        label: 'Persentase Kepatuhan Kelas (%)',
-                        data: dataSet,
-                        backgroundColor: 'rgba(74, 144, 226, 0.2)',
-                        borderColor: '#4A90E2',
-                        pointBackgroundColor: '#FF6B6B',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    scales: { r: { suggestedMin: 0, suggestedMax: 100 } },
-                    plugins: { legend: { position: 'bottom' } }
-                }
-            });
+                const ctx = document.getElementById('kaihChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Beribadah', 'Bangun Pagi', 'Tidur Cepat', 'Olahraga', 'Belajar', 'Bermasyarakat', 'Makan Sehat'],
+                        datasets: [{
+                            label: 'Persentase Kepatuhan Kelas (%)',
+                            data: dataSet,
+                            backgroundColor: 'rgba(74, 144, 226, 0.2)',
+                            borderColor: '#4A90E2',
+                            pointBackgroundColor: '#FF6B6B',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        scales: { r: { suggestedMin: 0, suggestedMax: 100 } },
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            } catch(e) { console.error("Chart load error", e); }
         }
 
         // --- MODAL FUNCTIONS ---
@@ -956,13 +931,10 @@
                 <div style="text-align: left;">
                     <h4 style="color: var(--primary); margin-bottom: 10px; font-weight: 700; font-size: 1.2rem;">Visi</h4>
                     <p style="margin-bottom: 25px; line-height: 1.8; font-style: italic; color: #333;">"${globalVisiContent}"</p>
-                    
                     <div style="width: 100%; height: 1px; background: #eee; margin-bottom: 25px;"></div>
-                    
                     <h4 style="color: var(--primary); margin-bottom: 10px; font-weight: 700; font-size: 1.2rem;">Misi</h4>
                     <p style="white-space: pre-line; line-height: 1.8; color: #555;">${globalMisiContent}</p>
-                </div>
-            `;
+                </div>`;
             
             modalHtml.innerHTML = contentHtml;
             modalAction.innerHTML = ''; 
@@ -972,7 +944,7 @@
 
         function openAnnouncementModal(title, imgSrc, textContent, docLink) {
             modalTitle.textContent = title;
-            if(imgSrc) { modalImg.src = imgSrc; modalImg.style.display = 'block'; } else { modalImg.style.display = 'none'; }
+            if(imgSrc) { modalImg.src = resolveImg(imgSrc); modalImg.style.display = 'block'; } else { modalImg.style.display = 'none'; }
             modalHtml.innerHTML = `<p style="line-height:1.8; white-space: pre-line; font-size: 1rem; color: #525f7f;">${textContent}</p>`;
             if(docLink) { modalAction.innerHTML = `<a href="${docLink}" target="_blank" class="modal-btn"><i class="fas fa-file-download"></i> Buka Dokumen / Tautan</a>`; } else { modalAction.innerHTML = ''; }
             modal.style.display = 'block';
